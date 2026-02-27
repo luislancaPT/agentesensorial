@@ -8,317 +8,310 @@
 <meta name="apple-mobile-web-app-title" content="Sensory Agent">
 <meta name="theme-color" content="#070c16">
 <title>◈ Sensory Space Agent</title>
-
-<!-- PWA Manifest inline -->
-<script>
-const manifestData = {
-  name: "Sensory Space Agent",
-  short_name: "SensoryMap",
-  description: "Mapeamento multissensorial arquitectónico",
-  start_url: "./sensory-agent-mobile.html",
-  display: "standalone",
-  background_color: "#070c16",
-  theme_color: "#4AC8E8",
-  orientation: "portrait",
-  icons: [
-    { src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23070c16'/><text y='70' x='10' font-size='70'>◈</text></svg>", sizes: "192x192", type: "image/svg+xml" }
-  ]
-};
-const blob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
-const manifestURL = URL.createObjectURL(blob);
-const link = document.createElement('link');
-link.rel = 'manifest';
-link.href = manifestURL;
-document.head.appendChild(link);
-</script>
-
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  :root {
-    --bg: #070c16;
-    --bg2: #0a0e1a;
-    --bg3: #0d1829;
-    --border: #1e2d47;
-    --text: #c8d8f0;
-    --muted: #5e7a99;
-    --faint: #1e2d47;
-    --vision: #F4B942;
-    --sound: #4AC8E8;
-    --smell: #7DDA58;
-    --taste: #FF7F50;
-    --temp: #FF5C5C;
-    --haptic: #A78BFA;
-    --danger: #FF3333;
-    --safe: #7DDA58;
-    --mono: 'Share Tech Mono', 'Courier New', monospace;
-    --nav-h: 68px;
-    --header-h: 56px;
-  }
-  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--mono); overflow: hidden; }
-  
-  /* ── Layout ── */
-  #app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
-  #header { height: var(--header-h); background: var(--bg2); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; gap: 10px; flex-shrink: 0; z-index: 10; }
-  #content { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; padding-bottom: calc(var(--nav-h) + 8px); }
-  #nav { height: var(--nav-h); background: var(--bg2); border-top: 1px solid var(--border); display: flex; align-items: stretch; position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
-  .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border: none; background: transparent; color: var(--muted); cursor: pointer; transition: color .2s; font-family: var(--mono); font-size: 9px; letter-spacing: 0.5px; padding: 8px 2px; }
-  .nav-btn.active { color: var(--sound); }
-  .nav-btn .icon { font-size: 22px; line-height: 1; }
-  .page { display: none; padding: 12px; }
-  .page.active { display: block; }
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  /* Backgrounds — ligeiramente mais claros para maior separação */
+  --bg:#0b1220;--bg2:#111a2e;--bg3:#172035;
+  /* Bordas mais visíveis */
+  --border:#2e4a6e;
+  /* Texto principal: quase branco para máximo contraste */
+  --text:#eaf2ff;
+  /* Muted: muito mais claro que antes (#5e7a99 → #8faecf) */
+  --muted:#8faecf;
+  /* Cores de acento — ligeiramente mais brilhantes */
+  --sound:#5DD4F0;--safe:#7DDA58;--danger:#FF4444;--warn:#FF8C42;
+  --vision:#FFCA4F;--sound-c:#5DD4F0;--smell:#88E863;--taste:#FF8C42;--temp:#FF6666;--haptic:#BB99FF;
+  --mono:'Share Tech Mono','Courier New',monospace;
+  --nav-h:68px;--hdr-h:56px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--mono);overflow:hidden}
 
-  /* ── Cards & Base ── */
-  .card { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
-  .label { color: var(--muted); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
-  input, select, textarea { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 10px 12px; font-size: 15px; font-family: var(--mono); outline: none; width: 100%; -webkit-appearance: none; }
-  textarea { resize: vertical; min-height: 70px; }
-  input:focus, select:focus, textarea:focus { border-color: var(--sound); }
-  
-  /* ── Buttons ── */
-  .btn { display: flex; align-items: center; justify-content: center; gap: 8px; border: none; border-radius: 8px; padding: 13px 18px; font-family: var(--mono); font-size: 13px; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: opacity .15s, transform .1s; width: 100%; -webkit-user-select: none; }
-  .btn:active { transform: scale(0.97); opacity: 0.85; }
-  .btn-sm { padding: 8px 14px; font-size: 11px; width: auto; border-radius: 6px; }
-  .btn-primary { background: var(--sound); color: var(--bg); }
-  .btn-danger { background: var(--danger); color: #fff; }
-  .btn-green { background: var(--safe); color: var(--bg); }
-  .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
-  .btn-cam { background: #1a2a3a; color: var(--sound); border: 2px dashed var(--sound); padding: 20px; flex-direction: column; gap: 6px; font-size: 11px; border-radius: 12px; }
+/* ── LAYOUT ── */
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh}
+#header{height:var(--hdr-h);background:var(--bg2);border-bottom:2px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;z-index:10}
+#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--nav-h)+8px)}
+#nav{height:var(--nav-h);background:var(--bg2);border-top:2px solid var(--border);display:flex;align-items:stretch;position:fixed;bottom:0;left:0;right:0;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+/* Nav labels mais grandes e mais brilhantes */
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:none;background:transparent;color:#6a8aaa;cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:.5px;padding:8px 2px}
+.nav-btn.active{color:var(--sound)}
+.nav-btn .icon{font-size:22px;line-height:1}
+.page{display:none;padding:12px}
+.page.active{display:block}
 
-  /* ── Sense Pills ── */
-  .sense-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-  .sense-pill { border: 1px solid var(--border); border-radius: 8px; padding: 10px 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: all .2s; font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); background: transparent; }
-  .sense-pill.active { color: var(--bg); }
-  .sense-pill .pill-icon { font-size: 24px; }
+/* ── CARDS / BASE ── */
+/* Cards com fundo mais contrastante e borda bem visível */
+.card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px}
+/* Labels: maiores, mais brilhantes, mais legíveis */
+.lbl{color:#7aaad4;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px;font-weight:bold}
+/* Inputs: fundo mais claro, texto branco, borda visível */
+input,select,textarea{
+  background:#0b1525;border:1.5px solid #3a5a80;border-radius:7px;
+  color:#eaf2ff;padding:11px 13px;font-size:16px;font-family:var(--mono);
+  outline:none;width:100%;-webkit-appearance:none
+}
+textarea{resize:vertical;min-height:72px}
+input:focus,select:focus,textarea:focus{border-color:var(--sound);background:#0d1a2e}
+/* Placeholder mais visível */
+input::placeholder,textarea::placeholder{color:#4a6a8a}
+select option{background:#111a2e;color:#eaf2ff}
 
-  /* ── Slider ── */
-  .slider-row { display: flex; gap: 10px; align-items: center; }
-  input[type=range] { flex: 1; height: 6px; -webkit-appearance: none; background: var(--border); border-radius: 3px; outline: none; padding: 0; border: none; }
-  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; }
-  .slider-val { min-width: 80px; font-size: 10px; text-align: right; }
+/* ── BUTTONS ── */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:9px;padding:14px 18px;font-family:var(--mono);font-size:14px;font-weight:bold;letter-spacing:1px;cursor:pointer;transition:opacity .15s,transform .1s;width:100%;-webkit-user-select:none}
+.btn:active{transform:scale(.97);opacity:.85}
+.btn-sm{padding:9px 14px;font-size:12px;width:auto;border-radius:7px}
+.btn-primary{background:var(--sound);color:#050e1c}
+.btn-danger{background:#FF4444;color:#fff}
+.btn-green{background:var(--safe);color:#050e1c}
+/* Ghost com borda mais espessa e texto bem legível */
+.btn-ghost{background:#172035;color:var(--text);border:1.5px solid #3a5a80}
+.btn-cam{background:#162030;color:var(--sound);border:2px dashed var(--sound);padding:20px;flex-direction:column;gap:6px;font-size:12px;border-radius:12px}
 
-  /* ── Map Canvas ── */
-  #map-canvas { width: 100%; border-radius: 8px; border: 1px solid var(--border); display: block; touch-action: none; background: var(--bg2); }
+/* ── SENSE PILLS — inactive com texto mais legível ── */
+.sense-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.sense-pill{border:1.5px solid #3a5a80;border-radius:9px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#8faecf;background:#111a2e}
+.sense-pill.active{color:#050e1c}
+.sense-pill .pill-icon{font-size:24px}
 
-  /* ── Conflict badge ── */
-  .conflict-badge { background: #FF333322; border: 1px solid var(--danger); border-radius: 6px; padding: 8px 12px; margin-bottom: 8px; font-size: 11px; color: var(--danger); display: flex; align-items: center; gap: 8px; }
+/* ── SLIDER ── */
+.slider-row{display:flex;gap:8px;align-items:center}
+input[type=range]{flex:1;height:7px;-webkit-appearance:none;background:#2a3e58;border-radius:4px;outline:none;padding:0;border:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;cursor:pointer}
+.slider-val{min-width:76px;font-size:11px;text-align:right;color:var(--text)}
 
-  /* ── Photo grid ── */
-  .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
-  .photo-thumb { position: relative; aspect-ratio: 1; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
-  .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
-  .photo-del { position: absolute; top: 3px; right: 3px; background: rgba(0,0,0,.75); color: #fff; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; }
-  .photo-label { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,.7); font-size: 9px; padding: 3px 4px; color: #aaa; font-family: var(--mono); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+/* ── MAP ── */
+#map-canvas{width:100%;border-radius:8px;border:1.5px solid var(--border);display:block;touch-action:none;background:#111a2e}
 
-  /* ── Sensor list item ── */
-  .sensor-item { background: var(--bg3); border-radius: 8px; padding: 12px; margin-bottom: 8px; border-left: 3px solid var(--border); position: relative; }
-  .sensor-item-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-  .sensor-name { font-size: 14px; font-weight: bold; }
-  .sensor-meta { font-size: 10px; color: var(--muted); margin-top: 3px; }
+/* ── CONFLICT ── */
+.conflict-badge{background:#FF444422;border:1.5px solid #FF4444;border-radius:7px;padding:10px 14px;margin-bottom:8px;font-size:12px;color:#FF8080;display:flex;align-items:center;gap:8px}
 
-  /* ── GPS dot ── */
-  @keyframes gpsPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.3)} }
-  .gps-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--safe); animation: gpsPulse 1.5s infinite; display: inline-block; }
-  
-  /* ── Analysis ── */
-  .analysis-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-size: 12px; line-height: 1.8; white-space: pre-wrap; color: #9ab0cc; max-height: 60vh; overflow-y: auto; }
-  .section-head { color: var(--sound); font-size: 13px; font-weight: bold; border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 14px 0 8px; }
+/* ── PHOTOS ── */
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.photo-thumb{position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;border:1.5px solid var(--border)}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-del{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.8);color:#fff;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center}
+.photo-label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.75);font-size:9px;padding:3px 4px;color:#ccd;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 
-  /* ── Toast ── */
-  #toast { position: fixed; top: calc(var(--header-h) + 8px); left: 50%; transform: translateX(-50%); background: var(--sound); color: var(--bg); padding: 10px 20px; border-radius: 20px; font-size: 12px; font-family: var(--mono); z-index: 1000; opacity: 0; transition: opacity .3s; pointer-events: none; white-space: nowrap; }
-  #toast.show { opacity: 1; }
+/* ── SENSOR LIST ── */
+.sensor-item{background:var(--bg3);border-radius:9px;padding:13px;margin-bottom:9px;border-left:3px solid var(--border)}
+.sensor-item-header{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.sensor-name{font-size:15px;font-weight:bold}
+/* Meta text mais legível */
+.sensor-meta{font-size:11px;color:#8faecf;margin-top:3px}
 
-  /* ── Spinner ── */
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .spinner { display: inline-block; animation: spin 1s linear infinite; }
+/* ── GPS ── */
+@keyframes gpsPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.3)}}
+.gps-dot{width:9px;height:9px;border-radius:50%;background:var(--safe);animation:gpsPulse 1.5s infinite;display:inline-block}
 
-  /* ── Field rows ── */
-  .field-row { margin-bottom: 12px; }
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+/* ── TOAST ── */
+#toast{position:fixed;top:calc(var(--hdr-h)+8px);left:50%;transform:translateX(-50%);background:var(--sound);color:#050e1c;padding:11px 22px;border-radius:22px;font-size:13px;font-weight:bold;z-index:1000;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 16px rgba(93,212,240,.4)}
+#toast.show{opacity:1}
 
-  /* ── Tabs ── */
-  .tab-bar { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; margin-bottom: 12px; }
-  .tab-bar::-webkit-scrollbar { display: none; }
-  .tab { border: 1px solid var(--border); border-radius: 20px; padding: 6px 14px; cursor: pointer; font-family: var(--mono); font-size: 10px; letter-spacing: 1px; white-space: nowrap; background: transparent; color: var(--muted); }
-  .tab.active { color: var(--bg); }
+/* ── MISC ── */
+@keyframes spin{to{transform:rotate(360deg)}}
+.field-row{margin-bottom:13px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+/* Tabs: texto mais legível */
+.tab-bar{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;margin-bottom:12px}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab{border:1.5px solid #3a5a80;border-radius:20px;padding:7px 14px;cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:1px;white-space:nowrap;background:#111a2e;color:#8faecf}
+.tab.active{color:#050e1c;border-color:transparent}
+hr{border:none;border-top:1.5px solid var(--border);margin:14px 0}
+.star-row{display:flex;gap:6px;margin-top:6px}
+.star{font-size:26px;color:#2e4a6e;cursor:pointer;transition:color .15s}
+.star.on{color:#FFCA4F}
+/* Modal mais legível */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;display:flex;align-items:flex-end}
+.modal{background:var(--bg2);border-radius:18px 18px 0 0;padding:22px 18px;width:100%;max-height:90vh;overflow-y:auto;border-top:2px solid var(--border)}
+.modal-title{font-size:16px;font-weight:bold;margin-bottom:16px;color:var(--sound)}
+#offline-bar{background:#3a1e00;border-bottom:2px solid #8B5E00;padding:8px 16px;font-size:11px;color:#FFB84D;letter-spacing:1px;text-align:center;display:none}
+#offline-bar.show{display:block}
 
-  /* ── Separator ── */
-  hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+/* ── LANGUAGE SELECTOR ── */
+#lang-btn{background:#172035;border:1.5px solid #3a5a80;border-radius:7px;color:var(--text);font-family:var(--mono);font-size:12px;padding:6px 10px;cursor:pointer;letter-spacing:1px;flex-shrink:0}
+.lang-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:700;display:flex;align-items:flex-end;display:none}
+.lang-modal-overlay.show{display:flex}
+.lang-modal{background:var(--bg2);border-radius:18px 18px 0 0;padding:22px 18px;width:100%;border-top:2px solid var(--border)}
+.lang-opt{display:flex;align-items:center;gap:14px;padding:16px 13px;border:1.5px solid #3a5a80;border-radius:10px;margin-bottom:10px;cursor:pointer;transition:border-color .2s;background:#111a2e}
+.lang-opt:active{opacity:.7}
+.lang-opt.selected{border-color:var(--sound)}
+.lang-flag{font-size:28px}
+.lang-name{flex:1}
+.lang-name-main{font-size:16px;font-weight:bold;color:var(--text)}
+.lang-name-sub{font-size:11px;color:#8faecf;letter-spacing:1px}
+.lang-check{color:var(--sound);font-size:20px}
 
-  /* ── Star rating ── */
-  .star-row { display: flex; gap: 6px; margin-top: 6px; }
-  .star { font-size: 24px; color: var(--border); cursor: pointer; transition: color .15s; }
-  .star.on { color: #F4B942; }
-
-  /* ── Expand/Collapse ── */
-  details summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
-  details summary::-webkit-details-marker { display: none; }
-  details[open] summary .chev { transform: rotate(90deg); }
-  .chev { transition: transform .2s; display: inline-block; color: var(--muted); }
-
-  /* ── Modal ── */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.8); z-index: 500; display: flex; align-items: flex-end; }
-  .modal { background: var(--bg2); border-radius: 16px 16px 0 0; padding: 20px 16px; width: 100%; max-height: 90vh; overflow-y: auto; border-top: 2px solid var(--border); }
-  .modal-title { font-size: 15px; font-weight: bold; margin-bottom: 16px; color: var(--sound); }
-
-  /* ── Pull to refresh indicator ── */
-  #offline-bar { background: #4a2a00; border-bottom: 1px solid #8B5E00; padding: 6px 16px; font-size: 10px; color: #FFB347; letter-spacing: 1px; text-align: center; display: none; }
-  #offline-bar.show { display: block; }
+/* ══ VOICE ══════════════════════════════════════════════════════════════════ */
+#voice-fab{position:fixed;bottom:calc(var(--nav-h)+16px);right:16px;z-index:200;width:64px;height:64px;border-radius:50%;border:none;cursor:pointer;background:#1e3a5a;color:#fff;font-size:26px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:all .2s;-webkit-user-select:none}
+#voice-fab.listening{background:#E53E3E;animation:voicePulse 1.2s ease-in-out infinite;box-shadow:0 4px 32px rgba(229,62,62,.8)}
+@keyframes voicePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+.mic-btn{background:#1a2e44;border:1.5px solid #3a5a80;border-radius:7px;color:#8faecf;font-size:17px;padding:10px 11px;cursor:pointer;flex-shrink:0;display:flex;align-items:center}
+.mic-btn.active{border-color:#E53E3E;color:#E53E3E;background:#E53E3E18}
+.input-mic-row{display:flex;gap:6px}
+.input-mic-row input,.input-mic-row textarea{flex:1}
+#voice-overlay{position:fixed;inset:0;z-index:600;background:rgba(7,12,22,.97);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:calc(env(safe-area-inset-bottom)+20px);opacity:0;pointer-events:none;transition:opacity .25s}
+#voice-overlay.show{opacity:1;pointer-events:all}
+#voice-panel{background:var(--bg2);border:1.5px solid var(--border);border-radius:20px 20px 16px 16px;width:100%;max-width:500px;padding:24px 20px 20px;display:flex;flex-direction:column;gap:14px}
+#voice-wave{display:flex;align-items:center;justify-content:center;gap:4px;height:40px}
+.wave-bar{width:4px;border-radius:2px;background:#E53E3E;animation:waveAnim .8s ease-in-out infinite alternate}
+.wave-bar:nth-child(1){height:10px;animation-delay:0s}.wave-bar:nth-child(2){height:24px;animation-delay:.1s}.wave-bar:nth-child(3){height:36px;animation-delay:.15s}.wave-bar:nth-child(4){height:28px;animation-delay:.2s}.wave-bar:nth-child(5){height:40px;animation-delay:.05s}.wave-bar:nth-child(6){height:28px;animation-delay:.25s}.wave-bar:nth-child(7){height:36px;animation-delay:.1s}.wave-bar:nth-child(8){height:22px;animation-delay:.3s}.wave-bar:nth-child(9){height:10px;animation-delay:.15s}
+@keyframes waveAnim{to{transform:scaleY(.3);opacity:.4}}
+#voice-wave.paused .wave-bar{animation:none;height:6px;background:#3a5a80}
+/* Transcript box bem legível */
+#voice-transcript{min-height:56px;background:#0b1525;border:1.5px solid #3a5a80;border-radius:10px;padding:13px 15px;font-size:16px;line-height:1.6;color:#eaf2ff}
+#voice-transcript.interim{color:#8faecf;font-style:italic}
+#voice-field-label{font-size:11px;letter-spacing:2px;color:var(--sound);text-transform:uppercase;text-align:center;font-weight:bold}
+#voice-status{font-size:13px;color:#a0c0e0;text-align:center}
+#voice-commands{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+/* Command chips: bordas e texto mais visíveis */
+.vcmd{border:1.5px solid #3a5a80;border-radius:20px;padding:5px 11px;font-size:11px;color:#a0c0e0;letter-spacing:.5px;background:#111a2e}
+#voice-mode-bar{background:var(--bg2);border:1.5px solid var(--border);border-radius:9px;padding:11px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px}
+#vmi{width:9px;height:9px;border-radius:50%;background:#4a6a8a;flex-shrink:0}
+#vmi.on{background:#E53E3E;animation:gpsPulse 1s infinite}
+/* Voice mode text mais legível */
+#vmt{flex:1;font-size:12px;color:#8faecf}
+#guided-steps{display:flex;gap:4px;flex-wrap:wrap}
+.step-dot{width:9px;height:9px;border-radius:50%;background:#2e4a6e;transition:background .2s}
+.step-dot.done{background:var(--safe)}
+.step-dot.current{background:#E53E3E;animation:gpsPulse 1s infinite}
+.section-head{color:var(--sound);font-size:14px;font-weight:bold;border-bottom:1.5px solid var(--border);padding-bottom:6px;margin:14px 0 8px}
 </style>
 </head>
 <body>
-
 <div id="app">
-  <!-- Header -->
   <div id="header">
     <div style="flex:1">
-      <div style="font-size:15px;color:var(--sound);letter-spacing:2px">◈ SENSORY AGENT</div>
-      <div style="font-size:9px;color:var(--muted);letter-spacing:1px" id="space-title-header">Sem espaço definido</div>
+      <div style="font-size:15px;color:var(--sound);letter-spacing:2px;font-weight:bold">◈ SENSORY AGENT</div>
+      <div style="font-size:10px;color:#8faecf;letter-spacing:1px" id="space-title-header">—</div>
     </div>
-    <div id="gps-status" style="font-size:10px;color:var(--muted);text-align:right">
-      <span class="gps-dot" style="background:var(--muted)"></span> GPS
+    <div id="gps-status" style="font-size:10px;color:#8faecf">
+      <span class="gps-dot" style="background:#3a5a80"></span>
     </div>
-    <div style="font-size:10px;color:var(--muted);text-align:right;margin-left:8px" id="counts-header">0 est.</div>
+    <div style="font-size:12px;color:#8faecf;margin-left:8px" id="counts-header">0</div>
+    <button id="lang-btn" onclick="openLang()">🌐 PT</button>
   </div>
 
-  <div id="offline-bar">⚡ MODO OFFLINE — dados guardados localmente</div>
+  <div id="offline-bar"></div>
 
-  <!-- Pages -->
   <div id="content">
 
-    <!-- PAGE: ESPAÇO -->
+    <!-- ══ PAGE: SPACE ══ -->
     <div class="page active" id="page-space">
       <div class="card">
-        <div class="label">Identificação do Espaço</div>
+        <div class="lbl" data-i18n="spaceId">Identificação do Espaço</div>
         <div class="field-row">
-          <div class="label">Nome do Espaço</div>
-          <input id="sp-name" type="text" placeholder="Ex: Biblioteca Municipal de Sintra" oninput="updateSpaceHeader()">
+          <div class="lbl" data-i18n="spaceName">Nome do Espaço</div>
+          <div class="input-mic-row">
+            <input id="sp-name" type="text" oninput="updateSpaceHeader()" data-i18n-ph="spaceNamePh">
+            <button class="mic-btn" onclick="voiceField('sp-name','spaceName')">🎤</button>
+          </div>
         </div>
         <div class="row2">
           <div>
-            <div class="label">Área (m²)</div>
+            <div class="lbl" data-i18n="spaceArea">Área (m²)</div>
             <input id="sp-area" type="number" placeholder="0">
           </div>
           <div>
-            <div class="label">Piso / Nível</div>
-            <input id="sp-floor" type="text" placeholder="Ex: R/C, 1º">
+            <div class="lbl" data-i18n="spaceFloor">Piso / Nível</div>
+            <input id="sp-floor" type="text" data-i18n-ph="spaceFloorPh">
           </div>
         </div>
         <div class="field-row">
-          <div class="label">Tipologia / Uso</div>
-          <select id="sp-type">
-            <option value="">Selecionar…</option>
-            <option>Habitação</option>
-            <option>Escola / Educação</option>
-            <option>Saúde / Hospital</option>
-            <option>Cultura / Museu / Biblioteca</option>
-            <option>Comércio / Retalho</option>
-            <option>Escritório / Trabalho</option>
-            <option>Culto / Religioso</option>
-            <option>Transporte / Estação</option>
-            <option>Espaço Público / Praça</option>
-            <option>Industrial</option>
-            <option>Outro</option>
-          </select>
+          <div class="lbl" data-i18n="spaceType">Tipologia / Uso</div>
+          <select id="sp-type" data-i18n-opts="spaceTypes"></select>
         </div>
         <div class="field-row">
-          <div class="label">Descrição / Contexto</div>
-          <textarea id="sp-desc" placeholder="Contexto, história, características relevantes…"></textarea>
+          <div class="lbl" data-i18n="spaceDesc">Descrição / Contexto</div>
+          <div class="input-mic-row" style="align-items:flex-start">
+            <textarea id="sp-desc" data-i18n-ph="spaceDescPh"></textarea>
+            <button class="mic-btn" onclick="voiceField('sp-desc','spaceDesc')">🎤</button>
+          </div>
         </div>
       </div>
-
       <div class="card">
-        <div class="label">Localização GPS</div>
-        <button class="btn btn-ghost" onclick="getGPS()">📍 OBTER COORDENADAS</button>
+        <div class="lbl">GPS</div>
+        <button class="btn btn-ghost" onclick="getGPS()" data-i18n="gpsBtn">📍 OBTER COORDENADAS</button>
         <div id="gps-result" style="margin-top:10px;font-size:11px;color:var(--muted);display:none">
           <span class="gps-dot"></span> <span id="gps-coords"></span>
         </div>
       </div>
-
       <div class="card">
-        <div class="label">Planta / Alçado do Espaço</div>
+        <div class="lbl" data-i18n="planLabel">Planta / Alçado</div>
         <label class="btn btn-cam">
           <span style="font-size:32px">📐</span>
-          <span>CARREGAR PLANTA (JPG · PNG)</span>
-          <span style="color:var(--muted)">DWG → exportar como JPG no CAD</span>
+          <span data-i18n="planBtn">CARREGAR PLANTA</span>
           <input type="file" accept="image/*" style="display:none" onchange="loadPlan(this)">
         </label>
         <div id="plan-preview" style="margin-top:10px;display:none">
           <img id="plan-img" style="width:100%;border-radius:8px;border:1px solid var(--border)">
-          <button class="btn btn-danger btn-sm" style="margin-top:6px" onclick="removePlan()">✕ REMOVER PLANTA</button>
+          <button class="btn btn-danger btn-sm" style="margin-top:6px" onclick="removePlan()" data-i18n="planRemove">✕ REMOVER</button>
         </div>
       </div>
-
-      <button class="btn btn-green" onclick="saveSpace();showToast('Espaço guardado ✓')">💾 GUARDAR ESPAÇO</button>
+      <button class="btn btn-green" onclick="saveSpace()" data-i18n="spaceSave">💾 GUARDAR ESPAÇO</button>
     </div>
 
-    <!-- PAGE: REGISTAR -->
+    <!-- ══ PAGE: REGISTER ══ -->
     <div class="page" id="page-register">
-      <div class="card">
-        <div class="label">Sentido a Registar</div>
-        <div class="sense-grid" id="sense-selector">
-          <!-- filled by JS -->
-        </div>
+      <div id="voice-mode-bar">
+        <div id="vmi"></div>
+        <div id="vmt" data-i18n="voiceHint">🎤 Toque no microfone ou fale livremente</div>
+        <button onclick="startGuidedVoice()" style="background:transparent;border:1px solid #E53E3E;border-radius:20px;color:#E53E3E;font-family:var(--mono);font-size:10px;padding:4px 10px;cursor:pointer;white-space:nowrap" data-i18n="guidedBtn">MODO GUIADO</button>
       </div>
-
-      <!-- Dynamic form filled by JS -->
+      <div class="card">
+        <div class="lbl" data-i18n="senseLabel">Sentido</div>
+        <div class="sense-grid" id="sense-selector"></div>
+      </div>
       <div id="sensor-form"></div>
-
-      <div class="card" id="photo-section">
-        <div class="label">Fotografias do Estímulo</div>
+      <div class="card">
+        <div class="lbl" data-i18n="photosLabel">Fotografias</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <label class="btn btn-cam">
             <span style="font-size:28px">📷</span>
-            <span>CÂMARA</span>
+            <span data-i18n="camBtn">CÂMARA</span>
             <input type="file" accept="image/*" capture="environment" style="display:none" onchange="addPhoto(this,'capture')">
           </label>
           <label class="btn btn-cam" style="border-color:var(--smell);color:var(--smell)">
             <span style="font-size:28px">🖼</span>
-            <span>GALERIA</span>
+            <span data-i18n="galleryBtn">GALERIA</span>
             <input type="file" accept="image/*" multiple style="display:none" onchange="addPhoto(this,'gallery')">
           </label>
         </div>
         <div class="photo-grid" id="capture-photos"></div>
       </div>
-
-      <button class="btn btn-green" onclick="saveSensor()">✅ GUARDAR ESTÍMULO</button>
+      <button class="btn btn-green" onclick="saveSensor()" data-i18n="saveSensor">✅ GUARDAR ESTÍMULO</button>
     </div>
 
-    <!-- PAGE: MAPA -->
+    <!-- ══ PAGE: MAP ══ -->
     <div class="page" id="page-map">
-      <div style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none">
-        <button class="tab active" onclick="filterMap(this,'all')">TODOS</button>
-        <button class="tab" onclick="filterMap(this,'vision')" style="">👁 VIS</button>
-        <button class="tab" onclick="filterMap(this,'sound')">🔊 SOM</button>
-        <button class="tab" onclick="filterMap(this,'smell')">🌬 OLF</button>
-        <button class="tab" onclick="filterMap(this,'taste')">👅 PAL</button>
-        <button class="tab" onclick="filterMap(this,'temperature')">🌡 TMP</button>
-        <button class="tab" onclick="filterMap(this,'haptic')">✋ HÁP</button>
+      <div style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none" id="map-filter-bar">
+        <button class="tab active" onclick="filterMap(this,'all')" data-i18n="all">TODOS</button>
+        <button class="tab" onclick="filterMap(this,'vision')">👁</button>
+        <button class="tab" onclick="filterMap(this,'sound')">🔊</button>
+        <button class="tab" onclick="filterMap(this,'smell')">🌬</button>
+        <button class="tab" onclick="filterMap(this,'taste')">👅</button>
+        <button class="tab" onclick="filterMap(this,'temperature')">🌡</button>
+        <button class="tab" onclick="filterMap(this,'haptic')">✋</button>
       </div>
-
       <div id="conflict-summary"></div>
-
       <canvas id="map-canvas"></canvas>
-
       <div style="display:flex;gap:8px;margin-top:10px">
         <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;flex:1">
           <input type="checkbox" id="show-conflicts" checked onchange="renderMap()" style="width:auto;accent-color:var(--danger)">
-          Mostrar conflitos
+          <span data-i18n="showConflicts">Mostrar conflitos</span>
         </label>
-        <button class="btn btn-ghost btn-sm" onclick="exportMapImage()">📤 EXPORTAR</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportMapImage()" data-i18n="exportBtn">📤 EXPORTAR</button>
       </div>
-
       <div style="margin-top:10px">
-        <div class="label">Legenda</div>
+        <div class="lbl" data-i18n="legendLabel">Legenda</div>
         <div id="map-legend"></div>
       </div>
     </div>
 
-    <!-- PAGE: REGISTOS -->
+    <!-- ══ PAGE: LIST ══ -->
     <div class="page" id="page-list">
       <div class="tab-bar" id="list-filter-bar">
-        <button class="tab active" onclick="filterList(this,'all')">TODOS</button>
+        <button class="tab active" onclick="filterList(this,'all')" data-i18n="all">TODOS</button>
         <button class="tab" onclick="filterList(this,'vision')">👁</button>
         <button class="tab" onclick="filterList(this,'sound')">🔊</button>
         <button class="tab" onclick="filterList(this,'smell')">🌬</button>
@@ -329,1019 +322,1307 @@ document.head.appendChild(link);
       <div id="sensor-list"></div>
     </div>
 
-    <!-- PAGE: ANÁLISE -->
+    <!-- ══ PAGE: ANALYSIS ══ -->
     <div class="page" id="page-analysis">
-      <div class="row3" style="margin-bottom:12px" id="analysis-stats"></div>
+      <div class="row2" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px" id="analysis-stats"></div>
       <div id="conflict-list-analysis"></div>
-      <button class="btn btn-green" onclick="runAI()" id="ai-btn">🤖 ANALISAR COM IA</button>
+      <button class="btn btn-green" onclick="runAI()" id="ai-btn" data-i18n="aiBtn">🤖 ANALISAR COM IA</button>
       <div id="ai-result" style="margin-top:12px;display:none"></div>
-
       <hr>
       <div class="card" style="border-color:var(--sound)44;margin-top:4px">
-        <div class="label">Exportar para Desktop</div>
-        <button class="btn btn-primary btn-full" onclick="exportJSON()">📥 EXPORTAR JSON</button>
-        <div style="margin-top:10px;font-size:10px;color:var(--muted);font-family:var(--mono);line-height:2">
-          Após exportar, transfere o ficheiro .json<br>
-          para o computador via:<br>
-          📱 <strong style="color:var(--text)">iPhone</strong> → AirDrop · iCloud Drive · Email<br>
-          🤖 <strong style="color:var(--text)">Android</strong> → WhatsApp (para ti) · Drive · Email<br><br>
-          No computador abre:<br>
-          <span style="color:var(--sound)">sensory-report-desktop.html</span><br>
-          e carrega o ficheiro JSON
-        </div>
+        <div class="lbl" data-i18n="exportTitle">Exportar para Desktop</div>
+        <button class="btn btn-primary" onclick="exportJSON()" data-i18n="exportJSON">📥 EXPORTAR JSON</button>
+        <div style="margin-top:10px;font-size:10px;color:var(--muted);line-height:2" id="export-hint"></div>
       </div>
     </div>
 
   </div><!-- /content -->
 
-  <!-- Bottom Nav -->
   <nav id="nav">
     <button class="nav-btn active" onclick="goPage('space',this)">
-      <span class="icon">🏛</span>ESPAÇO
+      <span class="icon">🏛</span><span data-i18n="navSpace">ESPAÇO</span>
     </button>
     <button class="nav-btn" onclick="goPage('register',this)">
-      <span class="icon">＋</span>REGISTAR
+      <span class="icon">＋</span><span data-i18n="navRegister">REGISTAR</span>
     </button>
     <button class="nav-btn" onclick="goPage('map',this);renderMap()">
-      <span class="icon">🗺</span>MAPA
+      <span class="icon">🗺</span><span data-i18n="navMap">MAPA</span>
     </button>
     <button class="nav-btn" onclick="goPage('list',this);renderList()">
-      <span class="icon">📋</span>LISTA
+      <span class="icon">📋</span><span data-i18n="navList">LISTA</span>
     </button>
     <button class="nav-btn" onclick="goPage('analysis',this);renderAnalysis()">
-      <span class="icon">🤖</span>IA
+      <span class="icon">🤖</span><span data-i18n="navAI">IA</span>
     </button>
   </nav>
-</div>
+</div><!-- /app -->
 
 <div id="toast"></div>
 
-<!-- Sensor Detail Modal -->
+<!-- Language modal -->
+<div class="lang-modal-overlay" id="lang-modal" onclick="closeLangIfBg(event)">
+  <div class="lang-modal">
+    <div style="font-size:13px;letter-spacing:2px;color:var(--sound);margin-bottom:16px" data-i18n="langTitle">ESCOLHER LÍNGUA</div>
+    <div class="lang-opt" onclick="setLang('pt')" id="lo-pt">
+      <span class="lang-flag">🇵🇹</span>
+      <div class="lang-name"><div class="lang-name-main">Português</div><div class="lang-name-sub">PT-PT</div></div>
+      <span class="lang-check" id="lc-pt" style="display:none">✓</span>
+    </div>
+    <div class="lang-opt" onclick="setLang('en')" id="lo-en">
+      <span class="lang-flag">🇬🇧</span>
+      <div class="lang-name"><div class="lang-name-main">English</div><div class="lang-name-sub">EN-GB</div></div>
+      <span class="lang-check" id="lc-en" style="display:none">✓</span>
+    </div>
+    <div class="lang-opt" onclick="setLang('es')" id="lo-es">
+      <span class="lang-flag">🇪🇸</span>
+      <div class="lang-name"><div class="lang-name-main">Español</div><div class="lang-name-sub">ES-ES</div></div>
+      <span class="lang-check" id="lc-es" style="display:none">✓</span>
+    </div>
+    <button class="btn btn-ghost" onclick="closeLang()" style="margin-top:8px" data-i18n="cancel">CANCELAR</button>
+  </div>
+</div>
+
+<!-- Voice overlay -->
+<div id="voice-overlay">
+  <div id="voice-panel">
+    <div id="voice-field-label">A OUVIR…</div>
+    <div id="voice-wave">
+      <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+    </div>
+    <div id="voice-transcript">…</div>
+    <div id="guided-steps" style="justify-content:center;display:none"></div>
+    <div id="voice-status"></div>
+    <div id="voice-commands"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+      <button onclick="stopVoice()" style="background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:var(--mono);font-size:12px;padding:12px;cursor:pointer" data-i18n="voiceStop">⏹ PARAR</button>
+      <button onclick="applyVoiceAndClose()" style="background:var(--safe);border:none;border-radius:8px;color:var(--bg);font-family:var(--mono);font-size:12px;padding:12px;cursor:pointer;font-weight:bold" data-i18n="voiceApply">✓ APLICAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- Floating mic -->
+<button id="voice-fab" onclick="toggleVoiceFab()" title="🎤">🎤</button>
+
+<!-- Sensor modal -->
 <div class="modal-overlay" id="modal" style="display:none" onclick="closeModal(event)">
   <div class="modal" id="modal-content"></div>
 </div>
 
 <script>
-// ══ STATE ════════════════════════════════════════════════════════════════════
-const SENSES = {
-  vision:      { label:"Visão",       emoji:"👁",  color:"#F4B942" },
-  sound:       { label:"Som",         emoji:"🔊",  color:"#4AC8E8" },
-  smell:       { label:"Olfato",      emoji:"🌬",  color:"#7DDA58" },
-  taste:       { label:"Paladar",     emoji:"👅",  color:"#FF7F50" },
-  temperature: { label:"Temperatura", emoji:"🌡",  color:"#FF5C5C" },
-  haptic:      { label:"Háptico",     emoji:"✋",  color:"#A78BFA" },
+// ══════════════════════════════════════════════════════════════════════════════
+// i18n — TRANSLATIONS
+// ══════════════════════════════════════════════════════════════════════════════
+const LANGS = {
+  pt: {
+    code:'pt-PT', flag:'🇵🇹', label:'PT',
+    // nav
+    navSpace:'ESPAÇO', navRegister:'REGISTAR', navMap:'MAPA', navList:'LISTA', navAI:'IA',
+    // space page
+    spaceId:'Identificação do Espaço', spaceName:'Nome do Espaço', spaceNamePh:'Ex: Biblioteca Municipal…',
+    spaceArea:'Área (m²)', spaceFloor:'Piso / Nível', spaceFloorPh:'Ex: R/C, 1º',
+    spaceType:'Tipologia / Uso', spaceDesc:'Descrição / Contexto', spaceDescPh:'Contexto, história, características…',
+    spaceSave:'💾 GUARDAR ESPAÇO',
+    spaceTypes:['Selecionar…','Habitação','Escola / Educação','Saúde / Hospital','Cultura / Museu / Biblioteca','Comércio / Retalho','Escritório / Trabalho','Culto / Religioso','Transporte / Estação','Espaço Público / Praça','Industrial','Outro'],
+    gpsBtn:'📍 OBTER COORDENADAS',
+    planLabel:'Planta / Alçado', planBtn:'CARREGAR PLANTA (JPG · PNG)', planRemove:'✕ REMOVER PLANTA',
+    // register
+    senseLabel:'Sentido a Registar',
+    voiceHint:'🎤 Toque no microfone para falar — ou use o teclado',
+    guidedBtn:'MODO GUIADO',
+    photosLabel:'Fotografias do Estímulo', camBtn:'CÂMARA', galleryBtn:'GALERIA',
+    saveSensor:'✅ GUARDAR ESTÍMULO',
+    // form
+    fLabel:'Nome / Descrição', fLabelPh:'Ex: Tráfego A5, Humidade parede norte…',
+    fIntensity:'Intensidade',
+    fProp:'Tipo de Propagação',
+    propOpts:['Radial — todas as direções','Direcional — cone de propagação','Difuso — dispersão gradual','Pontual — extinção rápida'],
+    fRadius:'Raio (unidades planta)',
+    fPos:'Posição X, Y',
+    fPosPh:'Auto (canvas)',
+    fNotes:'Notas / Observações', fNotesPh:'Horário, sazonalidade, variações…',
+    fPleasant:'Agradabilidade', fDisturb:'Perturbação / Incomodo',
+    // map
+    all:'TODOS', showConflicts:'Mostrar conflitos', exportBtn:'📤 EXPORTAR', legendLabel:'Legenda',
+    conflictBadge:'zona(s) de conflito detetada(s)',
+    noConflicts:'✓ Sem conflitos detetados',
+    noSensors:'Nenhum estímulo registado.\n\nUse ＋ REGISTAR para começar.',
+    // analysis
+    aiBtn:'🤖 ANALISAR COM IA', aiLoading:'⏳ A ANALISAR…',
+    exportTitle:'Exportar para Desktop', exportJSON:'📥 EXPORTAR JSON',
+    exportHint:'No telemóvel → painel IA → "EXPORTAR JSON"\nTransfere via AirDrop · WhatsApp · Email\nNo computador abre: sensory-report-desktop.html',
+    cancel:'CANCELAR',
+    // voice
+    langTitle:'ESCOLHER LÍNGUA',
+    voiceStop:'⏹ PARAR', voiceApply:'✓ APLICAR',
+    voiceListening:'🔴 A OUVIR — fale agora',
+    voiceIdle:'🎤 Toque no microfone para falar — ou use o teclado',
+    voiceFreeMode:'MODO LIVRE — diga campo e valor',
+    voiceFreeHint:'Ex: "intensidade forte" · "notas ruído alto" · "guardar"',
+    voiceFieldMode:'CAMPO: ',
+    voiceSaved:'Estímulo guardado ✓', voiceCancelled:'Cancelado',
+    // guided steps
+    gStep1Label:'1. SENTIDO', gStep1Hint:'Diga: som, olfato, visão, temperatura, háptico, paladar',
+    gStep1Cmds:['som','olfato','visão','temperatura','háptico','paladar'],
+    gStep2Label:'2. NOME DO ESTÍMULO', gStep2Hint:'Diga o nome do estímulo observado',
+    gStep2Cmds:['tráfego','AVAC','humidade','encandeamento','ruído'],
+    gStep3Label:'3. INTENSIDADE', gStep3Hint:'Diga: nada, fraco, moderado, forte, muito forte, extremo',
+    gStep3Cmds:['nada','fraco','moderado','forte','muito forte','extremo'],
+    gStep4Label:'4. PROPAGAÇÃO', gStep4Hint:'Diga: radial, direcional, difuso, pontual',
+    gStep4Cmds:['radial','direcional','difuso','pontual'],
+    gStep5Label:'5. NOTAS', gStep5Hint:'Descreva o que observa. Diga "sem notas" para saltar.',
+    gStep5Cmds:['sem notas','continuar'],
+    gDone:'Formulário preenchido por voz ✓',
+    // voice vocab
+    vSaveWords:['guardar','salvar','gravar','registar','confirmar','pronto'],
+    vCancelWords:['cancelar','cancela','parar','sair'],
+    vNoNotes:['sem notas','continuar','saltar','próximo'],
+    vNotePrefix:/^(notas?|observa(?:ção|r)?|anotar|registar que?)\s+(.+)$/,
+    vLabelPrefix:/^(nome|chamar|estímulo|chama-se)\s+(.+)$/,
+    vIntensityPrefix:/intensidade\s+(.+)/,
+    vRadiusMatch:/(?:raio|alcance|distância|metros?)\s*(\d+)/,
+    vTempMatch:/(?:temperatura\s+)?(-?\d+)\s*(?:graus?|celsius|ºc|°c)/,
+    vHumMatch:/(\d+)\s*(?:%|por\s*cento)\s*(?:humidade|hr)?|humidade\s+(\d+)/,
+    vDbMatch:/(\d+)\s*(?:decibéis?|db)/,
+    vAgrMatch:/(?:agradabilidade|agrado)\s+(\d)/,
+    vDistMatch:/(?:perturbação|incomodo)\s+(\d)/,
+    intensityMap:{
+      'nada':0,'zero':0,'sem intensidade':0,
+      'muito fraco':1,'fraquíssimo':1,'quase nada':1,
+      'fraco':2,'fraca':2,'baixo':2,'leve':2,'ligeiro':2,
+      'moderado':3,'médio':3,'normal':3,'razoável':3,
+      'forte':4,'alto':4,'intenso':4,'elevado':4,
+      'muito forte':5,'muito alto':5,'bastante forte':5,
+      'extremo':6,'máximo':6,'insuportável':6,'altíssimo':6,
+    },
+    senseMap:{
+      'som':'sound','áudio':'sound','ruído':'sound','acústica':'sound','barulho':'sound',
+      'visão':'vision','visual':'vision','luz':'vision','iluminação':'vision',
+      'olfato':'smell','cheiro':'smell','odor':'smell','aroma':'smell',
+      'paladar':'taste','gosto':'taste','sabor':'taste',
+      'temperatura':'temperature','térmico':'temperature','calor':'temperature','frio':'temperature',
+      'háptico':'haptic','tátil':'haptic','textura':'haptic','toque':'haptic',
+    },
+    propMap:{
+      'radial':'radial','todas as direções':'radial','circular':'radial','omnidirecional':'radial',
+      'direcional':'directional','direção':'directional','cone':'directional',
+      'difuso':'diffuse','disperso':'diffuse','gradual':'diffuse',
+      'pontual':'point','localizado':'point','concentrado':'point',
+    },
+    // smell
+    smellCats:['Naturais','Materiais','Jardins Interiores','Industrial','Humanos'],
+    smellItems:{
+      'Naturais':['Sal','Algas','Hierbas Aromáticas','Madeira Húmida','Terra'],
+      'Materiais':['Madeira de Conífera','Madeira de Frondosas','Tinta Fresca','Borracha','Betão'],
+      'Jardins Interiores':['Floral','Vegetação','Terra Molhada'],
+      'Industrial':['Gasóleo','Óleo Motor','Borracha Queimada','Químico'],
+      'Humanos':['Perfume','Comida','Café','Suor','Limpeza'],
+    },
+    smellOrigins:['Natural','Artificial','Ambos'],
+    smellPersists:['Momentâneo (<1min)','Curto (1–10min)','Duradouro (>10min)','Permanente'],
+    soundTypes:['Tráfego urbano','AVAC / Ventilação','Vozes','Música','Construção','Água / Fontes','Pássaros / Natureza','Alarmes / Sinais','Maquinaria','Outro'],
+    soundFreqs:['Graves (<250 Hz) — Tráfego, AVAC','Médios (250–2000 Hz) — Vozes, Música','Agudos (>2000 Hz) — Alarmes, Metais','Banda Larga — Ruído Branco, Vento'],
+    soundPeriods:['Contínuo','Intermitente','Pico / Explosivo','Rítmico'],
+    tempSources:['Radiação Solar Direta','AVAC / Ar Condicionado','Equipamento','Densidade de Pessoas','Massa Térmica do Material','Ventilação Natural'],
+    hapMats:['Betão — Frio, Rugoso','Madeira — Quente, Orgânico','Metal — Frio, Liso','Vidro — Frio, Liso','Têxtil — Quente, Suave','Pedra Natural — Frio, Variável','Terra / Vegetal — Natural','Água','Plástico — Variável'],
+    hapTexs:['Lisa','Rugosa','Porosa','Estriada','Macia / Deformável'],
+    hapElems:['Pavimento','Parede','Teto','Corrimão / Guarda','Mobiliário','Porta / Janela','Exterior / Solo'],
+    visTypes:['Encandeamento / Brilho','Sombra / Escuridão','Vista / Conexão Exterior','Oclusão Visual','Biofilia / Natureza','Cor Dominante','Padrão / Textura Visual','Escala / Proporção'],
+    visSources:['Luz Natural / Solar','Luz Artificial','Mista'],
+    tasteCats:['Área Alimentar / Refeitório','Qualidade da Água','Partículas no Ar (paladar)','Resíduos Químicos','Pó / Poeiras'],
+    intensityLabels:['Nada','Muito Fraco','Fraco','Moderado','Forte','Muito Forte','Extremo'],
+    propLabels:{radial:'Radial',directional:'Direcional',diffuse:'Difuso',point:'Pontual'},
+    senseLabels:{vision:'Visão',sound:'Som',smell:'Olfato',taste:'Paladar',temperature:'Temperatura',haptic:'Háptico'},
+    aiPromptLang:'PORTUGUÊS',
+  },
+
+  en: {
+    code:'en-GB', flag:'🇬🇧', label:'EN',
+    navSpace:'SPACE', navRegister:'REGISTER', navMap:'MAP', navList:'LIST', navAI:'AI',
+    spaceId:'Space Identification', spaceName:'Space Name', spaceNamePh:'E.g.: City Library…',
+    spaceArea:'Area (m²)', spaceFloor:'Floor / Level', spaceFloorPh:'E.g.: Ground, 1st',
+    spaceType:'Typology / Use', spaceDesc:'Description / Context', spaceDescPh:'Context, history, relevant features…',
+    spaceSave:'💾 SAVE SPACE',
+    spaceTypes:['Select…','Housing','School / Education','Health / Hospital','Culture / Museum / Library','Commerce / Retail','Office / Work','Religious','Transport / Station','Public Space / Square','Industrial','Other'],
+    gpsBtn:'📍 GET COORDINATES',
+    planLabel:'Floor Plan / Elevation', planBtn:'LOAD PLAN (JPG · PNG)', planRemove:'✕ REMOVE PLAN',
+    senseLabel:'Sense to Register',
+    voiceHint:'🎤 Tap microphone to speak — or use keyboard',
+    guidedBtn:'GUIDED MODE',
+    photosLabel:'Stimulus Photos', camBtn:'CAMERA', galleryBtn:'GALLERY',
+    saveSensor:'✅ SAVE STIMULUS',
+    fLabel:'Name / Description', fLabelPh:'E.g.: Road traffic, North wall damp…',
+    fIntensity:'Intensity',
+    fProp:'Propagation Type',
+    propOpts:['Radial — all directions','Directional — propagation cone','Diffuse — gradual spread','Point source — fast extinction'],
+    fRadius:'Radius (plan units)',
+    fPos:'Position X, Y', fPosPh:'Auto (canvas)',
+    fNotes:'Field Notes / Observations', fNotesPh:'Time, seasonality, variations…',
+    fPleasant:'Pleasantness', fDisturb:'Disturbance / Annoyance',
+    all:'ALL', showConflicts:'Show conflicts', exportBtn:'📤 EXPORT', legendLabel:'Legend',
+    conflictBadge:'conflict zone(s) detected',
+    noConflicts:'✓ No conflicts detected',
+    noSensors:'No stimuli registered.\n\nUse ＋ REGISTER to begin.',
+    aiBtn:'🤖 ANALYSE WITH AI', aiLoading:'⏳ ANALYSING…',
+    exportTitle:'Export to Desktop', exportJSON:'📥 EXPORT JSON',
+    exportHint:'On mobile → AI panel → "EXPORT JSON"\nTransfer via AirDrop · WhatsApp · Email\nOn desktop open: sensory-report-desktop.html',
+    cancel:'CANCEL', langTitle:'CHOOSE LANGUAGE',
+    voiceStop:'⏹ STOP', voiceApply:'✓ APPLY',
+    voiceListening:'🔴 LISTENING — speak now',
+    voiceIdle:'🎤 Tap microphone to speak — or use keyboard',
+    voiceFreeMode:'FREE MODE — say field and value',
+    voiceFreeHint:'E.g.: "intensity strong" · "notes constant noise" · "save"',
+    voiceFieldMode:'FIELD: ',
+    voiceSaved:'Stimulus saved ✓', voiceCancelled:'Cancelled',
+    gStep1Label:'1. SENSE', gStep1Hint:'Say: sound, smell, vision, temperature, haptic, taste',
+    gStep1Cmds:['sound','smell','vision','temperature','haptic','taste'],
+    gStep2Label:'2. STIMULUS NAME', gStep2Hint:'Say the name of the observed stimulus',
+    gStep2Cmds:['traffic','HVAC','damp','glare','noise'],
+    gStep3Label:'3. INTENSITY', gStep3Hint:'Say: none, weak, moderate, strong, very strong, extreme',
+    gStep3Cmds:['none','weak','moderate','strong','very strong','extreme'],
+    gStep4Label:'4. PROPAGATION', gStep4Hint:'Say: radial, directional, diffuse, point',
+    gStep4Cmds:['radial','directional','diffuse','point'],
+    gStep5Label:'5. NOTES', gStep5Hint:'Describe what you observe. Say "no notes" to skip.',
+    gStep5Cmds:['no notes','continue'],
+    gDone:'Form filled by voice ✓',
+    vSaveWords:['save','store','record','confirm','done','ok save'],
+    vCancelWords:['cancel','stop','exit','close'],
+    vNoNotes:['no notes','continue','skip','next'],
+    vNotePrefix:/^(notes?|observation|observe|note that)\s+(.+)$/,
+    vLabelPrefix:/^(name|call|stimulus|named)\s+(.+)$/,
+    vIntensityPrefix:/intensity\s+(.+)/,
+    vRadiusMatch:/(?:radius|range|distance|meters?)\s*(\d+)/,
+    vTempMatch:/(?:temperature\s+)?(-?\d+)\s*(?:degrees?|celsius|°c)/,
+    vHumMatch:/(\d+)\s*(?:%|percent)\s*(?:humidity|rh)?|humidity\s+(\d+)/,
+    vDbMatch:/(\d+)\s*(?:decibels?|db)/,
+    vAgrMatch:/(?:pleasantness|pleasant)\s+(\d)/,
+    vDistMatch:/(?:disturbance|disturb|annoyance)\s+(\d)/,
+    intensityMap:{
+      'none':0,'zero':0,'nothing':0,
+      'very weak':1,'very low':1,'barely':1,
+      'weak':2,'low':2,'slight':2,'mild':2,
+      'moderate':3,'medium':3,'normal':3,'average':3,
+      'strong':4,'high':4,'intense':4,
+      'very strong':5,'very high':5,'quite strong':5,
+      'extreme':6,'maximum':6,'unbearable':6,'very intense':6,
+    },
+    senseMap:{
+      'sound':'sound','audio':'sound','noise':'sound','acoustic':'sound',
+      'vision':'vision','visual':'vision','light':'vision','lighting':'vision','sight':'vision',
+      'smell':'smell','odour':'smell','odor':'smell','scent':'smell','olfactory':'smell',
+      'taste':'taste','flavour':'taste','flavor':'taste',
+      'temperature':'temperature','thermal':'temperature','heat':'temperature','cold':'temperature',
+      'haptic':'haptic','tactile':'haptic','texture':'haptic','touch':'haptic',
+    },
+    propMap:{
+      'radial':'radial','all directions':'radial','circular':'radial','omnidirectional':'radial',
+      'directional':'directional','directed':'directional','cone':'directional',
+      'diffuse':'diffuse','scattered':'diffuse','gradual':'diffuse',
+      'point':'point','localized':'point','concentrated':'point','point source':'point',
+    },
+    smellCats:['Natural','Materials','Indoor Gardens','Industrial','Human'],
+    smellItems:{
+      'Natural':['Salt','Seaweed','Aromatic Herbs','Damp Wood','Earth'],
+      'Materials':['Conifer Wood','Hardwood','Fresh Paint','Rubber','Concrete'],
+      'Indoor Gardens':['Floral','Vegetation','Wet Soil'],
+      'Industrial':['Diesel','Engine Oil','Burned Rubber','Chemical'],
+      'Human':['Perfume','Food','Coffee','Sweat','Cleaning'],
+    },
+    smellOrigins:['Natural','Artificial','Both'],
+    smellPersists:['Momentary (<1min)','Short (1–10min)','Lasting (>10min)','Permanent'],
+    soundTypes:['Road traffic','HVAC / Ventilation','Voices','Music','Construction','Water / Fountains','Birds / Nature','Alarms / Signals','Machinery','Other'],
+    soundFreqs:['Bass (<250 Hz) — Traffic, HVAC','Mid (250–2000 Hz) — Voices, Music','High (>2000 Hz) — Alarms, Metal','Broadband — White Noise, Wind'],
+    soundPeriods:['Continuous','Intermittent','Peak / Impulsive','Rhythmic'],
+    tempSources:['Direct Solar Radiation','HVAC / Air Conditioning','Equipment','People Density','Thermal Mass','Natural Ventilation'],
+    hapMats:['Concrete — Cold, Rough','Wood — Warm, Organic','Metal — Cold, Smooth','Glass — Cold, Smooth','Textile — Warm, Soft','Natural Stone — Cold, Variable','Earth / Organic — Natural','Water','Plastic — Variable'],
+    hapTexs:['Smooth','Rough','Porous','Ribbed','Soft / Deformable'],
+    hapElems:['Floor','Wall','Ceiling','Handrail / Guard','Furniture','Door / Window','Outdoor / Ground'],
+    visTypes:['Glare / Brightness','Shadow / Darkness','View / Exterior Connection','Visual Occlusion','Biophilia / Nature','Dominant Colour','Pattern / Visual Texture','Scale / Proportion'],
+    visSources:['Natural / Solar Light','Artificial Light','Mixed'],
+    tasteCats:['Food Area / Canteen','Water Quality','Airborne Particles (taste)','Chemical Residues','Dust / Particles'],
+    intensityLabels:['None','Very Weak','Weak','Moderate','Strong','Very Strong','Extreme'],
+    propLabels:{radial:'Radial',directional:'Directional',diffuse:'Diffuse',point:'Point'},
+    senseLabels:{vision:'Vision',sound:'Sound',smell:'Smell',taste:'Taste',temperature:'Temperature',haptic:'Haptic'},
+    aiPromptLang:'ENGLISH',
+  },
+
+  es: {
+    code:'es-ES', flag:'🇪🇸', label:'ES',
+    navSpace:'ESPACIO', navRegister:'REGISTRAR', navMap:'MAPA', navList:'LISTA', navAI:'IA',
+    spaceId:'Identificación del Espacio', spaceName:'Nombre del Espacio', spaceNamePh:'Ej: Biblioteca Municipal…',
+    spaceArea:'Área (m²)', spaceFloor:'Planta / Nivel', spaceFloorPh:'Ej: P.B., 1ª',
+    spaceType:'Tipología / Uso', spaceDesc:'Descripción / Contexto', spaceDescPh:'Contexto, historia, características…',
+    spaceSave:'💾 GUARDAR ESPACIO',
+    spaceTypes:['Seleccionar…','Vivienda','Escuela / Educación','Salud / Hospital','Cultura / Museo / Biblioteca','Comercio / Retail','Oficina / Trabajo','Culto / Religioso','Transporte / Estación','Espacio Público / Plaza','Industrial','Otro'],
+    gpsBtn:'📍 OBTENER COORDENADAS',
+    planLabel:'Planta / Alzado', planBtn:'CARGAR PLANTA (JPG · PNG)', planRemove:'✕ ELIMINAR PLANTA',
+    senseLabel:'Sentido a Registrar',
+    voiceHint:'🎤 Toca el micrófono para hablar — o usa el teclado',
+    guidedBtn:'MODO GUIADO',
+    photosLabel:'Fotografías del Estímulo', camBtn:'CÁMARA', galleryBtn:'GALERÍA',
+    saveSensor:'✅ GUARDAR ESTÍMULO',
+    fLabel:'Nombre / Descripción', fLabelPh:'Ej: Tráfico A-5, Humedad pared norte…',
+    fIntensity:'Intensidad',
+    fProp:'Tipo de Propagación',
+    propOpts:['Radial — todas las direcciones','Direccional — cono de propagación','Difuso — dispersión gradual','Puntual — extinción rápida'],
+    fRadius:'Radio (unidades planta)',
+    fPos:'Posición X, Y', fPosPh:'Auto (canvas)',
+    fNotes:'Notas / Observaciones de Campo', fNotesPh:'Horario, estacionalidad, variaciones…',
+    fPleasant:'Agradabilidad', fDisturb:'Perturbación / Molestia',
+    all:'TODOS', showConflicts:'Mostrar conflictos', exportBtn:'📤 EXPORTAR', legendLabel:'Leyenda',
+    conflictBadge:'zona(s) de conflicto detectada(s)',
+    noConflicts:'✓ Sin conflictos detectados',
+    noSensors:'Ningún estímulo registrado.\n\nUse ＋ REGISTRAR para comenzar.',
+    aiBtn:'🤖 ANALIZAR CON IA', aiLoading:'⏳ ANALIZANDO…',
+    exportTitle:'Exportar al Escritorio', exportJSON:'📥 EXPORTAR JSON',
+    exportHint:'En el móvil → panel IA → "EXPORTAR JSON"\nTransfiere vía AirDrop · WhatsApp · Email\nEn el ordenador abre: sensory-report-desktop.html',
+    cancel:'CANCELAR', langTitle:'ELEGIR IDIOMA',
+    voiceStop:'⏹ DETENER', voiceApply:'✓ APLICAR',
+    voiceListening:'🔴 ESCUCHANDO — hable ahora',
+    voiceIdle:'🎤 Toca el micrófono para hablar — o usa el teclado',
+    voiceFreeMode:'MODO LIBRE — diga campo y valor',
+    voiceFreeHint:'Ej: "intensidad fuerte" · "notas ruido alto" · "guardar"',
+    voiceFieldMode:'CAMPO: ',
+    voiceSaved:'Estímulo guardado ✓', voiceCancelled:'Cancelado',
+    gStep1Label:'1. SENTIDO', gStep1Hint:'Diga: sonido, olfato, visión, temperatura, háptico, sabor',
+    gStep1Cmds:['sonido','olfato','visión','temperatura','háptico','sabor'],
+    gStep2Label:'2. NOMBRE DEL ESTÍMULO', gStep2Hint:'Diga el nombre del estímulo observado',
+    gStep2Cmds:['tráfico','HVAC','humedad','deslumbramiento','ruido'],
+    gStep3Label:'3. INTENSIDAD', gStep3Hint:'Diga: nada, débil, moderado, fuerte, muy fuerte, extremo',
+    gStep3Cmds:['nada','débil','moderado','fuerte','muy fuerte','extremo'],
+    gStep4Label:'4. PROPAGACIÓN', gStep4Hint:'Diga: radial, direccional, difuso, puntual',
+    gStep4Cmds:['radial','direccional','difuso','puntual'],
+    gStep5Label:'5. NOTAS', gStep5Hint:'Describa lo que observa. Diga "sin notas" para saltar.',
+    gStep5Cmds:['sin notas','continuar'],
+    gDone:'Formulario completado por voz ✓',
+    vSaveWords:['guardar','salvar','grabar','registrar','confirmar','listo'],
+    vCancelWords:['cancelar','cancela','parar','salir'],
+    vNoNotes:['sin notas','continuar','saltar','siguiente'],
+    vNotePrefix:/^(notas?|observaci[oó]n|observar|anotar)\s+(.+)$/,
+    vLabelPrefix:/^(nombre|llamar|est[ií]mulo|se\s+llama)\s+(.+)$/,
+    vIntensityPrefix:/intensidad\s+(.+)/,
+    vRadiusMatch:/(?:radio|alcance|distancia|metros?)\s*(\d+)/,
+    vTempMatch:/(?:temperatura\s+)?(-?\d+)\s*(?:grados?|celsius|°c)/,
+    vHumMatch:/(\d+)\s*(?:%|por\s*ciento)\s*(?:humedad|hr)?|humedad\s+(\d+)/,
+    vDbMatch:/(\d+)\s*(?:decibeles?|db)/,
+    vAgrMatch:/(?:agradabilidad|agrado)\s+(\d)/,
+    vDistMatch:/(?:perturbaci[oó]n|molestia)\s+(\d)/,
+    intensityMap:{
+      'nada':0,'cero':0,'sin intensidad':0,
+      'muy débil':1,'muy suave':1,'casi nada':1,
+      'débil':2,'bajo':2,'suave':2,'leve':2,'ligero':2,
+      'moderado':3,'medio':3,'normal':3,'razonable':3,
+      'fuerte':4,'alto':4,'intenso':4,'elevado':4,
+      'muy fuerte':5,'muy alto':5,'bastante fuerte':5,
+      'extremo':6,'máximo':6,'insoportable':6,'altísimo':6,
+    },
+    senseMap:{
+      'sonido':'sound','audio':'sound','ruido':'sound','acústica':'sound',
+      'visión':'vision','visual':'vision','luz':'vision','iluminación':'vision',
+      'olfato':'smell','olor':'smell','aroma':'smell','fragancia':'smell',
+      'sabor':'taste','gusto':'taste','paladar':'taste',
+      'temperatura':'temperature','térmico':'temperature','calor':'temperature','frío':'temperature',
+      'háptico':'haptic','táctil':'haptic','textura':'haptic','tacto':'haptic',
+    },
+    propMap:{
+      'radial':'radial','todas las direcciones':'radial','circular':'radial','omnidireccional':'radial',
+      'direccional':'directional','dirección':'directional','cono':'directional',
+      'difuso':'diffuse','disperso':'diffuse','gradual':'diffuse',
+      'puntual':'point','localizado':'point','concentrado':'point',
+    },
+    smellCats:['Naturales','Materiales','Jardines Interiores','Industrial','Humanos'],
+    smellItems:{
+      'Naturales':['Sal','Algas','Hierbas Aromáticas','Madera Húmeda','Tierra'],
+      'Materiales':['Madera de Conífera','Madera de Frondosa','Pintura Fresca','Goma','Hormigón'],
+      'Jardines Interiores':['Floral','Vegetación','Tierra Mojada'],
+      'Industrial':['Gasóleo','Aceite de Motor','Goma Quemada','Químico'],
+      'Humanos':['Perfume','Comida','Café','Sudor','Limpieza'],
+    },
+    smellOrigins:['Natural','Artificial','Ambos'],
+    smellPersists:['Momentáneo (<1min)','Corto (1–10min)','Duradero (>10min)','Permanente'],
+    soundTypes:['Tráfico urbano','HVAC / Ventilación','Voces','Música','Construcción','Agua / Fuentes','Pájaros / Naturaleza','Alarmas / Señales','Maquinaria','Otro'],
+    soundFreqs:['Graves (<250 Hz) — Tráfico, HVAC','Medios (250–2000 Hz) — Voces, Música','Agudos (>2000 Hz) — Alarmas, Metales','Banda Ancha — Ruido Blanco, Viento'],
+    soundPeriods:['Continuo','Intermitente','Pico / Explosivo','Rítmico'],
+    tempSources:['Radiación Solar Directa','HVAC / Aire Acondicionado','Equipamiento','Densidad de Personas','Masa Térmica del Material','Ventilación Natural'],
+    hapMats:['Hormigón — Frío, Rugoso','Madera — Cálida, Orgánica','Metal — Frío, Liso','Vidrio — Frío, Liso','Textil — Cálido, Suave','Piedra Natural — Frío, Variable','Tierra / Vegetal — Natural','Agua','Plástico — Variable'],
+    hapTexs:['Lisa','Rugosa','Porosa','Estriada','Blanda / Deformable'],
+    hapElems:['Pavimento','Pared','Techo','Barandilla / Pasamanos','Mobiliario','Puerta / Ventana','Exterior / Suelo'],
+    visTypes:['Deslumbramiento / Brillo','Sombra / Oscuridad','Vista / Conexión Exterior','Oclusión Visual','Biofilia / Naturaleza','Color Dominante','Patrón / Textura Visual','Escala / Proporción'],
+    visSources:['Luz Natural / Solar','Luz Artificial','Mixta'],
+    tasteCats:['Área de Comedor / Cafetería','Calidad del Agua','Partículas en el Aire (sabor)','Residuos Químicos','Polvo / Partículas'],
+    intensityLabels:['Nada','Muy Débil','Débil','Moderado','Fuerte','Muy Fuerte','Extremo'],
+    propLabels:{radial:'Radial',directional:'Direccional',diffuse:'Difuso',point:'Puntual'},
+    senseLabels:{vision:'Visión',sound:'Sonido',smell:'Olfato',taste:'Sabor',temperature:'Temperatura',haptic:'Háptico'},
+    aiPromptLang:'ESPAÑOL',
+  }
 };
 
-const INTENSITY = ["Nada","Muito Fraco","Fraco","Moderado","Forte","Muito Forte","Extremo"];
-const PROPAGATION = { radial:"Radial", directional:"Direcional", diffuse:"Difuso", point:"Pontual" };
+const SENSE_EMOJIS = {vision:'👁',sound:'🔊',smell:'🌬',taste:'👅',temperature:'🌡',haptic:'✋'};
+const SENSE_COLORS = {vision:'#F4B942',sound:'#4AC8E8',smell:'#7DDA58',taste:'#FF7F50',temperature:'#FF5C5C',haptic:'#A78BFA'};
 
-const SMELL_CATS = {
-  "Naturais": ["Sal","Algas","Hierbas Aromáticas","Madeira Húmida","Terra"],
-  "Materiais": ["Madeira de Conífera","Madeira de Frondosas","Tinta Fresca","Borracha","Betão"],
-  "Jardins Interiores": ["Floral","Vegetação","Terra Molhada"],
-  "Industrial": ["Gasóleo","Óleo Motor","Borracha Queimada","Químico"],
-  "Humanos": ["Perfume","Comida","Café","Suor","Limpeza","Bollería"],
-};
-
-const SOUND_TYPES = [
-  { v:"traffic", l:"Tráfego urbano" }, { v:"hvac", l:"AVAC / Ventilação" },
-  { v:"voices", l:"Vozes" }, { v:"music", l:"Música" }, { v:"construction", l:"Construção" },
-  { v:"water", l:"Água / Fontes" }, { v:"birds", l:"Pássaros / Natureza" },
-  { v:"alarm", l:"Alarmes / Sinais" }, { v:"machinery", l:"Maquinaria" }, { v:"other", l:"Outro" },
-];
-
-const SMELL_INTENSITY = ["Nada","Ligeiro","Moderado","Forte","Muito Forte","Insuportável"];
-const SMELL_ORIGIN = ["Natural","Artificial","Ambos"];
+// ══ STATE ═════════════════════════════════════════════════════════════════════
+let lang = localStorage.getItem('sa_lang') || 'pt';
+let T = LANGS[lang]; // current translations
 
 let state = {
-  space: { name:"", area:"", floor:"", type:"", desc:"", gps:null, planImage:null },
-  sensors: [],
-  photos: [],      // session photos attached to current sensor being edited
-  activeSense: "sound",
-  mapFilter: "all",
-  listFilter: "all",
-  gps: null,
+  space:{name:'',area:'',floor:'',type:'',desc:'',gps:null,planImage:null},
+  sensors:[],
+  activeSense:'sound',
+  gps:null,
 };
+let tempPhotos = [];
+let starRatings = {pleasant:0,disturb:0};
+let listFilter = 'all';
+let mapFilter = 'all';
 
-// ══ PERSISTENCE ══════════════════════════════════════════════════════════════
-function saveAll() {
-  try {
-    const toStore = { ...state, photos:[] };
-    // Store photos separately (large)
-    const photosForStorage = state.sensors.map(s => ({ id: s.id, photos: s.photos || [] }));
-    localStorage.setItem('sensory_agent_data', JSON.stringify(toStore));
-    localStorage.setItem('sensory_agent_photos', JSON.stringify(photosForStorage));
-    localStorage.setItem('sensory_agent_plan', state.space.planImage || '');
-  } catch(e) { console.warn('Storage full', e); showToast('⚠ Armazenamento cheio'); }
+// ══ PERSISTENCE ═══════════════════════════════════════════════════════════════
+function saveAll(){
+  try{
+    const d={...state,space:{...state.space,planImage:null}};
+    const photos=state.sensors.map(s=>({id:s.id,photos:s.photos||[]}));
+    localStorage.setItem('sa_data',JSON.stringify(d));
+    localStorage.setItem('sa_photos',JSON.stringify(photos));
+    localStorage.setItem('sa_plan',state.space.planImage||'');
+    localStorage.setItem('sa_lang',lang);
+  }catch(e){showToast('⚠ Storage full');}
+}
+function loadAll(){
+  try{
+    const r=localStorage.getItem('sa_data');
+    if(r){
+      const p=JSON.parse(r);
+      state={...state,...p};
+      const ph=localStorage.getItem('sa_photos');
+      if(ph){JSON.parse(ph).forEach(p=>{const s=state.sensors.find(x=>x.id===p.id);if(s)s.photos=p.photos;});}
+      state.space.planImage=localStorage.getItem('sa_plan')||null;
+    }
+    lang=localStorage.getItem('sa_lang')||'pt';
+    T=LANGS[lang];
+  }catch(e){}
 }
 
-function loadAll() {
-  try {
-    const raw = localStorage.getItem('sensory_agent_data');
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      state = { ...state, ...parsed };
-      const photosRaw = localStorage.getItem('sensory_agent_photos');
-      if (photosRaw) {
-        const photosArr = JSON.parse(photosRaw);
-        photosArr.forEach(p => {
-          const s = state.sensors.find(x => x.id === p.id);
-          if (s) s.photos = p.photos;
-        });
-      }
-      state.space.planImage = localStorage.getItem('sensory_agent_plan') || null;
-    }
-  } catch(e) { console.warn('Load error', e); }
+// ══ LANGUAGE ══════════════════════════════════════════════════════════════════
+function openLang(){ document.getElementById('lang-modal').classList.add('show'); updateLangModal(); }
+function closeLang(){ document.getElementById('lang-modal').classList.remove('show'); }
+function closeLangIfBg(e){ if(e.target===document.getElementById('lang-modal')) closeLang(); }
+function updateLangModal(){
+  ['pt','en','es'].forEach(l=>{
+    document.getElementById('lc-'+l).style.display = l===lang?'':'none';
+    document.getElementById('lo-'+l).classList.toggle('selected',l===lang);
+  });
+}
+function setLang(l){
+  lang=l; T=LANGS[l];
+  localStorage.setItem('sa_lang',l);
+  closeLang();
+  applyTranslations();
+  buildSenseSelector();
+  buildSensorForm();
+  renderAnalysis();
+  updateVoiceLang();
+  showToast(T.flag+' '+T.label);
+}
+
+function applyTranslations(){
+  // Update lang btn
+  document.getElementById('lang-btn').textContent='🌐 '+T.label;
+  document.documentElement.lang=T.code.split('-')[0];
+
+  // data-i18n text
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n');
+    if(T[k]!==undefined) el.textContent=T[k];
+  });
+  // placeholders
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    const k=el.getAttribute('data-i18n-ph');
+    if(T[k]!==undefined) el.placeholder=T[k];
+  });
+  // select options
+  document.querySelectorAll('[data-i18n-opts]').forEach(el=>{
+    const k=el.getAttribute('data-i18n-opts');
+    if(T[k]) el.innerHTML=T[k].map(o=>`<option value="${o}">${o}</option>`).join('');
+  });
+  // export hint
+  const eh=document.getElementById('export-hint');
+  if(eh) eh.style.whiteSpace='pre-line', eh.textContent=T.exportHint;
+  // voice buttons
+  document.querySelectorAll('[data-i18n="voiceStop"]').forEach(e=>e.textContent=T.voiceStop);
+  document.querySelectorAll('[data-i18n="voiceApply"]').forEach(e=>e.textContent=T.voiceApply);
+  // nav buttons
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n');
+    if(T[k]!==undefined) el.textContent=T[k];
+  });
+  updateCountHeader();
+  updateSpaceHeader();
 }
 
 // ══ NAVIGATION ════════════════════════════════════════════════════════════════
-function goPage(name, btn) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
+function goPage(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
   btn.classList.add('active');
 }
 
 // ══ GPS ═══════════════════════════════════════════════════════════════════════
-function getGPS() {
-  if (!navigator.geolocation) return showToast('GPS não disponível');
-  showToast('A obter GPS…');
-  navigator.geolocation.getCurrentPosition(pos => {
-    const { latitude: lat, longitude: lng, accuracy } = pos.coords;
-    state.space.gps = { lat, lng, accuracy };
-    state.gps = { lat, lng };
-    document.getElementById('gps-coords').textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)} (±${Math.round(accuracy)}m)`;
-    document.getElementById('gps-result').style.display = 'block';
-    const dot = document.querySelector('#gps-status .gps-dot');
-    dot.style.background = 'var(--safe)';
-    showToast('📍 GPS obtido ✓');
+function getGPS(){
+  if(!navigator.geolocation) return showToast('GPS N/A');
+  showToast('GPS…');
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const{latitude:lat,longitude:lng,accuracy}=pos.coords;
+    state.space.gps={lat,lng,accuracy};
+    state.gps={lat,lng};
+    document.getElementById('gps-coords').textContent=`${lat.toFixed(6)}, ${lng.toFixed(6)} (±${Math.round(accuracy)}m)`;
+    document.getElementById('gps-result').style.display='block';
+    document.querySelector('#gps-status .gps-dot').style.background='var(--safe)';
+    showToast('📍 GPS ✓');
     saveAll();
-  }, err => showToast('GPS: ' + err.message));
+  },err=>showToast('GPS: '+err.message));
 }
 
-// ══ SPACE ════════════════════════════════════════════════════════════════════
-function updateSpaceHeader() {
-  const v = document.getElementById('sp-name').value;
-  document.getElementById('space-title-header').textContent = v || 'Sem espaço definido';
+// ══ SPACE ═════════════════════════════════════════════════════════════════════
+function updateSpaceHeader(){
+  const v=document.getElementById('sp-name').value;
+  document.getElementById('space-title-header').textContent=v||'—';
 }
-
-function saveSpace() {
-  state.space = {
-    ...state.space,
-    name: document.getElementById('sp-name').value,
-    area: document.getElementById('sp-area').value,
-    floor: document.getElementById('sp-floor').value,
-    type: document.getElementById('sp-type').value,
-    desc: document.getElementById('sp-desc').value,
+function saveSpace(){
+  state.space={...state.space,
+    name:document.getElementById('sp-name').value,
+    area:document.getElementById('sp-area').value,
+    floor:document.getElementById('sp-floor').value,
+    type:document.getElementById('sp-type').value,
+    desc:document.getElementById('sp-desc').value,
   };
-  updateSpaceHeader();
-  saveAll();
+  updateSpaceHeader(); saveAll();
+  showToast(T.spaceSave.replace('💾 ','')+'✓');
 }
-
-function loadPlan(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const r = new FileReader();
-  r.onload = e => {
-    state.space.planImage = e.target.result;
-    document.getElementById('plan-img').src = e.target.result;
-    document.getElementById('plan-preview').style.display = 'block';
-    saveAll();
-    showToast('Planta carregada ✓');
-  };
-  r.readAsDataURL(file);
+function loadPlan(input){
+  const f=input.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{state.space.planImage=e.target.result;document.getElementById('plan-img').src=e.target.result;document.getElementById('plan-preview').style.display='block';saveAll();showToast(T.planBtn+' ✓');};
+  r.readAsDataURL(f);
 }
-
-function removePlan() {
-  state.space.planImage = null;
-  document.getElementById('plan-preview').style.display = 'none';
-  saveAll();
-}
+function removePlan(){state.space.planImage=null;document.getElementById('plan-preview').style.display='none';saveAll();}
 
 // ══ SENSE SELECTOR ════════════════════════════════════════════════════════════
-function buildSenseSelector() {
-  const el = document.getElementById('sense-selector');
-  el.innerHTML = Object.entries(SENSES).map(([k, s]) => `
-    <button class="sense-pill ${k === state.activeSense ? 'active' : ''}"
-      style="${k === state.activeSense ? `background:${s.color};border-color:${s.color};` : ''}"
+function buildSenseSelector(){
+  document.getElementById('sense-selector').innerHTML=Object.keys(SENSE_EMOJIS).map(k=>`
+    <button class="sense-pill ${k===state.activeSense?'active':''}"
+      style="${k===state.activeSense?`background:${SENSE_COLORS[k]};border-color:${SENSE_COLORS[k]};`:''}"
       onclick="selectSense('${k}')">
-      <span class="pill-icon">${s.emoji}</span>
-      ${s.label.toUpperCase()}
+      <span class="pill-icon">${SENSE_EMOJIS[k]}</span>
+      ${(T.senseLabels[k]||k).toUpperCase()}
     </button>
   `).join('');
 }
-
-function selectSense(sense) {
-  state.activeSense = sense;
-  buildSenseSelector();
-  buildSensorForm();
-}
+function selectSense(s){state.activeSense=s;buildSenseSelector();buildSensorForm();}
 
 // ══ SENSOR FORM ═══════════════════════════════════════════════════════════════
-let tempSensor = {};
-let tempPhotos = [];
+function buildSensorForm(){
+  const s=state.activeSense; const col=SENSE_COLORS[s];
+  tempPhotos=[]; document.getElementById('capture-photos').innerHTML='';
+  starRatings={pleasant:0,disturb:0};
 
-function buildSensorForm() {
-  const s = state.activeSense;
-  const col = SENSES[s].color;
-  tempSensor = {
-    sense: s, label: '', intensity: 3, propagationType: 'radial',
-    propagationRadius: 80, angle: 0, spreadAngle: 90,
-    notes: '', x: 300 + Math.random()*100, y: 200 + Math.random()*100,
-    gps: state.gps,
-    timestamp: new Date().toISOString(),
-    photos: [],
-  };
-  tempPhotos = [];
-  document.getElementById('capture-photos').innerHTML = '';
+  let extra='';
+  if(s==='smell') extra=buildSmellExtra();
+  else if(s==='sound') extra=buildSoundExtra();
+  else if(s==='temperature') extra=buildTempExtra();
+  else if(s==='haptic') extra=buildHapticExtra();
+  else if(s==='vision') extra=buildVisionExtra();
+  else if(s==='taste') extra=buildTasteExtra();
 
-  let extra = '';
-  if (s === 'smell') {
-    extra = `
-      <div class="field-row">
-        <div class="label">Categoria Olfativa</div>
-        <select id="f-smell-cat" onchange="updateSmellItems()">
-          <option value="">Selecionar…</option>
-          ${Object.keys(SMELL_CATS).map(c => `<option value="${c}">${c}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field-row" id="smell-items-row" style="display:none">
-        <div class="label">Odor Específico</div>
-        <select id="f-smell-item"><option value="">Selecionar…</option></select>
-      </div>
-      <div class="field-row">
-        <div class="label">Origem</div>
-        <select id="f-smell-origin">
-          ${SMELL_ORIGIN.map(o => `<option value="${o}">${o}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field-row">
-        <div class="label">Persistência</div>
-        <select id="f-smell-persist">
-          <option value="momentary">Momentâneo (&lt;1min)</option>
-          <option value="short">Curto (1–10min)</option>
-          <option value="lasting">Duradouro (&gt;10min)</option>
-          <option value="permanent">Permanente</option>
-        </select>
-      </div>
-    `;
-  } else if (s === 'sound') {
-    extra = `
-      <div class="field-row">
-        <div class="label">Tipo de Som</div>
-        <select id="f-sound-type">
-          <option value="">Selecionar…</option>
-          ${SOUND_TYPES.map(t => `<option value="${t.v}">${t.l}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field-row">
-        <div class="label">Frequência Dominante</div>
-        <select id="f-sound-freq">
-          <option value="">Selecionar…</option>
-          <option value="low">Graves (&lt;250 Hz) — Tráfego, AVAC</option>
-          <option value="mid">Médios (250–2000 Hz) — Vozes, Música</option>
-          <option value="high">Agudos (&gt;2000 Hz) — Alarmes, Metais</option>
-          <option value="broad">Banda Larga — Ruído Branco, Vento</option>
-        </select>
-      </div>
-      <div class="field-row">
-        <div class="label">Nível Estimado (dB)</div>
-        <input id="f-sound-db" type="number" placeholder="Ex: 65" min="0" max="140">
-      </div>
-      <div class="field-row">
-        <div class="label">Periodicidade</div>
-        <select id="f-sound-period">
-          <option value="continuous">Contínuo</option>
-          <option value="intermittent">Intermitente</option>
-          <option value="peak">Pico / Explosivo</option>
-          <option value="rhythmic">Rítmico</option>
-        </select>
-      </div>
-    `;
-  } else if (s === 'temperature') {
-    extra = `
-      <div class="row2">
-        <div class="field-row">
-          <div class="label">Temperatura (°C)</div>
-          <input id="f-temp-val" type="number" placeholder="Ex: 28">
-        </div>
-        <div class="field-row">
-          <div class="label">Humidade (%)</div>
-          <input id="f-temp-hum" type="number" placeholder="Ex: 70">
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="label">Fonte Térmica</div>
-        <select id="f-temp-source">
-          <option value="">Selecionar…</option>
-          <option value="sun">Radiação Solar Direta</option>
-          <option value="hvac">AVAC / Ar Condicionado</option>
-          <option value="equipment">Equipamento</option>
-          <option value="people">Densidade de Pessoas</option>
-          <option value="material">Massa Térmica do Material</option>
-          <option value="wind">Ventilação Natural</option>
-        </select>
-      </div>
-    `;
-  } else if (s === 'haptic') {
-    extra = `
-      <div class="field-row">
-        <div class="label">Material / Superfície</div>
-        <select id="f-hap-mat">
-          <option value="">Selecionar…</option>
-          <option value="concrete">Betão — Frio, Rugoso</option>
-          <option value="wood">Madeira — Quente, Orgânico</option>
-          <option value="metal">Metal — Frio, Liso</option>
-          <option value="glass">Vidro — Frio, Liso</option>
-          <option value="textile">Têxtil — Quente, Suave</option>
-          <option value="stone">Pedra Natural — Frio, Variável</option>
-          <option value="earth">Terra / Vegetal — Natural</option>
-          <option value="water">Água</option>
-          <option value="plastic">Plástico — Variável</option>
-        </select>
-      </div>
-      <div class="field-row">
-        <div class="label">Textura</div>
-        <select id="f-hap-tex">
-          <option value="">Selecionar…</option>
-          <option value="smooth">Lisa</option>
-          <option value="rough">Rugosa</option>
-          <option value="porous">Porosa</option>
-          <option value="ribbed">Estriada</option>
-          <option value="soft">Macia / Deformável</option>
-        </select>
-      </div>
-      <div class="field-row">
-        <div class="label">Elemento</div>
-        <select id="f-hap-elem">
-          <option value="">Selecionar…</option>
-          <option value="floor">Pavimento</option>
-          <option value="wall">Parede</option>
-          <option value="ceiling">Teto</option>
-          <option value="railing">Corrimão / Guarda</option>
-          <option value="furniture">Mobiliário</option>
-          <option value="door">Porta / Janela</option>
-          <option value="outdoor">Exterior / Solo</option>
-        </select>
-      </div>
-    `;
-  } else if (s === 'vision') {
-    extra = `
-      <div class="field-row">
-        <div class="label">Tipo de Estímulo Visual</div>
-        <select id="f-vis-type">
-          <option value="">Selecionar…</option>
-          <option value="glare">Encandeamento / Brilho</option>
-          <option value="shadow">Sombra / Escuridão</option>
-          <option value="view">Vista / Conexão Exterior</option>
-          <option value="occlusion">Oclusão Visual</option>
-          <option value="biophilia">Biofilia / Natureza</option>
-          <option value="color">Cor Dominante</option>
-          <option value="pattern">Padrão / Textura Visual</option>
-          <option value="scale">Escala / Proporção</option>
-        </select>
-      </div>
-      <div class="row2">
-        <div class="field-row">
-          <div class="label">Iluminância Est. (lux)</div>
-          <input id="f-vis-lux" type="number" placeholder="Ex: 300">
-        </div>
-        <div class="field-row">
-          <div class="label">Temperatura Cor (K)</div>
-          <input id="f-vis-kelvin" type="number" placeholder="Ex: 4000">
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="label">Fonte de Luz</div>
-        <select id="f-vis-source">
-          <option value="">Selecionar…</option>
-          <option value="natural">Luz Natural / Solar</option>
-          <option value="artificial">Luz Artificial</option>
-          <option value="mixed">Mista</option>
-        </select>
-      </div>
-    `;
-  } else if (s === 'taste') {
-    extra = `
-      <div class="field-row">
-        <div class="label">Categoria</div>
-        <select id="f-taste-cat">
-          <option value="">Selecionar…</option>
-          <option value="food">Área Alimentar / Refeitório</option>
-          <option value="water">Qualidade da Água</option>
-          <option value="air-taste">Partículas no Ar (paladar)</option>
-          <option value="chemical">Resíduos Químicos</option>
-          <option value="dust">Pó / Poeiras</option>
-        </select>
-      </div>
-    `;
-  }
-
-  document.getElementById('sensor-form').innerHTML = `
+  document.getElementById('sensor-form').innerHTML=`
     <div class="card" style="border-color:${col}44">
       <div style="color:${col};font-size:14px;font-weight:bold;margin-bottom:12px">
-        ${SENSES[s].emoji} Novo Estímulo — ${SENSES[s].label}
+        ${SENSE_EMOJIS[s]} ${T.senseLabels[s]||s}
       </div>
-
       <div class="field-row">
-        <div class="label">Nome / Descrição</div>
-        <input id="f-label" type="text" placeholder="Ex: Tráfego A5, Humidade parede norte…">
+        <div class="lbl">${T.fLabel}</div>
+        <div class="input-mic-row">
+          <input id="f-label" type="text" placeholder="${T.fLabelPh}">
+          <button class="mic-btn" onclick="voiceField('f-label','${T.fLabel}')">🎤</button>
+        </div>
       </div>
-
       <div class="field-row">
-        <div class="label">Intensidade — <span id="f-int-label">${INTENSITY[3]}</span></div>
+        <div class="lbl">${T.fIntensity} — <span id="f-int-lbl">${T.intensityLabels[3]}</span></div>
         <div class="slider-row">
           <input type="range" id="f-intensity" min="0" max="6" value="3"
-            style="--thumb-color:${col}"
-            oninput="document.getElementById('f-int-label').textContent=INTENSITY[this.value]">
+            oninput="document.getElementById('f-int-lbl').textContent=T.intensityLabels[this.value];document.getElementById('f-int-num').textContent=this.value+'/6'">
           <style>#f-intensity::-webkit-slider-thumb{background:${col}}</style>
           <div class="slider-val" style="color:${col}" id="f-int-num">3/6</div>
+          <button class="mic-btn" onclick="voiceIntensity()">🎤</button>
         </div>
       </div>
-
       <div class="field-row">
-        <div class="label">Tipo de Propagação</div>
+        <div class="lbl">${T.fProp}</div>
         <select id="f-prop">
-          <option value="radial">Radial — todas as direções</option>
-          <option value="directional">Direcional — cone de propagação</option>
-          <option value="diffuse">Difuso — dispersão gradual</option>
-          <option value="point">Pontual — extinção rápida</option>
+          ${(T.propOpts||[]).map((o,i)=>{
+            const vals=['radial','directional','diffuse','point'];
+            return `<option value="${vals[i]}">${o}</option>`;
+          }).join('')}
         </select>
       </div>
-
       <div class="row2">
         <div class="field-row">
-          <div class="label">Raio (unidades planta)</div>
-          <input id="f-radius" type="number" value="80" min="10" max="500">
+          <div class="lbl">${T.fRadius}</div>
+          <div class="input-mic-row">
+            <input id="f-radius" type="number" value="80" min="10" max="500">
+            <button class="mic-btn" onclick="voiceField('f-radius','${T.fRadius}')">🎤</button>
+          </div>
         </div>
         <div class="field-row">
-          <div class="label">Posição X, Y</div>
-          <input id="f-xy" type="text" placeholder="Auto (canvas)">
+          <div class="lbl">${T.fPos}</div>
+          <input id="f-xy" type="text" placeholder="${T.fPosPh}">
         </div>
       </div>
-
       ${extra}
-
       <div class="field-row">
-        <div class="label">Notas / Observações de Campo</div>
-        <textarea id="f-notes" placeholder="Horário, sazonalidade, variações, contexto…"></textarea>
+        <div class="lbl">${T.fNotes}</div>
+        <div class="input-mic-row" style="align-items:flex-start">
+          <textarea id="f-notes" placeholder="${T.fNotesPh}"></textarea>
+          <button class="mic-btn" onclick="voiceNotes()">🎤</button>
+        </div>
       </div>
-
       <div class="field-row">
-        <div class="label">Avaliação Subjetiva</div>
-        <div class="label" style="margin-top:4px">Agradabilidade</div>
+        <div class="lbl">${T.fPleasant}</div>
         <div class="star-row" id="stars-pleasant">${[1,2,3,4,5].map(i=>`<span class="star" onclick="setStar('pleasant',${i})">★</span>`).join('')}</div>
-        <div class="label" style="margin-top:8px">Perturbação / Incomodo</div>
+        <div class="lbl" style="margin-top:8px">${T.fDisturb}</div>
         <div class="star-row" id="stars-disturb">${[1,2,3,4,5].map(i=>`<span class="star" onclick="setStar('disturb',${i})">★</span>`).join('')}</div>
       </div>
+    </div>`;
+}
+
+function buildSmellExtra(){
+  const cats=T.smellCats||[];
+  return `
+    <div class="field-row"><div class="lbl">Categoria</div>
+      <select id="f-smell-cat" onchange="updateSmellItems()">
+        <option value="">—</option>${cats.map(c=>`<option value="${c}">${c}</option>`).join('')}
+      </select></div>
+    <div class="field-row" id="smell-items-row" style="display:none"><div class="lbl">Item</div>
+      <select id="f-smell-item"><option value="">—</option></select></div>
+    <div class="field-row"><div class="lbl">Origem</div>
+      <select id="f-smell-origin">${(T.smellOrigins||[]).map(o=>`<option>${o}</option>`).join('')}</select></div>
+    <div class="field-row"><div class="lbl">Persistência</div>
+      <select id="f-smell-persist">${(T.smellPersists||[]).map(o=>`<option>${o}</option>`).join('')}</select></div>`;
+}
+function buildSoundExtra(){
+  return `
+    <div class="field-row"><div class="lbl">Tipo</div>
+      <select id="f-sound-type"><option value="">—</option>${(T.soundTypes||[]).map(o=>`<option value="${o}">${o}</option>`).join('')}</select></div>
+    <div class="field-row"><div class="lbl">Frequência</div>
+      <select id="f-sound-freq"><option value="">—</option>${(T.soundFreqs||[]).map(o=>`<option value="${o}">${o}</option>`).join('')}</select></div>
+    <div class="row2">
+      <div class="field-row"><div class="lbl">dB</div>
+        <div class="input-mic-row"><input id="f-sound-db" type="number" placeholder="Ex: 65">
+        <button class="mic-btn" onclick="voiceField('f-sound-db','dB')">🎤</button></div></div>
+      <div class="field-row"><div class="lbl">Periodicidade</div>
+        <select id="f-sound-period">${(T.soundPeriods||[]).map(o=>`<option>${o}</option>`).join('')}</select></div>
+    </div>`;
+}
+function buildTempExtra(){
+  return `
+    <div class="row2">
+      <div class="field-row"><div class="lbl">°C</div>
+        <div class="input-mic-row"><input id="f-temp-val" type="number" placeholder="Ex: 28">
+        <button class="mic-btn" onclick="voiceField('f-temp-val','°C')">🎤</button></div></div>
+      <div class="field-row"><div class="lbl">HR%</div>
+        <div class="input-mic-row"><input id="f-temp-hum" type="number" placeholder="Ex: 70">
+        <button class="mic-btn" onclick="voiceField('f-temp-hum','Humidity %')">🎤</button></div></div>
     </div>
-  `;
-
-  document.getElementById('f-intensity').addEventListener('input', function() {
-    document.getElementById('f-int-num').textContent = this.value + '/6';
-  });
+    <div class="field-row"><div class="lbl">Fonte</div>
+      <select id="f-temp-source"><option value="">—</option>${(T.tempSources||[]).map(o=>`<option>${o}</option>`).join('')}</select></div>`;
 }
-
-function updateSmellItems() {
-  const cat = document.getElementById('f-smell-cat').value;
-  const row = document.getElementById('smell-items-row');
-  if (!cat) { row.style.display = 'none'; return; }
-  row.style.display = 'block';
-  const items = SMELL_CATS[cat] || [];
-  document.getElementById('f-smell-item').innerHTML =
-    '<option value="">Selecionar…</option>' +
-    items.map(i => `<option value="${i}">${i}</option>`).join('');
+function buildHapticExtra(){
+  return `
+    <div class="field-row"><div class="lbl">Material</div>
+      <select id="f-hap-mat"><option value="">—</option>${(T.hapMats||[]).map(o=>`<option>${o}</option>`).join('')}</select></div>
+    <div class="field-row"><div class="lbl">Textura</div>
+      <select id="f-hap-tex"><option value="">—</option>${(T.hapTexs||[]).map(o=>`<option>${o}</option>`).join('')}</select></div>
+    <div class="field-row"><div class="lbl">Elemento</div>
+      <select id="f-hap-elem"><option value="">—</option>${(T.hapElems||[]).map(o=>`<option>${o}</option>`).join('')}</select></div>`;
 }
-
-let starRatings = { pleasant: 0, disturb: 0 };
-function setStar(type, val) {
-  starRatings[type] = val;
-  const els = document.querySelectorAll(`#stars-${type} .star`);
-  els.forEach((el, i) => el.classList.toggle('on', i < val));
-}
-
-// ══ PHOTOS ═══════════════════════════════════════════════════════════════════
-function addPhoto(input, mode) {
-  Array.from(input.files).forEach(file => {
-    const r = new FileReader();
-    r.onload = e => {
-      const id = crypto.randomUUID();
-      tempPhotos.push({ id, src: e.target.result, name: file.name, mode, timestamp: new Date().toISOString(), gps: state.gps });
-      renderTempPhotos();
-    };
-    r.readAsDataURL(file);
-  });
-  input.value = '';
-}
-
-function renderTempPhotos() {
-  const el = document.getElementById('capture-photos');
-  el.innerHTML = tempPhotos.map(p => `
-    <div class="photo-thumb">
-      <img src="${p.src}">
-      <div class="photo-label">${p.name}</div>
-      <button class="photo-del" onclick="removeTempPhoto('${p.id}')">✕</button>
+function buildVisionExtra(){
+  return `
+    <div class="field-row"><div class="lbl">Tipo Visual</div>
+      <select id="f-vis-type"><option value="">—</option>${(T.visTypes||[]).map(o=>`<option>${o}</option>`).join('')}</select></div>
+    <div class="row2">
+      <div class="field-row"><div class="lbl">lux</div>
+        <div class="input-mic-row"><input id="f-vis-lux" type="number" placeholder="Ex: 300">
+        <button class="mic-btn" onclick="voiceField('f-vis-lux','lux')">🎤</button></div></div>
+      <div class="field-row"><div class="lbl">K</div>
+        <div class="input-mic-row"><input id="f-vis-kelvin" type="number" placeholder="Ex: 4000">
+        <button class="mic-btn" onclick="voiceField('f-vis-kelvin','Kelvin')">🎤</button></div></div>
     </div>
-  `).join('');
+    <div class="field-row"><div class="lbl">Fonte de Luz</div>
+      <select id="f-vis-source"><option value="">—</option>${(T.visSources||[]).map(o=>`<option>${o}</option>`).join('')}</select></div>`;
+}
+function buildTasteExtra(){
+  return `
+    <div class="field-row"><div class="lbl">Categoria</div>
+      <select id="f-taste-cat"><option value="">—</option>${(T.tasteCats||[]).map(o=>`<option>${o}</option>`).join('')}</select></div>`;
 }
 
-function removeTempPhoto(id) {
-  tempPhotos = tempPhotos.filter(p => p.id !== id);
-  renderTempPhotos();
+function updateSmellItems(){
+  const cat=document.getElementById('f-smell-cat').value;
+  const row=document.getElementById('smell-items-row');
+  if(!cat){row.style.display='none';return;}
+  row.style.display='block';
+  const items=(T.smellItems||{})[cat]||[];
+  document.getElementById('f-smell-item').innerHTML='<option value="">—</option>'+items.map(i=>`<option>${i}</option>`).join('');
 }
+
+function setStar(type,val){
+  starRatings[type]=val;
+  document.querySelectorAll(`#stars-${type} .star`).forEach((el,i)=>el.classList.toggle('on',i<val));
+}
+
+// ══ PHOTOS ════════════════════════════════════════════════════════════════════
+function addPhoto(input,mode){
+  Array.from(input.files).forEach(f=>{
+    const r=new FileReader();
+    r.onload=e=>{const id=crypto.randomUUID();tempPhotos.push({id,src:e.target.result,name:f.name,mode,timestamp:new Date().toISOString(),gps:state.gps});renderTempPhotos();};
+    r.readAsDataURL(f);
+  });
+  input.value='';
+}
+function renderTempPhotos(){
+  document.getElementById('capture-photos').innerHTML=tempPhotos.map(p=>`
+    <div class="photo-thumb"><img src="${p.src}">
+    <div class="photo-label">${p.name}</div>
+    <button class="photo-del" onclick="removeTempPhoto('${p.id}')">✕</button></div>`).join('');
+}
+function removeTempPhoto(id){tempPhotos=tempPhotos.filter(p=>p.id!==id);renderTempPhotos();}
 
 // ══ SAVE SENSOR ═══════════════════════════════════════════════════════════════
-function saveSensor() {
-  const label = document.getElementById('f-label').value.trim() || `${SENSES[state.activeSense].label} #${state.sensors.length + 1}`;
-  const intensity = parseInt(document.getElementById('f-intensity').value);
-  const prop = document.getElementById('f-prop').value;
-  const radius = parseInt(document.getElementById('f-radius').value) || 80;
-  const notes = document.getElementById('f-notes').value;
+function saveSensor(){
+  const label=document.getElementById('f-label').value.trim()||`${T.senseLabels[state.activeSense]} #${state.sensors.length+1}`;
+  const intensity=parseInt(document.getElementById('f-intensity').value);
+  const prop=document.getElementById('f-prop').value;
+  const radius=parseInt(document.getElementById('f-radius').value)||80;
+  const notes=document.getElementById('f-notes').value;
+  const xy=document.getElementById('f-xy').value.trim();
+  let x=300+Math.random()*200,y=200+Math.random()*150;
+  if(xy){const p=xy.split(',');if(p.length===2){x=parseFloat(p[0])||x;y=parseFloat(p[1])||y;}}
 
-  // Extra fields
-  const extra = {};
-  const s = state.activeSense;
-  if (s === 'smell') {
-    extra.smellCat = document.getElementById('f-smell-cat')?.value;
-    extra.smellItem = document.getElementById('f-smell-item')?.value;
-    extra.smellOrigin = document.getElementById('f-smell-origin')?.value;
-    extra.smellPersist = document.getElementById('f-smell-persist')?.value;
-  } else if (s === 'sound') {
-    extra.soundType = document.getElementById('f-sound-type')?.value;
-    extra.soundFreq = document.getElementById('f-sound-freq')?.value;
-    extra.soundDb = document.getElementById('f-sound-db')?.value;
-    extra.soundPeriod = document.getElementById('f-sound-period')?.value;
-  } else if (s === 'temperature') {
-    extra.tempVal = document.getElementById('f-temp-val')?.value;
-    extra.tempHum = document.getElementById('f-temp-hum')?.value;
-    extra.tempSource = document.getElementById('f-temp-source')?.value;
-  } else if (s === 'haptic') {
-    extra.hapMat = document.getElementById('f-hap-mat')?.value;
-    extra.hapTex = document.getElementById('f-hap-tex')?.value;
-    extra.hapElem = document.getElementById('f-hap-elem')?.value;
-  } else if (s === 'vision') {
-    extra.visType = document.getElementById('f-vis-type')?.value;
-    extra.visLux = document.getElementById('f-vis-lux')?.value;
-    extra.visKelvin = document.getElementById('f-vis-kelvin')?.value;
-    extra.visSource = document.getElementById('f-vis-source')?.value;
-  } else if (s === 'taste') {
-    extra.tasteCat = document.getElementById('f-taste-cat')?.value;
-  }
+  const extra={};
+  const s=state.activeSense;
+  if(s==='smell'){extra.smellCat=document.getElementById('f-smell-cat')?.value;extra.smellItem=document.getElementById('f-smell-item')?.value;extra.smellOrigin=document.getElementById('f-smell-origin')?.value;extra.smellPersist=document.getElementById('f-smell-persist')?.value;}
+  else if(s==='sound'){extra.soundType=document.getElementById('f-sound-type')?.value;extra.soundFreq=document.getElementById('f-sound-freq')?.value;extra.soundDb=document.getElementById('f-sound-db')?.value;extra.soundPeriod=document.getElementById('f-sound-period')?.value;}
+  else if(s==='temperature'){extra.tempVal=document.getElementById('f-temp-val')?.value;extra.tempHum=document.getElementById('f-temp-hum')?.value;extra.tempSource=document.getElementById('f-temp-source')?.value;}
+  else if(s==='haptic'){extra.hapMat=document.getElementById('f-hap-mat')?.value;extra.hapTex=document.getElementById('f-hap-tex')?.value;extra.hapElem=document.getElementById('f-hap-elem')?.value;}
+  else if(s==='vision'){extra.visType=document.getElementById('f-vis-type')?.value;extra.visLux=document.getElementById('f-vis-lux')?.value;extra.visKelvin=document.getElementById('f-vis-kelvin')?.value;extra.visSource=document.getElementById('f-vis-source')?.value;}
+  else if(s==='taste'){extra.tasteCat=document.getElementById('f-taste-cat')?.value;}
 
-  // Position from f-xy or random
-  const xy = document.getElementById('f-xy').value.trim();
-  let x = 300 + Math.random() * 200, y = 200 + Math.random() * 150;
-  if (xy) {
-    const parts = xy.split(',');
-    if (parts.length === 2) { x = parseFloat(parts[0]) || x; y = parseFloat(parts[1]) || y; }
-  }
-
-  const sensor = {
-    id: crypto.randomUUID(),
-    sense: s, label, intensity, propagationType: prop,
-    propagationRadius: radius, notes, x, y,
-    gps: state.gps,
-    timestamp: new Date().toISOString(),
-    photos: tempPhotos,
-    ratings: { ...starRatings },
-    ...extra
-  };
-
-  state.sensors.push(sensor);
-  saveAll();
-  updateCountHeader();
-  showToast('✅ Estímulo guardado!');
+  state.sensors.push({id:crypto.randomUUID(),sense:s,label,intensity,propagationType:prop,propagationRadius:radius,notes,x,y,gps:state.gps,timestamp:new Date().toISOString(),photos:tempPhotos,ratings:{...starRatings},...extra});
+  saveAll(); updateCountHeader(); showToast(T.voiceSaved);
   buildSensorForm();
-  starRatings = { pleasant: 0, disturb: 0 };
 }
 
 // ══ MAP ═══════════════════════════════════════════════════════════════════════
-let mapFilter = 'all';
-
-function filterMap(btn, sense) {
-  mapFilter = sense;
-  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+function filterMap(btn,sense){
+  mapFilter=sense;
+  document.querySelectorAll('#map-filter-bar .tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderMap();
 }
-
-function renderMap() {
-  const canvas = document.getElementById('map-canvas');
-  const W = canvas.parentElement.clientWidth;
-  const H = Math.round(W * 0.75);
-  canvas.width = W; canvas.height = H;
-  const ctx = canvas.getContext('2d');
-
-  ctx.fillStyle = '#0a0e1a';
-  ctx.fillRect(0, 0, W, H);
-
-  // Grid
-  ctx.strokeStyle = '#1e2d47'; ctx.lineWidth = 0.5;
-  for (let x = 0; x < W; x += 30) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
-  for (let y = 0; y < H; y += 30) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
-
-  // Plan
-  if (state.space.planImage) {
-    const img = new Image();
-    img.onload = () => {
-      ctx.save();
-      ctx.globalAlpha = 0.55;
-      const r = Math.min(W / img.width, H / img.height);
-      const dw = img.width * r, dh = img.height * r;
-      ctx.drawImage(img, (W - dw)/2, (H - dh)/2, dw, dh);
-      ctx.restore();
-      drawSensors(ctx, W, H);
-    };
-    img.src = state.space.planImage;
+function renderMap(){
+  const canvas=document.getElementById('map-canvas');
+  const W=canvas.parentElement.clientWidth; const H=Math.round(W*.75);
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#0a0e1a'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#1e2d47'; ctx.lineWidth=.5;
+  for(let x=0;x<W;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  const sensors=mapFilter==='all'?state.sensors:state.sensors.filter(s=>s.sense===mapFilter);
+  if(state.space.planImage){
+    const img=new Image();
+    img.onload=()=>{ctx.save();ctx.globalAlpha=.55;const r=Math.min(W/img.width,H/img.height);ctx.drawImage(img,(W-img.width*r)/2,(H-img.height*r)/2,img.width*r,img.height*r);ctx.restore();drawSensors(ctx,sensors,W,H);};
+    img.src=state.space.planImage;
   } else {
-    drawPlaceholderRooms(ctx, W, H);
-    drawSensors(ctx, W, H);
+    ctx.strokeStyle='#1e3a5a'; ctx.lineWidth=1.2;
+    [[.1,.1,.35,.4],[.45,.1,.3,.4],[.75,.1,.22,.3],[.1,.52,.22,.35],[.33,.52,.4,.35],[.75,.42,.22,.45],[.1,.88,.87,.1]].forEach(([rx,ry,rw,rh])=>{
+      ctx.fillStyle='#0d1829'; ctx.fillRect(rx*W,ry*H,rw*W,rh*H); ctx.strokeRect(rx*W,ry*H,rw*W,rh*H);
+    });
+    ctx.fillStyle='#2a3d5a'; ctx.font=`${Math.max(8,W*.015)}px monospace`; ctx.textAlign='center';
+    ctx.fillText('↑ '+T.planBtn, W/2, H-15);
+    drawSensors(ctx,sensors,W,H);
   }
-
   buildMapLegend();
 }
-
-function drawPlaceholderRooms(ctx, W, H) {
-  const sw = W / 700, sh = H / 580;
-  const rooms = [[100,80,200,160],[300,80,180,160],[480,80,140,120],[100,240,140,180],[240,240,240,180],[480,200,140,220],[100,420,520,120]];
-  ctx.strokeStyle = '#1e3a5a'; ctx.lineWidth = 1.5;
-  rooms.forEach(([rx,ry,rw,rh]) => {
-    const sx=rx*sw, sy=ry*sh, srw=rw*sw, srh=rh*sh;
-    ctx.strokeRect(sx, sy, srw, srh);
-    ctx.fillStyle = '#0d1829';
-    ctx.fillRect(sx+1, sy+1, srw-2, srh-2);
-  });
-  ctx.fillStyle = '#2a3d5a'; ctx.font = `${Math.max(8,W*0.015)}px monospace`;
-  ctx.textAlign = 'center';
-  ctx.fillText('↑ Carregue uma planta em ESPAÇO', W/2, H-15);
-}
-
-function drawSensors(ctx, W, H) {
-  const showConflicts = document.getElementById('show-conflicts').checked;
-  const sensors = mapFilter === 'all' ? state.sensors : state.sensors.filter(s => s.sense === mapFilter);
-  const scaleX = W / 700, scaleY = H / 580;
-
-  sensors.forEach(s => {
-    const x = s.x * scaleX, y = s.y * scaleY;
-    const r = s.propagationRadius * Math.min(scaleX, scaleY);
-    const col = SENSES[s.sense].color;
-    const alpha = Math.min(0.65, 0.08 + s.intensity * 0.08);
-
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    if (s.propagationType === 'radial' || s.propagationType === 'diffuse') {
-      const g = ctx.createRadialGradient(x, y, 2, x, y, r);
-      g.addColorStop(0, col); g.addColorStop(1, 'transparent');
-      ctx.fillStyle = g;
-      if (s.propagationType === 'diffuse') {
-        for (let i=1;i<=4;i++) {
-          ctx.beginPath(); ctx.arc(x, y, r*i/4, 0, Math.PI*2); ctx.fill();
-        }
-      } else {
-        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill();
-      }
-    } else if (s.propagationType === 'directional') {
-      const rad = (s.angle - 90) * Math.PI / 180;
-      const spread = (s.spreadAngle / 2) * Math.PI / 180;
-      const g = ctx.createRadialGradient(x, y, 2, x, y, r);
-      g.addColorStop(0, col); g.addColorStop(1, 'transparent');
-      ctx.fillStyle = g;
-      ctx.beginPath(); ctx.moveTo(x, y); ctx.arc(x, y, r, rad - spread, rad + spread); ctx.closePath(); ctx.fill();
+function drawSensors(ctx,sensors,W,H){
+  const showC=document.getElementById('show-conflicts').checked;
+  const sx=W/700, sy=H/580;
+  sensors.forEach(s=>{
+    const x=s.x*sx, y=s.y*sy, r=s.propagationRadius*Math.min(sx,sy);
+    const col=SENSE_COLORS[s.sense]||'#888';
+    const alpha=Math.min(.55,.06+s.intensity*.07);
+    ctx.save(); ctx.globalAlpha=alpha;
+    const g=ctx.createRadialGradient(x,y,1,x,y,r);
+    g.addColorStop(0,col); g.addColorStop(1,'transparent');
+    ctx.fillStyle=g;
+    if(s.propagationType==='directional'){
+      const rad=(s.angle-90)*Math.PI/180, sp=((s.spreadAngle||90)/2)*Math.PI/180;
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.arc(x,y,r,rad-sp,rad+sp); ctx.closePath();
     } else {
-      ctx.fillStyle = col;
-      ctx.beginPath(); ctx.arc(x, y, Math.max(6, s.intensity*3), 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
     }
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x, y, 7, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#0a0e1a'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(SENSES[s.sense].emoji, x, y);
+    ctx.fill(); ctx.globalAlpha=1;
+    ctx.fillStyle=col; ctx.beginPath(); ctx.arc(x,y,7,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font=`bold ${Math.max(7,W*.019)}px sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(SENSE_EMOJIS[s.sense]||'●',x,y);
     ctx.restore();
   });
-
-  // Conflicts
-  if (showConflicts) {
-    const conflicts = detectConflicts(sensors, scaleX, scaleY);
-    conflicts.forEach(c => {
-      ctx.save();
-      ctx.globalAlpha = 0.6; ctx.strokeStyle = '#FF3333'; ctx.lineWidth = 2; ctx.setLineDash([4,3]);
-      ctx.beginPath(); ctx.arc(c.x, c.y, 15 + c.severity * 20, 0, Math.PI*2); ctx.stroke();
-      ctx.globalAlpha = 0.25; ctx.fillStyle = '#FF3333';
-      ctx.beginPath(); ctx.arc(c.x, c.y, 15 + c.severity * 20, 0, Math.PI*2); ctx.fill();
-      ctx.globalAlpha = 1; ctx.fillStyle = '#FF3333'; ctx.font = 'bold 14px monospace';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('⚠', c.x, c.y);
+  if(showC){
+    const cs=detectConflicts(sensors,sx,sy);
+    cs.forEach(c=>{
+      ctx.save(); ctx.globalAlpha=.5; ctx.strokeStyle='#FF3333'; ctx.lineWidth=1.5; ctx.setLineDash([3,2]);
+      ctx.beginPath(); ctx.arc(c.x,c.y,12+c.severity*15,0,Math.PI*2); ctx.stroke();
+      ctx.globalAlpha=.2; ctx.fillStyle='#FF3333'; ctx.fill();
+      ctx.globalAlpha=1; ctx.fillStyle='#FF3333'; ctx.font=`bold ${Math.max(10,W*.02)}px sans-serif`;
+      ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('⚠',c.x,c.y);
       ctx.restore();
     });
-
-    const el = document.getElementById('conflict-summary');
-    if (conflicts.length > 0) {
-      el.innerHTML = `<div class="conflict-badge">⚠ ${conflicts.length} zona(s) de conflito detetada(s)</div>`;
-    } else {
-      el.innerHTML = '';
-    }
+    const el=document.getElementById('conflict-summary');
+    el.innerHTML=cs.length?`<div class="conflict-badge">⚠ ${cs.length} ${T.conflictBadge}</div>`:'';
   }
 }
-
-function detectConflicts(sensors, sx = 1, sy = 1) {
-  const out = [];
-  for (let i = 0; i < sensors.length; i++) {
-    for (let j = i+1; j < sensors.length; j++) {
-      const a = sensors[i], b = sensors[j];
-      const ax = a.x*sx, ay = a.y*sy, bx = b.x*sx, by = b.y*sy;
-      const dist = Math.hypot(ax-bx, ay-by);
-      const overlap = (a.propagationRadius*Math.min(sx,sy) + b.propagationRadius*Math.min(sx,sy)) - dist;
-      if (overlap > 15) out.push({ sensorA: a, sensorB: b, x:(ax+bx)/2, y:(ay+by)/2, severity: Math.min(1, overlap/80) });
-    }
+function detectConflicts(sensors,sx=1,sy=1){
+  const out=[];
+  for(let i=0;i<sensors.length;i++) for(let j=i+1;j<sensors.length;j++){
+    const a=sensors[i],b=sensors[j];
+    const ax=a.x*sx,ay=a.y*sy,bx=b.x*sx,by=b.y*sy;
+    const dist=Math.hypot(ax-bx,ay-by);
+    const ov=(a.propagationRadius*Math.min(sx,sy)+b.propagationRadius*Math.min(sx,sy))-dist;
+    if(ov>15) out.push({sensorA:a,sensorB:b,x:(ax+bx)/2,y:(ay+by)/2,severity:Math.min(1,ov/80)});
   }
   return out;
 }
-
-function buildMapLegend() {
-  const el = document.getElementById('map-legend');
-  el.innerHTML = Object.entries(SENSES).map(([k, s]) => {
-    const cnt = state.sensors.filter(x => x.sense === k).length;
+function buildMapLegend(){
+  document.getElementById('map-legend').innerHTML=Object.keys(SENSE_EMOJIS).map(k=>{
+    const cnt=state.sensors.filter(x=>x.sense===k).length;
     return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
-      <div style="width:10px;height:10px;border-radius:50%;background:${s.color}"></div>
-      <span style="font-size:11px;flex:1;color:#8899b4">${s.label}</span>
-      <span style="font-size:12px;color:${s.color};font-weight:bold">${cnt}</span>
+      <div style="width:10px;height:10px;border-radius:50%;background:${SENSE_COLORS[k]}"></div>
+      <span style="font-size:11px;flex:1;color:#8899b4">${SENSE_EMOJIS[k]} ${T.senseLabels[k]||k}</span>
+      <span style="font-size:12px;color:${SENSE_COLORS[k]};font-weight:bold">${cnt}</span>
     </div>`;
   }).join('');
 }
-
-function exportMapImage() {
-  const canvas = document.getElementById('map-canvas');
-  const link = document.createElement('a');
-  link.download = `sensory-map-${Date.now()}.png`;
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-  showToast('Mapa exportado ✓');
+function exportMapImage(){
+  const canvas=document.getElementById('map-canvas');
+  const a=document.createElement('a'); a.download=`sensory-map-${Date.now()}.png`; a.href=canvas.toDataURL(); a.click();
+  showToast(T.exportBtn+' ✓');
 }
 
-// Touch-to-place on canvas
-document.addEventListener('DOMContentLoaded', () => {
-  const canvas = document.getElementById('map-canvas');
-  canvas.addEventListener('touchstart', (e) => {
-    if (e.touches.length !== 1) return;
-    e.preventDefault();
-    const t = e.touches[0];
-    const rect = canvas.getBoundingClientRect();
-    const px = (t.clientX - rect.left) / rect.width * 700;
-    const py = (t.clientY - rect.top) / rect.height * 580;
-    showToast('📍 Posição: ' + Math.round(px) + ', ' + Math.round(py) + ' — use no formulário');
-    document.getElementById('f-xy') && (document.getElementById('f-xy').value = Math.round(px) + ',' + Math.round(py));
-  }, { passive: false });
-});
-
-// ══ LIST ═════════════════════════════════════════════════════════════════════
-let listFilter = 'all';
-
-function filterList(btn, sense) {
-  listFilter = sense;
-  document.querySelectorAll('#list-filter-bar .tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderList();
+// ══ LIST ══════════════════════════════════════════════════════════════════════
+function filterList(btn,sense){
+  listFilter=sense;
+  document.querySelectorAll('#list-filter-bar .tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); renderList();
 }
-
-function renderList() {
-  const sensors = listFilter === 'all' ? state.sensors : state.sensors.filter(s => s.sense === listFilter);
-  const el = document.getElementById('sensor-list');
-  if (sensors.length === 0) {
-    el.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px">Nenhum estímulo registado.<br><br>Use ＋ REGISTAR para começar.</div>`;
-    return;
-  }
-  el.innerHTML = sensors.slice().reverse().map(s => {
-    const col = SENSES[s.sense].color;
-    const ts = new Date(s.timestamp).toLocaleString('pt-PT', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
-    return `
-      <div class="sensor-item" style="border-left-color:${col}" onclick="openSensorDetail('${s.id}')">
-        <div class="sensor-item-header">
-          <div>
-            <div class="sensor-name" style="color:${col}">${SENSES[s.sense].emoji} ${s.label}</div>
-            <div class="sensor-meta">${INTENSITY[s.intensity]} · ${PROPAGATION[s.propagationType] || ''} · ${ts}</div>
-          </div>
-          <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteSensor('${s.id}')">✕</button>
-        </div>
-        ${s.photos?.length > 0 ? `<div style="margin-top:8px;display:flex;gap:4px;overflow-x:auto">${s.photos.slice(0,3).map(p=>`<img src="${p.src}" style="height:50px;width:50px;object-fit:cover;border-radius:4px;border:1px solid var(--border);flex-shrink:0">`).join('')}</div>` : ''}
-        ${s.notes ? `<div style="margin-top:6px;font-size:11px;color:var(--muted);line-height:1.5">${s.notes.substring(0,120)}${s.notes.length>120?'…':''}</div>` : ''}
+function renderList(){
+  const sensors=listFilter==='all'?state.sensors:state.sensors.filter(s=>s.sense===listFilter);
+  const el=document.getElementById('sensor-list');
+  if(!sensors.length){el.innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;white-space:pre-line">${T.noSensors}</div>`;return;}
+  el.innerHTML=sensors.slice().reverse().map(s=>{
+    const col=SENSE_COLORS[s.sense]; const ts=s.timestamp?new Date(s.timestamp).toLocaleString([],{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
+    return `<div class="sensor-item" style="border-left-color:${col}" onclick="openSensorDetail('${s.id}')">
+      <div class="sensor-item-header">
+        <div><div class="sensor-name" style="color:${col}">${SENSE_EMOJIS[s.sense]} ${s.label}</div>
+        <div class="sensor-meta">${T.intensityLabels[s.intensity]||s.intensity} · ${T.propLabels[s.propagationType]||''} · ${ts}</div></div>
+        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteSensor('${s.id}')">✕</button>
       </div>
-    `;
+      ${s.photos?.length?`<div style="margin-top:8px;display:flex;gap:4px;overflow-x:auto">${s.photos.slice(0,3).map(p=>`<img src="${p.src}" style="height:50px;width:50px;object-fit:cover;border-radius:4px;border:1px solid var(--border);flex-shrink:0">`).join('')}</div>`:''}
+      ${s.notes?`<div style="margin-top:6px;font-size:11px;color:#8faecf;line-height:1.5">${s.notes.substring(0,100)}${s.notes.length>100?'…':''}</div>`:''}
+    </div>`;
   }).join('');
 }
-
-function deleteSensor(id) {
-  if (!confirm('Apagar este estímulo?')) return;
-  state.sensors = state.sensors.filter(s => s.id !== id);
-  saveAll(); renderList(); updateCountHeader(); showToast('Estímulo apagado');
-}
-
-function openSensorDetail(id) {
-  const s = state.sensors.find(x => x.id === id);
-  if (!s) return;
-  const col = SENSES[s.sense].color;
-  const modal = document.getElementById('modal-content');
-  const ts = new Date(s.timestamp).toLocaleString('pt-PT');
-  modal.innerHTML = `
-    <div class="modal-title" style="color:${col}">${SENSES[s.sense].emoji} ${s.label}</div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:12px">${ts} ${s.gps ? '· GPS: '+s.gps.lat.toFixed(5)+', '+s.gps.lng.toFixed(5) : ''}</div>
+function deleteSensor(id){state.sensors=state.sensors.filter(s=>s.id!==id);saveAll();renderList();updateCountHeader();}
+function openSensorDetail(id){
+  const s=state.sensors.find(x=>x.id===id); if(!s)return;
+  const col=SENSE_COLORS[s.sense]; const ts=s.timestamp?new Date(s.timestamp).toLocaleString():'—';
+  document.getElementById('modal-content').innerHTML=`
+    <div class="modal-title" style="color:${col}">${SENSE_EMOJIS[s.sense]} ${s.label}</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px">${ts}${s.gps?' · GPS: '+s.gps.lat.toFixed(5)+', '+s.gps.lng.toFixed(5):''}</div>
     <div class="row2" style="margin-bottom:12px">
-      <div><div class="label">Intensidade</div><div style="color:${col}">${INTENSITY[s.intensity]} (${s.intensity}/6)</div></div>
-      <div><div class="label">Propagação</div><div>${PROPAGATION[s.propagationType]}</div></div>
+      <div><div class="lbl">${T.fIntensity}</div><div style="color:${col}">${T.intensityLabels[s.intensity]} (${s.intensity}/6)</div></div>
+      <div><div class="lbl">${T.fProp}</div><div>${T.propLabels[s.propagationType]||s.propagationType}</div></div>
     </div>
-    ${s.notes ? `<div><div class="label">Notas</div><div style="font-size:12px;color:#9ab0cc;line-height:1.7">${s.notes}</div></div>` : ''}
-    ${s.photos?.length ? `
-      <div class="label" style="margin-top:12px">Fotografias (${s.photos.length})</div>
-      <div class="photo-grid" style="margin-top:6px">${s.photos.map(p=>`<div class="photo-thumb"><img src="${p.src}"><div class="photo-label">${p.name}</div></div>`).join('')}</div>
-    ` : ''}
-    <div class="label" style="margin-top:12px">Avaliação Subjetiva</div>
-    <div style="font-size:12px;color:#9ab0cc">
-      Agradabilidade: ${'★'.repeat(s.ratings?.pleasant||0)}${'☆'.repeat(5-(s.ratings?.pleasant||0))} &nbsp; 
-      Perturbação: ${'★'.repeat(s.ratings?.disturb||0)}${'☆'.repeat(5-(s.ratings?.disturb||0))}
-    </div>
-    <button class="btn btn-ghost" style="margin-top:16px" onclick="closeModal()">FECHAR</button>
-  `;
-  document.getElementById('modal').style.display = 'flex';
+    ${s.notes?`<div><div class="lbl">${T.fNotes}</div><div style="font-size:13px;color:#c8dff5;line-height:1.7">${s.notes}</div></div>`:''}
+    ${s.photos?.length?`<div class="lbl" style="margin-top:12px">${T.photosLabel} (${s.photos.length})</div>
+    <div class="photo-grid" style="margin-top:6px">${s.photos.map(p=>`<div class="photo-thumb"><img src="${p.src}"><div class="photo-label">${p.name}</div></div>`).join('')}</div>`:''}
+    <button class="btn btn-ghost" style="margin-top:16px" onclick="closeModal()">${T.cancel}</button>`;
+  document.getElementById('modal').style.display='flex';
 }
-
-function closeModal(e) {
-  if (!e || e.target === document.getElementById('modal')) {
-    document.getElementById('modal').style.display = 'none';
-  }
-}
+function closeModal(e){if(!e||e.target===document.getElementById('modal')) document.getElementById('modal').style.display='none';}
 
 // ══ ANALYSIS ══════════════════════════════════════════════════════════════════
-function renderAnalysis() {
-  const statsEl = document.getElementById('analysis-stats');
-  statsEl.innerHTML = Object.entries(SENSES).map(([k, s]) => {
-    const cnt = state.sensors.filter(x => x.sense === k).length;
-    const maxI = Math.max(0, ...state.sensors.filter(x => x.sense === k).map(x => x.intensity));
-    return `
-      <div class="card" style="border-color:${cnt>0?s.color+'44':'var(--border)'}">
-        <div style="font-size:20px">${s.emoji}</div>
-        <div style="font-size:12px;font-weight:bold;color:${s.color}">${cnt}</div>
-        <div style="font-size:9px;color:var(--muted)">${s.label}</div>
-        <div style="height:3px;background:var(--border);border-radius:2px;margin-top:4px">
-          <div style="height:100%;width:${(maxI/6)*100}%;background:${s.color};border-radius:2px"></div>
-        </div>
-      </div>
-    `;
+function renderAnalysis(){
+  document.getElementById('analysis-stats').innerHTML=Object.keys(SENSE_EMOJIS).map(k=>{
+    const arr=state.sensors.filter(x=>x.sense===k);
+    const maxI=arr.length?Math.max(...arr.map(x=>x.intensity)):0;
+    return `<div class="card" style="border-color:${arr.length?SENSE_COLORS[k]+'44':'var(--border)'}">
+      <div style="font-size:20px">${SENSE_EMOJIS[k]}</div>
+      <div style="font-size:12px;font-weight:bold;color:${SENSE_COLORS[k]}">${arr.length}</div>
+      <div style="font-size:9px;color:#8faecf">${T.senseLabels[k]||k}</div>
+      <div style="height:3px;background:var(--border);border-radius:2px;margin-top:4px">
+        <div style="height:100%;width:${(maxI/6)*100}%;background:${SENSE_COLORS[k]};border-radius:2px"></div></div>
+    </div>`;
   }).join('');
-
-  const conflicts = detectConflicts(state.sensors);
-  const conflEl = document.getElementById('conflict-list-analysis');
-  if (conflicts.length > 0) {
-    conflEl.innerHTML = `
-      <div class="card" style="border-color:var(--danger)44;margin-bottom:12px">
-        <div style="color:var(--danger);font-weight:bold;margin-bottom:8px">⚠ CONFLITOS (${conflicts.length})</div>
-        ${conflicts.map(c => `
-          <div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:11px">
-            <span style="color:${SENSES[c.sensorA.sense].color}">${c.sensorA.label}</span>
-            <span style="color:var(--muted)"> ✕ </span>
-            <span style="color:${SENSES[c.sensorB.sense].color}">${c.sensorB.label}</span>
-            <span style="color:#8899b4;margin-left:6px">${Math.round(c.severity*100)}%</span>
-          </div>
-        `).join('')}
-      </div>
-    `;
-  } else {
-    conflEl.innerHTML = `<div class="card" style="border-color:var(--safe)44;margin-bottom:12px;color:var(--safe);font-size:12px">✓ Sem conflitos detetados</div>`;
-  }
+  const cs=detectConflicts(state.sensors);
+  document.getElementById('conflict-list-analysis').innerHTML=cs.length
+    ?`<div class="card" style="border-color:var(--danger)44;margin-bottom:12px">
+        <div style="color:var(--danger);font-weight:bold;margin-bottom:8px">⚠ (${cs.length})</div>
+        ${cs.map(c=>`<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:11px">
+          <span style="color:${SENSE_COLORS[c.sensorA.sense]}">${c.sensorA.label}</span>
+          <span style="color:var(--muted)"> ✕ </span>
+          <span style="color:${SENSE_COLORS[c.sensorB.sense]}">${c.sensorB.label}</span>
+          <span style="color:#8899b4;margin-left:6px">${Math.round(c.severity*100)}%</span>
+        </div>`).join('')}
+      </div>`
+    :`<div class="card" style="border-color:var(--safe)44;margin-bottom:12px;color:var(--safe);font-size:12px">${T.noConflicts}</div>`;
+  // export hint
+  const eh=document.getElementById('export-hint');
+  if(eh){eh.style.whiteSpace='pre-line';eh.textContent=T.exportHint;}
 }
 
-async function runAI() {
-  if (state.sensors.length === 0) return showToast('Adicione estímulos primeiro');
-  const btn = document.getElementById('ai-btn');
-  btn.textContent = '⏳ A ANALISAR…';
-  btn.disabled = true;
+async function runAI(){
+  if(!state.sensors.length) return showToast('0 sensors');
+  const btn=document.getElementById('ai-btn');
+  btn.textContent=T.aiLoading; btn.disabled=true;
+  const cs=detectConflicts(state.sensors);
+  const prompt=`You are an expert in sensory architecture and spatial perception. Respond entirely in ${T.aiPromptLang}.
 
-  const conflicts = detectConflicts(state.sensors);
-  const prompt = `
-Você é um especialista em arquitetura sensorial e percepção espacial, baseado nos trabalhos de Yi-Fu Tuan (Topophilia), Merleau-Ponty (Fenomenologia da Percepção), Raymond Murray Schafer (Soundscape), Kate McLean (Smellscapes) e Raymond Lucas (Research Methods for Architecture).
+SPACE: ${state.space.name||'Unknown'} | Area: ${state.space.area||'?'}m² | Use: ${state.space.type||'?'}
+${state.space.desc?'Description: '+state.space.desc:''}
 
-Analise este espaço em PORTUGUÊS:
+STIMULI (${state.sensors.length}):
+${state.sensors.map(s=>`[${T.senseLabels[s.sense]}] "${s.label}" | ${T.intensityLabels[s.intensity]} (${s.intensity}/6) | ${T.propLabels[s.propagationType]||s.propagationType} | ${s.notes||''}`).join('\n')}
 
-**ESPAÇO:** ${state.space.name || "Não especificado"} | Área: ${state.space.area||'?'}m² | Uso: ${state.space.type||'?'}
-${state.space.desc ? '**Descrição:** ' + state.space.desc : ''}
+CONFLICTS (${cs.length}): ${cs.map(c=>`"${c.sensorA.label}" ✕ "${c.sensorB.label}" (${Math.round(c.severity*100)}%)`).join(', ')||'None'}
 
-**ESTÍMULOS SENSORIAIS (${state.sensors.length}):**
-${state.sensors.map(s => `[${SENSES[s.sense].label}] "${s.label}" | Intensidade: ${INTENSITY[s.intensity]} (${s.intensity}/6) | Propagação: ${PROPAGATION[s.propagationType]} | ${s.notes || ''}`).join('\n')}
-
-**CONFLITOS (${conflicts.length}):**
-${conflicts.map(c => `- "${c.sensorA.label}" ✕ "${c.sensorB.label}" (${Math.round(c.severity*100)}%)`).join('\n') || 'Nenhum'}
-
-Responda com 4 secções:
-## 🔍 DIAGNÓSTICO SENSORIAL
-## ⚠️ ZONAS DE CONFLITO
-## 💡 SOLUÇÕES PROPOSTAS (min. 3 numeradas)
-## 📐 REPRESENTAÇÃO GRÁFICA RECOMENDADA
-`;
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
-    });
-    const data = await res.json();
-    const text = data.content?.map(b => b.text||'').join('') || 'Sem resposta da API';
-
-    const resultEl = document.getElementById('ai-result');
-    resultEl.style.display = 'block';
-    resultEl.innerHTML = text.split('##').filter(Boolean).map((sec, i) => {
-      const lines = sec.split('\n');
+Respond in 4 sections (use ## headings):
+## 🔍 SENSORY DIAGNOSIS
+## ⚠️ CONFLICT ZONES  
+## 💡 PROPOSED SOLUTIONS (min. 3 numbered)
+## 📐 RECOMMENDED GRAPHIC REPRESENTATION`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const text=data.content?.map(b=>b.text||'').join('')||'No response';
+    const el=document.getElementById('ai-result');
+    el.style.display='block';
+    el.innerHTML=text.split('##').filter(Boolean).map(sec=>{
+      const lines=sec.split('\n');
       return `<div class="section-head">## ${lines[0].trim()}</div>
-              <div style="font-size:12px;color:#9ab0cc;line-height:1.8;white-space:pre-wrap">${lines.slice(1).join('\n').trim()}</div>`;
+              <div style="font-size:13px;color:#c8dff5;line-height:1.8;white-space:pre-wrap">${lines.slice(1).join('\n').trim()}</div>`;
     }).join('');
-    showToast('Análise concluída ✓');
-  } catch(e) {
-    document.getElementById('ai-result').style.display = 'block';
-    document.getElementById('ai-result').innerHTML = `<div class="conflict-badge">Erro: ${e.message}</div>`;
+  }catch(e){
+    document.getElementById('ai-result').style.display='block';
+    document.getElementById('ai-result').innerHTML=`<div class="conflict-badge">Error: ${e.message}</div>`;
   }
-  btn.textContent = '🤖 ANALISAR COM IA';
-  btn.disabled = false;
+  btn.textContent=T.aiBtn; btn.disabled=false;
 }
 
-function exportJSON() {
-  const data = JSON.stringify({ space: state.space, sensors: state.sensors.map(s => ({ ...s, photos: s.photos?.map(p => ({ ...p, src: '[imagem]' })) })) }, null, 2);
-  const blob = new Blob([data], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `sensory-${state.space.name||'export'}-${Date.now()}.json`;
-  a.click(); URL.revokeObjectURL(url);
-  showToast('JSON exportado ✓');
+function exportJSON(){
+  const data=JSON.stringify({space:state.space,sensors:state.sensors.map(s=>({...s,photos:s.photos?.map(p=>({...p,src:'[image]'}))}))},null,2);
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
+  a.download=`sensory-${state.space.name||'export'}-${Date.now()}.json`;
+  a.click(); showToast(T.exportJSON+' ✓');
 }
 
 // ══ HELPERS ═══════════════════════════════════════════════════════════════════
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2500);
+function showToast(msg){
+  const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2500);
+}
+function updateCountHeader(){ document.getElementById('counts-header').textContent=state.sensors.length; }
+
+// ══ VOICE ENGINE ══════════════════════════════════════════════════════════════
+const VOICE={recognition:null,listening:false,mode:'free',targetField:null,guidedStep:0,finalTranscript:'',timer:null};
+
+function initVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){document.getElementById('voice-fab').style.display='none';document.getElementById('voice-mode-bar').style.display='none';return;}
+  VOICE.recognition=new SR();
+  updateVoiceLang();
+  VOICE.recognition.continuous=true;
+  VOICE.recognition.interimResults=true;
+  VOICE.recognition.onresult=onVoiceResult;
+  VOICE.recognition.onerror=e=>{if(e.error!=='no-speech'&&e.error!=='aborted') setVoiceStatus('⚠ '+e.error);};
+  VOICE.recognition.onend=()=>{if(VOICE.listening){try{VOICE.recognition.start();}catch(e){}}else setVoiceUI(false);};
 }
 
-function updateCountHeader() {
-  document.getElementById('counts-header').textContent = state.sensors.length + ' est.';
+function updateVoiceLang(){
+  if(VOICE.recognition) VOICE.recognition.lang=T.code;
 }
+
+function onVoiceResult(event){
+  let fin='', interim='';
+  for(let i=event.resultIndex;i<event.results.length;i++){
+    const t=event.results[i][0].transcript;
+    if(event.results[i].isFinal) fin+=t; else interim+=t;
+  }
+  const display=fin||interim;
+  const el=document.getElementById('voice-transcript');
+  el.textContent=display||'…'; el.className=fin?'':'interim';
+  if(fin.trim()){
+    VOICE.finalTranscript=fin.trim();
+    clearTimeout(VOICE.timer);
+    VOICE.timer=setTimeout(()=>processVoiceCommand(VOICE.finalTranscript),600);
+  }
+}
+
+function processVoiceCommand(text){
+  const t=text.toLowerCase().trim();
+  // Save
+  if(T.vSaveWords.some(w=>t.startsWith(w))){stopVoice();saveSensor();return;}
+  // Cancel
+  if(T.vCancelWords.some(w=>t.startsWith(w))){stopVoice();showToast(T.voiceCancelled);return;}
+  // Guided mode
+  if(VOICE.mode==='guided'){applyGuidedStep(text);return;}
+  // Field mode
+  if(VOICE.mode==='field'&&VOICE.targetField){
+    const el=document.getElementById(VOICE.targetField);
+    if(el){el.value=el.type==='number'?text.replace(/\D/g,''):capFirst(text);flashField(el);}
+    stopVoice(); return;
+  }
+  // Free mode
+  let applied=[];
+  // Sense
+  const sense=matchMap(t,T.senseMap);
+  if(sense){selectSense(sense);applied.push(T.senseLabels[sense]);}
+  // Label
+  const lm=t.match(T.vLabelPrefix);
+  if(lm){const el=document.getElementById('f-label');if(el){el.value=capFirst(lm[2]);flashField(el);applied.push('name');}}
+  // Intensity explicit
+  const im=t.match(T.vIntensityPrefix);
+  const iv=im?matchIntensity(im[1],T.intensityMap):matchIntensity(t,T.intensityMap);
+  if(iv!==null){const sl=document.getElementById('f-intensity');if(sl){sl.value=iv;sl.dispatchEvent(new Event('input'));flashField(sl);applied.push(T.intensityLabels[iv]);}}
+  // Propagation
+  const prop=matchMap(t,T.propMap);
+  if(prop){const sel=document.getElementById('f-prop');if(sel){sel.value=prop;flashField(sel);applied.push(T.propLabels[prop]);}}
+  // Radius
+  const rm=t.match(T.vRadiusMatch);
+  if(rm){const el=document.getElementById('f-radius');if(el){el.value=rm[1];flashField(el);applied.push('r:'+rm[1]);}}
+  // Temp
+  const tm=t.match(T.vTempMatch);
+  if(tm){const el=document.getElementById('f-temp-val');if(el){el.value=tm[1];flashField(el);applied.push(tm[1]+'°C');}}
+  // Humidity
+  const hm=t.match(T.vHumMatch);
+  if(hm){const el=document.getElementById('f-temp-hum');if(el){el.value=hm[1]||hm[2];flashField(el);applied.push('HR:'+(hm[1]||hm[2])+'%');}}
+  // dB
+  const dm=t.match(T.vDbMatch);
+  if(dm){const el=document.getElementById('f-sound-db');if(el){el.value=dm[1];flashField(el);applied.push(dm[1]+'dB');}}
+  // Stars
+  const am=t.match(T.vAgrMatch);if(am) setStar('pleasant',parseInt(am[1]));
+  const drm=t.match(T.vDistMatch);if(drm) setStar('disturb',parseInt(drm[1]));
+  // Notes
+  const nm=t.match(T.vNotePrefix);
+  if(nm){const el=document.getElementById('f-notes');if(el){el.value=(el.value?el.value+'. ':'')+capFirst(nm[2]);flashField(el);applied.push('note');}}
+  else if(!applied.length){const el=document.getElementById('f-notes');if(el){el.value=(el.value?el.value+'. ':'')+capFirst(text);flashField(el);applied.push('→notes');}}
+
+  if(applied.length){
+    setVoiceStatus('✓ '+applied.join(' · '));
+    document.getElementById('voice-transcript').style.borderColor='var(--safe)';
+    setTimeout(()=>{document.getElementById('voice-transcript').style.borderColor='';},1000);
+  }
+  setTimeout(()=>{VOICE.finalTranscript='';const el=document.getElementById('voice-transcript');el.textContent='…';el.className='interim';},1500);
+}
+
+// ── Guided ────────────────────────────────────────────────────────────────────
+function startGuidedVoice(){
+  if(!VOICE.recognition) return showToast('Voice N/A');
+  VOICE.mode='guided'; VOICE.guidedStep=0;
+  document.getElementById('guided-steps').style.display='flex';
+  renderGuidedSteps(); openVoiceOverlay(); advanceGuidedStep();
+}
+function advanceGuidedStep(){
+  const steps=getGuidedSteps();
+  if(VOICE.guidedStep>=steps.length){stopVoice();showToast(T.gDone);return;}
+  const step=steps[VOICE.guidedStep];
+  setVoiceFieldLabel(step.label); setVoiceStatus(step.hint);
+  setVoiceCommands(step.cmds); renderGuidedSteps();
+}
+function getGuidedSteps(){
+  return [
+    {id:'sense',label:T.gStep1Label,hint:T.gStep1Hint,cmds:T.gStep1Cmds},
+    {id:'label',label:T.gStep2Label,hint:T.gStep2Hint,cmds:T.gStep2Cmds},
+    {id:'intensity',label:T.gStep3Label,hint:T.gStep3Hint,cmds:T.gStep3Cmds},
+    {id:'prop',label:T.gStep4Label,hint:T.gStep4Hint,cmds:T.gStep4Cmds},
+    {id:'notes',label:T.gStep5Label,hint:T.gStep5Hint,cmds:T.gStep5Cmds},
+  ];
+}
+function applyGuidedStep(text){
+  const t=text.toLowerCase().trim();
+  const steps=getGuidedSteps();
+  const step=steps[VOICE.guidedStep];
+  if(step.id==='sense'){
+    const match=matchMap(t,T.senseMap);
+    if(match){selectSense(match);setVoiceStatus('✓ '+T.senseLabels[match]);VOICE.guidedStep++;setTimeout(advanceGuidedStep,700);}
+    else setVoiceStatus('⚠ — '+T.gStep1Cmds.join(', '));
+  } else if(step.id==='label'){
+    const el=document.getElementById('f-label');if(el){el.value=capFirst(text);flashField(el);}
+    setVoiceStatus('✓ '+text);VOICE.guidedStep++;setTimeout(advanceGuidedStep,700);
+  } else if(step.id==='intensity'){
+    const iv=matchIntensity(t,T.intensityMap);
+    if(iv!==null){const sl=document.getElementById('f-intensity');if(sl){sl.value=iv;sl.dispatchEvent(new Event('input'));}setVoiceStatus('✓ '+T.intensityLabels[iv]);VOICE.guidedStep++;setTimeout(advanceGuidedStep,700);}
+    else setVoiceStatus('⚠ — '+T.intensityLabels.join(', '));
+  } else if(step.id==='prop'){
+    const match=matchMap(t,T.propMap);
+    if(match){const sel=document.getElementById('f-prop');if(sel)sel.value=match;setVoiceStatus('✓ '+T.propLabels[match]);VOICE.guidedStep++;setTimeout(advanceGuidedStep,700);}
+    else setVoiceStatus('⚠ — '+Object.values(T.propLabels).join(', '));
+  } else if(step.id==='notes'){
+    if(!T.vNoNotes.some(w=>t.startsWith(w))){const el=document.getElementById('f-notes');if(el){el.value=capFirst(text);flashField(el);}}
+    setVoiceStatus('✓');VOICE.guidedStep++;setTimeout(advanceGuidedStep,700);
+  }
+  VOICE.finalTranscript='';
+  document.getElementById('voice-transcript').textContent='…';
+}
+function renderGuidedSteps(){
+  document.getElementById('guided-steps').innerHTML=getGuidedSteps().map((s,i)=>{
+    let cls='step-dot';
+    if(i<VOICE.guidedStep) cls+=' done';
+    else if(i===VOICE.guidedStep) cls+=' current';
+    return `<div class="${cls}" title="${s.label}"></div>`;
+  }).join('');
+}
+
+// ── Field / Notes shortcuts ────────────────────────────────────────────────────
+function voiceField(fieldId,label){
+  if(!VOICE.recognition) return showToast('Voice N/A');
+  VOICE.mode='field'; VOICE.targetField=fieldId;
+  setVoiceFieldLabel(T.voiceFieldMode+(label||fieldId).toUpperCase());
+  setVoiceStatus(T.voiceFreeHint);
+  setVoiceCommands([]);
+  document.getElementById('guided-steps').style.display='none';
+  openVoiceOverlay();
+}
+function voiceIntensity(){
+  if(!VOICE.recognition) return showToast('Voice N/A');
+  VOICE.mode='guided'; VOICE.guidedStep=2;
+  VOICE.recognition.lang=T.code;
+  setVoiceFieldLabel(T.gStep3Label); setVoiceStatus(T.gStep3Hint); setVoiceCommands(T.gStep3Cmds);
+  document.getElementById('guided-steps').style.display='none';
+  openVoiceOverlay();
+}
+function voiceNotes(){
+  if(!VOICE.recognition) return showToast('Voice N/A');
+  VOICE.mode='field'; VOICE.targetField='f-notes';
+  setVoiceFieldLabel(T.voiceFieldMode+(T.fNotes).toUpperCase());
+  setVoiceStatus(T.fNotesPh);
+  setVoiceCommands([]);
+  document.getElementById('guided-steps').style.display='none';
+  openVoiceOverlay();
+}
+
+// ── FAB ────────────────────────────────────────────────────────────────────────
+function toggleVoiceFab(){
+  if(!VOICE.recognition) return showToast('Voice not supported in this browser. Use Chrome or Safari.');
+  if(VOICE.listening){stopVoice();return;}
+  VOICE.mode='free'; VOICE.targetField=null;
+  setVoiceFieldLabel(T.voiceFreeMode); setVoiceStatus(T.voiceFreeHint);
+  setVoiceCommands([T.vSaveWords[0],T.vCancelWords[0],'name…','intensity…','notes…']);
+  document.getElementById('guided-steps').style.display='none';
+  openVoiceOverlay();
+}
+function openVoiceOverlay(){
+  startVoiceRecognition(); document.getElementById('voice-overlay').classList.add('show');
+  document.getElementById('voice-wave').classList.remove('paused');
+}
+function stopVoice(){
+  VOICE.listening=false; VOICE.mode='free';
+  try{VOICE.recognition&&VOICE.recognition.stop();}catch(e){}
+  document.getElementById('voice-overlay').classList.remove('show');
+  setVoiceUI(false);
+  document.getElementById('voice-transcript').textContent='…';
+}
+function applyVoiceAndClose(){
+  const t=VOICE.finalTranscript||document.getElementById('voice-transcript').textContent;
+  if(t&&t!=='…') processVoiceCommand(t);
+  stopVoice();
+}
+function startVoiceRecognition(){
+  if(!VOICE.recognition)return;
+  VOICE.listening=true; setVoiceUI(true);
+  VOICE.recognition.lang=T.code;
+  try{VOICE.recognition.start();}catch(e){}
+}
+function setVoiceUI(on){
+  const fab=document.getElementById('voice-fab');
+  fab.className=on?'listening':''; fab.textContent=on?'⏹':'🎤';
+  const vmi=document.getElementById('vmi'); vmi.className=on?'on':'';
+  document.getElementById('vmt').textContent=on?T.voiceListening:T.voiceIdle;
+  if(!on) document.getElementById('voice-wave').classList.add('paused');
+  else document.getElementById('voice-wave').classList.remove('paused');
+}
+function setVoiceFieldLabel(t){document.getElementById('voice-field-label').textContent=t;}
+function setVoiceStatus(t){document.getElementById('voice-status').textContent=t;}
+function setVoiceCommands(cmds){document.getElementById('voice-commands').innerHTML=cmds.map(c=>`<span class="vcmd">${c}</span>`).join('');}
+
+// ── Utils ─────────────────────────────────────────────────────────────────────
+function matchMap(text,map){
+  const t=text.toLowerCase();
+  const keys=Object.keys(map).sort((a,b)=>b.length-a.length);
+  for(const k of keys){if(t.includes(k)) return map[k];}
+  return null;
+}
+function matchIntensity(text,map){
+  const t=text.toLowerCase().trim();
+  const v=matchMap(t,map);
+  if(v!==undefined&&v!==null) return v;
+  const n=t.match(/\b([0-6])\b/);
+  if(n) return parseInt(n[1]);
+  return null;
+}
+function capFirst(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
+function flashField(el){el.style.borderColor='var(--safe)';el.style.transition='border-color 1s ease-out';setTimeout(()=>{el.style.borderColor='';el.style.transition='';},1200);}
 
 // ══ INIT ══════════════════════════════════════════════════════════════════════
-function init() {
+function init(){
   loadAll();
-
   // Restore space form
-  document.getElementById('sp-name').value = state.space.name || '';
-  document.getElementById('sp-area').value = state.space.area || '';
-  document.getElementById('sp-floor').value = state.space.floor || '';
-  document.getElementById('sp-type').value = state.space.type || '';
-  document.getElementById('sp-desc').value = state.space.desc || '';
-  if (state.space.planImage) {
-    document.getElementById('plan-img').src = state.space.planImage;
-    document.getElementById('plan-preview').style.display = 'block';
-  }
-  if (state.space.gps) {
-    const g = state.space.gps;
-    document.getElementById('gps-coords').textContent = `${g.lat.toFixed(6)}, ${g.lng.toFixed(6)}`;
-    document.getElementById('gps-result').style.display = 'block';
-    document.querySelector('#gps-status .gps-dot').style.background = 'var(--safe)';
-  }
-  updateSpaceHeader();
-  updateCountHeader();
+  document.getElementById('sp-name').value=state.space.name||'';
+  document.getElementById('sp-area').value=state.space.area||'';
+  document.getElementById('sp-floor').value=state.space.floor||'';
+  document.getElementById('sp-desc').value=state.space.desc||'';
+  if(state.space.planImage){document.getElementById('plan-img').src=state.space.planImage;document.getElementById('plan-preview').style.display='block';}
+  if(state.space.gps){const g=state.space.gps;document.getElementById('gps-coords').textContent=`${g.lat.toFixed(6)}, ${g.lng.toFixed(6)}`;document.getElementById('gps-result').style.display='block';document.querySelector('#gps-status .gps-dot').style.background='var(--safe)';}
+  applyTranslations();
+  // Apply type select after translation
+  setTimeout(()=>{document.getElementById('sp-type').value=state.space.type||'';},50);
   buildSenseSelector();
   buildSensorForm();
-
-  // Offline detection
-  window.addEventListener('offline', () => document.getElementById('offline-bar').classList.add('show'));
-  window.addEventListener('online', () => document.getElementById('offline-bar').classList.remove('show'));
-  if (!navigator.onLine) document.getElementById('offline-bar').classList.add('show');
-
-  // Auto-save every 30s
-  setInterval(saveAll, 30000);
+  initVoice();
+  updateCountHeader();
+  window.addEventListener('offline',()=>document.getElementById('offline-bar').classList.add('show'));
+  window.addEventListener('online',()=>document.getElementById('offline-bar').classList.remove('show'));
+  if(!navigator.onLine) document.getElementById('offline-bar').classList.add('show');
+  setInterval(saveAll,30000);
 }
+window.addEventListener('load',init);
 
-window.addEventListener('load', init);
-
-// ══ SERVICE WORKER (inline registration) ═════════════════════════════════════
-if ('serviceWorker' in navigator) {
-  const swCode = `
-self.addEventListener('install', e => { self.skipWaiting(); });
-self.addEventListener('activate', e => { self.clients.claim(); });
-self.addEventListener('fetch', e => {
-  if (e.request.url.includes('fonts.googleapis') || e.request.url.includes('fonts.gstatic')) {
-    e.respondWith(
-      caches.open('sensory-fonts').then(cache =>
-        cache.match(e.request).then(r => r || fetch(e.request).then(res => { cache.put(e.request, res.clone()); return res; }))
-      )
-    );
-    return;
-  }
-  if (e.request.url.includes('api.anthropic.com')) return;
-  e.respondWith(
-    caches.open('sensory-v1').then(cache =>
-      cache.match(e.request).then(r => r || fetch(e.request).then(res => { if (res.ok) cache.put(e.request, res.clone()); return res; }).catch(() => r))
-    )
-  );
+// Canvas touch to set position
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('map-canvas').addEventListener('touchstart',e=>{
+    if(e.touches.length!==1)return; e.preventDefault();
+    const t=e.touches[0],rect=e.target.getBoundingClientRect();
+    const px=Math.round((t.clientX-rect.left)/rect.width*700);
+    const py=Math.round((t.clientY-rect.top)/rect.height*580);
+    showToast(`📍 ${px}, ${py}`);
+    const fe=document.getElementById('f-xy'); if(fe) fe.value=px+','+py;
+  },{passive:false});
 });
-`;
-  const swBlob = new Blob([swCode], {type: 'application/javascript'});
-  const swURL = URL.createObjectURL(swBlob);
-  navigator.serviceWorker.register(swURL).catch(() => {});
+
+// ══ SERVICE WORKER ═════════════════════════════════════════════════════════════
+if('serviceWorker'in navigator){
+  const sw=`self.addEventListener('install',e=>{self.skipWaiting()});self.addEventListener('activate',e=>{self.clients.claim()});self.addEventListener('fetch',e=>{if(e.request.url.includes('api.anthropic.com'))return;e.respondWith(caches.open('sa-v1').then(c=>c.match(e.request).then(r=>r||fetch(e.request).then(res=>{if(res.ok)c.put(e.request,res.clone());return res}).catch(()=>r))));});`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
 }
 </script>
 </body>
