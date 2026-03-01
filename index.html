@@ -210,6 +210,33 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0}
 #compass-canvas{touch-action:none;cursor:crosshair;border-radius:50%;background:#0d1825;
   border:2px solid var(--border);display:block}
 .ce-btn-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+
+/* ── ANALYSIS MODE TABS ── */
+.mode-tab{flex:1;padding:12px 8px;border:2px solid var(--border);border-radius:10px;
+  background:var(--bg3);color:var(--muted);font-family:var(--mono);font-size:11px;
+  letter-spacing:1px;cursor:pointer;text-align:center;line-height:1.4;transition:all .2s}
+.mode-tab.active{border-color:var(--sound);color:var(--sound);background:#162a40}
+/* ── API KEY CARD ── */
+#apikey-card{background:#1a2e20;border:1.5px solid #2a5a3a;border-radius:10px;padding:12px 14px;margin-bottom:14px}
+#apikey-card .lbl{color:#5aaa70}
+.apikey-row{display:flex;gap:8px;align-items:center}
+#api-key-input{flex:1;background:#0d1e14;border:1.5px solid #2a5a3a;border-radius:7px;
+  color:#e8ffe8;padding:10px 12px;font-size:14px;font-family:var(--mono);width:auto}
+#api-key-input::placeholder{color:#3a6a4a}
+#apikey-status{font-size:10px;letter-spacing:1px;margin-top:6px;font-family:var(--mono)}
+/* ── ANALYSIS RESULT ── */
+.ar-section{background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden}
+.ar-head{padding:11px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.ar-title{font-family:var(--mono);font-size:11px;letter-spacing:2px;font-weight:bold}
+.ar-body{padding:14px;font-size:13px;color:#d0e8ff;line-height:1.8}
+.sol-card{background:#0d1e30;border-left:3px solid var(--sound);border-radius:0 7px 7px 0;padding:10px 12px;margin-bottom:8px}
+.sol-card.prio-high{border-left-color:#FF6B6B}
+.sol-card.prio-med{border-left-color:#FFCA4F}
+.sol-card.prio-low{border-left-color:#88E863}
+.sol-prio{font-family:var(--mono);font-size:9px;letter-spacing:1px;margin-bottom:3px}
+.sol-title{font-size:13px;font-weight:bold;color:#fff;margin-bottom:4px}
+.sol-body{font-size:12px;color:#a8c8e8;line-height:1.6}
+.phase-badge{display:inline-block;font-family:var(--mono);font-size:9px;border-radius:4px;padding:3px 7px;margin-right:6px}
 </style>
 </head>
 <body>
@@ -368,9 +395,26 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0}
     <div class="page" id="page-analysis">
       <div class="row2" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px" id="analysis-stats"></div>
       <div id="conflict-list-analysis"></div>
+      <div id="apikey-card">
+        <div class="lbl" data-i18n="apiKeyLabel">CHAVE API ANTHROPIC</div>
+        <div class="apikey-row">
+          <input id="api-key-input" type="password" placeholder="sk-ant-…" oninput="onApiKeyChange()">
+          <button class="zoom-btn" onclick="toggleApiKeyVis()">👁</button>
+        </div>
+        <div id="apikey-status"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <button class="mode-tab active" id="mode-design" onclick="setAnalysisMode('design')">
+          🏗️<br><b data-i18n="modeDesign">PROJETO / REFORMA</b>
+        </button>
+        <button class="mode-tab" id="mode-poe" onclick="setAnalysisMode('poe')">
+          📋<br><b data-i18n="modePOE">PÓS-OCUPAÇÃO</b>
+        </button>
+      </div>
+      <div id="mode-desc" style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.7;padding:10px 12px;background:var(--bg3);border-radius:8px;border:1px solid var(--border)"></div>
       <button class="btn btn-green" onclick="runAI()" id="ai-btn" data-i18n="aiBtn">🤖 ANALISAR COM IA</button>
-      <div id="ai-result" style="margin-top:12px;display:none"></div>
-      <hr>
+      <div id="ai-result" style="margin-top:14px"></div>
+      <hr style="margin:20px 0">
       <div class="card" style="border-color:var(--sound)44;margin-top:4px">
         <div class="lbl" data-i18n="exportTitle">Exportar para Desktop</div>
         <button class="btn btn-primary" onclick="exportJSON()" data-i18n="exportJSON">📥 EXPORTAR JSON</button>
@@ -491,6 +535,10 @@ const LANGS = {
     noConflicts:'✓ Sem conflitos detetados',
     noSensors:'Nenhum estímulo registado.\n\nUse ＋ REGISTAR para começar.',
     // analysis
+    apiKeyLabel:'CHAVE API ANTHROPIC',apiKeyMissing:'⚠ Introduza a chave API Anthropic',apiKeyOk:'✓ Chave configurada',
+    modeDesign:'PROJETO / REFORMA',modePOE:'PÓS-OCUPAÇÃO (POE)',
+    modeDescDesign:'Análise para FASE DE PROJECTO ou REFORMA. Gera recomendações construtivas (materiais, layout, barreiras, zonamento) para prevenir conflitos sensoriais antes de construir.',
+    modeDescPOE:'AVALIAÇÃO PÓS-OCUPAÇÃO (POE). Diagnostica o desempenho sensorial do espaço existente. Identifica causas, impacto nos utilizadores e propõe intervenções por ordem de prioridade e facilidade de execução.',
     aiBtn:'🤖 ANALISAR COM IA', aiLoading:'⏳ A ANALISAR…',
     exportTitle:'Exportar para Desktop', exportJSON:'📥 EXPORTAR JSON',
     exportHint:'No telemóvel → painel IA → "EXPORTAR JSON"\nTransfere via AirDrop · WhatsApp · Email\nNo computador abre: sensory-report-desktop.html',
@@ -606,6 +654,10 @@ const LANGS = {
     conflictBadge:'conflict zone(s) detected',
     noConflicts:'✓ No conflicts detected',
     noSensors:'No stimuli registered.\n\nUse ＋ REGISTER to begin.',
+    apiKeyLabel:'ANTHROPIC API KEY',apiKeyMissing:'⚠ Enter your Anthropic API key',apiKeyOk:'✓ Key configured',
+    modeDesign:'DESIGN / RENOVATION',modePOE:'POST-OCCUPANCY (POE)',
+    modeDescDesign:'Analysis for the DESIGN or RENOVATION phase. Generates constructive recommendations (materials, layout, acoustic barriers, zoning) to prevent sensory conflicts before building.',
+    modeDescPOE:'POST-OCCUPANCY EVALUATION (POE). Diagnoses the sensory performance of the existing space. Identifies causes, user impact and proposes interventions in order of priority and ease of execution.',
     aiBtn:'🤖 ANALYSE WITH AI', aiLoading:'⏳ ANALYSING…',
     exportTitle:'Export to Desktop', exportJSON:'📥 EXPORT JSON',
     exportHint:'On mobile → AI panel → "EXPORT JSON"\nTransfer via AirDrop · WhatsApp · Email\nOn desktop open: sensory-report-desktop.html',
@@ -716,6 +768,10 @@ const LANGS = {
     conflictBadge:'zona(s) de conflicto detectada(s)',
     noConflicts:'✓ Sin conflictos detectados',
     noSensors:'Ningún estímulo registrado.\n\nUse ＋ REGISTRAR para comenzar.',
+    apiKeyLabel:'CLAVE API ANTHROPIC',apiKeyMissing:'⚠ Introduzca la clave API Anthropic',apiKeyOk:'✓ Clave configurada',
+    modeDesign:'PROYECTO / REFORMA',modePOE:'POST-OCUPACIÓN (POE)',
+    modeDescDesign:'Análisis para FASE DE PROYECTO o REFORMA. Genera recomendaciones constructivas (materiales, distribución, barreras, zonificación) para prevenir conflictos sensoriales antes de construir.',
+    modeDescPOE:'EVALUACIÓN POST-OCUPACIÓN (POE). Diagnostica el rendimiento sensorial del espacio existente. Identifica causas, impacto en usuarios y propone intervenciones por prioridad y facilidad de ejecución.',
     aiBtn:'🤖 ANALIZAR CON IA', aiLoading:'⏳ ANALIZANDO…',
     exportTitle:'Exportar al Escritorio', exportJSON:'📥 EXPORTAR JSON',
     exportHint:'En el móvil → panel IA → "EXPORTAR JSON"\nTransfiere vía AirDrop · WhatsApp · Email\nEn el ordenador abre: sensory-report-desktop.html',
@@ -1418,7 +1474,7 @@ function renderAnalysis(){
     return `<div class="card" style="border-color:${arr.length?SENSE_COLORS[k]+'44':'var(--border)'}">
       <div style="font-size:20px">${SENSE_EMOJIS[k]}</div>
       <div style="font-size:12px;font-weight:bold;color:${SENSE_COLORS[k]}">${arr.length}</div>
-      <div style="font-size:9px;color:#8faecf">${T.senseLabels[k]||k}</div>
+      <div style="font-size:9px;color:var(--muted)">${T.senseLabels[k]||k}</div>
       <div style="height:3px;background:var(--border);border-radius:2px;margin-top:4px">
         <div style="height:100%;width:${(maxI/6)*100}%;background:${SENSE_COLORS[k]};border-radius:2px"></div></div>
     </div>`;
@@ -1426,57 +1482,195 @@ function renderAnalysis(){
   const cs=detectConflicts(state.sensors);
   document.getElementById('conflict-list-analysis').innerHTML=cs.length
     ?`<div class="card" style="border-color:var(--danger)44;margin-bottom:12px">
-        <div style="color:var(--danger);font-weight:bold;margin-bottom:8px">⚠ (${cs.length})</div>
-        ${cs.map(c=>`<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:11px">
+        <div style="color:var(--danger);font-weight:bold;margin-bottom:8px;font-size:13px">&#9888; ${cs.length} conflito(s)</div>
+        ${cs.map(c=>`<div style="padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;align-items:center;gap:6px">
+          <div style="width:8px;height:8px;border-radius:50%;background:${SENSE_COLORS[c.sensorA.sense]};flex-shrink:0"></div>
           <span style="color:${SENSE_COLORS[c.sensorA.sense]}">${c.sensorA.label}</span>
-          <span style="color:var(--muted)"> ✕ </span>
+          <span style="color:var(--muted)">x</span>
+          <div style="width:8px;height:8px;border-radius:50%;background:${SENSE_COLORS[c.sensorB.sense]};flex-shrink:0"></div>
           <span style="color:${SENSE_COLORS[c.sensorB.sense]}">${c.sensorB.label}</span>
-          <span style="color:#8899b4;margin-left:6px">${Math.round(c.severity*100)}%</span>
+          <span style="color:var(--danger);margin-left:auto;font-family:var(--mono);font-size:10px">${Math.round(c.severity*100)}%</span>
         </div>`).join('')}
       </div>`
-    :`<div class="card" style="border-color:var(--safe)44;margin-bottom:12px;color:var(--safe);font-size:12px">${T.noConflicts}</div>`;
-  // export hint
+    :`<div class="card" style="border-color:var(--safe)44;margin-bottom:12px;color:var(--safe);font-size:12px">&#10003; ${T.noConflicts||'Sem conflitos'}</div>`;
+  // API key status
+  const key=localStorage.getItem('anthropic_api_key')||'';
+  const ki=document.getElementById('api-key-input');
+  if(ki && key) ki.value=key;
+  const ks=document.getElementById('apikey-status');
+  if(ks) ks.innerHTML=key?`<span style="color:#5aaa70">${T.apiKeyOk||'Chave configurada'}</span>`:`<span style="color:#FFCA4F">${T.apiKeyMissing||'Introduza a chave API'}</span>`;
+  updateModeDesc();
   const eh=document.getElementById('export-hint');
-  if(eh){eh.style.whiteSpace='pre-line';eh.textContent=T.exportHint;}
+  if(eh){eh.style.whiteSpace='pre-line';eh.textContent=T.exportHint||'';}
 }
 
 async function runAI(){
-  if(!state.sensors.length) return showToast('0 sensors');
+  if(!state.sensors.length) return showToast('Sem estimulos registados');
+  const key=localStorage.getItem('anthropic_api_key')||'';
+  if(!key){ showToast('Introduza a chave API na secao IA'); document.getElementById('api-key-input').focus(); return; }
   const btn=document.getElementById('ai-btn');
-  btn.textContent=T.aiLoading; btn.disabled=true;
+  btn.textContent=T.aiLoading||'A analisar...'; btn.disabled=true;
+  document.getElementById('ai-result').innerHTML='';
   const cs=detectConflicts(state.sensors);
-  const prompt=`You are an expert in sensory architecture and spatial perception. Respond entirely in ${T.aiPromptLang}.
+  const mode=window._analysisMode||'design';
+  const lang=T.aiPromptLang||'PORTUGUES';
+  const avgInt=(state.sensors.reduce((s,x)=>s+x.intensity,0)/state.sensors.length).toFixed(1);
+  const sLines=state.sensors.map(s=>{
+    const extra=[];
+    if(s.propagationType==='directional') extra.push('dir:'+( s.angle||0)+'deg spread:'+(s.spreadAngle||90)+'deg');
+    if(s.notes) extra.push('NOTAS: '+s.notes);
+    return '  ['+( T.senseLabels[s.sense]||s.sense).toUpperCase()+'] "'+s.label+'" | Int.'+s.intensity+'/6 | '+(T.propLabels[s.propagationType]||s.propagationType)+' | r='+s.propagationRadius+' '+extra.join(' | ');
+  }).join('
+');
+  const cLines=cs.length?cs.map(c=>'  - "'+c.sensorA.label+'" x "'+c.sensorB.label+'" '+Math.round(c.severity*100)+'%').join('
+'):'  Nenhum';
 
-SPACE: ${state.space.name||'Unknown'} | Area: ${state.space.area||'?'}m² | Use: ${state.space.type||'?'}
-${state.space.desc?'Description: '+state.space.desc:''}
+  const baseCtx='ESPACO: '+( state.space.name||'?')+' | '+( state.space.area||'?')+'m2 | '+(state.space.type||'?')+'
+Contexto: '+(state.space.desc||'nao especificado')+'
 
-STIMULI (${state.sensors.length}):
-${state.sensors.map(s=>`[${T.senseLabels[s.sense]}] "${s.label}" | ${T.intensityLabels[s.intensity]} (${s.intensity}/6) | ${T.propLabels[s.propagationType]||s.propagationType} | ${s.notes||''}`).join('\n')}
+ESTIMULOS ('+state.sensors.length+' | intensidade media: '+avgInt+'/6):
+'+sLines+'
 
-CONFLICTS (${cs.length}): ${cs.map(c=>`"${c.sensorA.label}" ✕ "${c.sensorB.label}" (${Math.round(c.severity*100)}%)`).join(', ')||'None'}
+CONFLITOS ('+cs.length+'):
+'+cLines;
 
-Respond in 4 sections (use ## headings):
-## 🔍 SENSORY DIAGNOSIS
-## ⚠️ CONFLICT ZONES  
-## 💡 PROPOSED SOLUTIONS (min. 3 numbered)
-## 📐 RECOMMENDED GRAPHIC REPRESENTATION`;
+  const designPrompt='Responds entirely in '+lang+'.
+Eres um arquitecto especialista em conforto sensorial.
+
+'+baseCtx+'
+
+Analise orientada para FASE DE PROJECTO ou REFORMA. Responde em 5 seccoes:
+
+## DIAGNOSTICO SENSORIAL
+Caracteriza o perfil sensorial: sentidos dominantes, intensidade geral, coerencia com a tipologia de uso.
+
+## CONFLITOS E RISCOS
+Para cada conflito: descreve o impacto concreto no utilizador. Identifica riscos latentes.
+
+## SOLUCOES DE PROJECTO
+Minimo 3 solucoes concretas por problema, com prefixo de prioridade:
+[ALTA] para impacto directo no conforto
+[MEDIA] para melhorias significativas
+[BAIXA] para optimizacoes
+Cada solucao: elemento construtivo/material especifico + norma tecnica (ISO/EN/WELL/LEED) + custo estimado (baixo/medio/alto).
+
+## REPRESENTACAO CARTOGRAFICA
+Como ajustar os registos existentes para reflectir as solucoes. Novos estimulos a registar apos intervencao.
+
+## CHECKLIST DE PROJECTO
+8-10 itens de verificacao antes do licenciamento ou inicio de obra.';
+
+  const poePrompt='Responds entirely in '+lang+'.
+Eres um investigador especialista em Avaliacao Pos-Ocupacao (POE) e conforto sensorial.
+
+'+baseCtx+'
+
+Analise de AVALIACAO POS-OCUPACAO. Responde em 5 seccoes:
+
+## DESEMPENHO SENSORIAL ACTUAL
+Classifica cada sentido: Adequado / Limite / Problematico. Identifica o sentido mais critico para esta tipologia de uso.
+
+## IMPACTO NOS UTILIZADORES
+Efeitos concretos dos estimulos nos utilizadores (produtividade, bem-estar, saude, orientacao). Referencia estudos (Schafer, Fanger, McLean, WELL) quando relevante.
+
+## CAUSAS E CONFLITOS
+Causas raiz de cada conflito: construtivas (dificeis) / de uso (geriveis) / de equipamento (interveniveis). Para cada causa: consequencia especifica e urgencia.
+
+## PLANO DE INTERVENCAO
+Accoes em 3 horizontes:
+[IMEDIATO] sem obras, custo zero ou minimo
+[CURTO PRAZO] pequenas obras 1-6 meses
+[MEDIO PRAZO] intervencao estrutural 6-24 meses
+Cada accao: descricao especifica, efeito esperado nos estimulos, norma de referencia.
+
+## INDICADORES DE MONITORIZACAO
+5-6 KPIs sensoriais: o que medir, como medir, limiar de referencia aceitavel para esta tipologia.';
+
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':key,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-ipc':'true'
+      },
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,
+        messages:[{role:'user',content:mode==='poe'?poePrompt:designPrompt}]})
+    });
+    if(!res.ok){
+      const err=await res.json().catch(()=>({}));
+      throw new Error(err.error?.message||'HTTP '+res.status);
+    }
     const data=await res.json();
-    const text=data.content?.map(b=>b.text||'').join('')||'No response';
-    const el=document.getElementById('ai-result');
-    el.style.display='block';
-    el.innerHTML=text.split('##').filter(Boolean).map(sec=>{
-      const lines=sec.split('\n');
-      return `<div class="section-head">## ${lines[0].trim()}</div>
-              <div style="font-size:14px;color:#e8f4ff;line-height:1.8;white-space:pre-wrap">${lines.slice(1).join('\n').trim()}</div>`;
-    }).join('');
+    const text=(data.content||[]).map(b=>b.text||'').join('').trim();
+    if(!text) throw new Error('Resposta vazia da API');
+
+    const modeLabel=mode==='poe'
+      ?'<span class="phase-badge" style="background:#2a4060;color:#88c0ff">AVALIACAO POS-OCUPACAO</span>'
+      :'<span class="phase-badge" style="background:#1a3a20;color:#88E863">FASE DE PROJECTO</span>';
+
+    const senseColMap={'DIAGNOSTICO':'#5DD4F0','DESEMPENHO':'#5DD4F0','CONFLITOS':'#FFCA4F','RISCOS':'#FFCA4F','SOLUCOES':'#88E863','INTERVENCAO':'#88E863','PLANO':'#88E863','REPRESENTACAO':'#FF8C42','CARTOGRAFICA':'#FF8C42','CHECKLIST':'#a0d0ff','IMPACTO':'#BB99FF','CAUSAS':'#FFCA4F','INDICADORES':'#FF8C42'};
+    const getCol=t=>{ for(const[k,v] of Object.entries(senseColMap)) if(t.toUpperCase().includes(k)) return v; return 'var(--sound)'; };
+
+    const sections=text.split(/
+##\s+/).filter(Boolean);
+    document.getElementById('ai-result').innerHTML=
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'+modeLabel+
+      '<span style="font-family:var(--mono);font-size:10px;color:var(--muted)">'+(state.space.name||'—')+' · '+new Date().toLocaleString([],{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'</span></div>'+
+      sections.map(sec=>{
+        const lines=sec.split('
+');
+        const title=lines[0].replace(/^#+\s*/,'').trim();
+        const col=getCol(title);
+        let body=lines.slice(1).join('
+').trim()
+          .replace(/\[ALTA\]\s*/g,'<div class="sol-card prio-high"><div class="sol-prio" style="color:#FF6B6B">ALTA PRIORIDADE</div><div class="sol-body">')
+          .replace(/\[MEDIA\]\s*/g,'<div class="sol-card prio-med"><div class="sol-prio" style="color:#FFCA4F">MEDIA PRIORIDADE</div><div class="sol-body">')
+          .replace(/\[BAIXA\]\s*/g,'<div class="sol-card prio-low"><div class="sol-prio" style="color:#88E863">BAIXA PRIORIDADE</div><div class="sol-body">')
+          .replace(/\[IMEDIATO\]\s*/g,'<div style="color:var(--sound);font-family:var(--mono);font-size:11px;margin:10px 0 4px">IMEDIATO</div><div class="sol-card prio-low"><div class="sol-body">')
+          .replace(/\[CURTO PRAZO\]\s*/g,'<div style="color:#FFCA4F;font-family:var(--mono);font-size:11px;margin:10px 0 4px">CURTO PRAZO</div><div class="sol-card prio-med"><div class="sol-body">')
+          .replace(/\[MEDIO PRAZO\]\s*/g,'<div style="color:#FF6B6B;font-family:var(--mono);font-size:11px;margin:10px 0 4px">MEDIO PRAZO</div><div class="sol-card prio-high"><div class="sol-body">')
+          .replace(/\*\*(.+?)\*\*/g,'<strong style="color:#fff">$1</strong>')
+          .replace(/^[-•]\s+(.+)$/gm,'<div style="padding:4px 0;border-bottom:1px solid #ffffff08;color:#d0e8ff">&#8594; $1</div>')
+          .replace(/
+
++/g,'<br>').replace(/
+/g,'<br>');
+        return '<div class="ar-section"><div class="ar-head" style="border-bottom-color:'+col+'44"><div class="ar-title" style="color:'+col+'">'+title+'</div></div><div class="ar-body">'+body+'</div></div>';
+      }).join('');
   }catch(e){
-    document.getElementById('ai-result').style.display='block';
-    document.getElementById('ai-result').innerHTML=`<div class="conflict-badge">Error: ${e.message}</div>`;
+    const isKey=e.message.includes('401')||e.message.toLowerCase().includes('key')||e.message.includes('auth');
+    document.getElementById('ai-result').innerHTML='<div class="ar-section" style="border-color:#FF666644"><div class="ar-head"><div class="ar-title" style="color:#FF6666">ERRO NA ANALISE</div></div><div class="ar-body"><strong style="color:#fff">'+e.message+'</strong><br>'+(isKey?'<span style="color:#FFCA4F">Verifique a chave API em console.anthropic.com</span>':'<span style="color:#a0c8e8">Verifique a ligacao e tente novamente</span>')+'</div></div>';
   }
   btn.textContent=T.aiBtn; btn.disabled=false;
 }
+function onApiKeyChange(){
+  const v=(document.getElementById('api-key-input').value||'').trim();
+  if(v) localStorage.setItem('anthropic_api_key',v);
+  else localStorage.removeItem('anthropic_api_key');
+  const ok=v.startsWith('sk-ant');
+  const ks=document.getElementById('apikey-status');
+  if(ks) ks.innerHTML=v?(ok?'<span style="color:#5aaa70">'+(T.apiKeyOk||'Chave configurada')+'</span>':'<span style="color:#FFCA4F">Formato incomum</span>'):'<span style="color:#FFCA4F">'+(T.apiKeyMissing||'Introduza a chave API')+'</span>';
+}
+function toggleApiKeyVis(){
+  const i=document.getElementById('api-key-input');
+  i.type=i.type==='password'?'text':'password';
+}
+window._analysisMode='design';
+function setAnalysisMode(m){
+  window._analysisMode=m;
+  document.getElementById('mode-design').classList.toggle('active',m==='design');
+  document.getElementById('mode-poe').classList.toggle('active',m==='poe');
+  updateModeDesc();
+  document.getElementById('ai-result').innerHTML='';
+}
+function updateModeDesc(){
+  const el=document.getElementById('mode-desc');
+  if(!el) return;
+  el.textContent=(window._analysisMode==='poe')?(T.modeDescPOE||''):(T.modeDescDesign||'');
+}
+
 
 function exportJSON(){
   const data=JSON.stringify({space:state.space,sensors:state.sensors.map(s=>({...s,photos:s.photos?.map(p=>({...p,src:'[image]'}))}))},null,2);
