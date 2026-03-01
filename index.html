@@ -184,6 +184,32 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0}
 .step-dot.done{background:var(--safe)}
 .step-dot.current{background:#E53E3E;animation:gpsPulse 1s infinite}
 .section-head{color:var(--sound);font-size:15px;font-weight:bold;border-bottom:1.5px solid var(--border);padding-bottom:6px;margin:16px 0 10px}
+
+/* ── MAP ZOOM CONTROLS ── */
+#map-zoom-bar{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.zoom-btn{background:var(--bg3);border:1.5px solid var(--border);border-radius:8px;color:var(--text);
+  font-family:var(--mono);font-size:16px;padding:7px 14px;cursor:pointer;flex-shrink:0;line-height:1}
+#zoom-label{font-family:var(--mono);font-size:11px;color:var(--muted);min-width:44px;text-align:center}
+#map-hint{font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:auto;letter-spacing:.5px}
+
+/* ── CONE EDITOR PANEL ── */
+#cone-editor{
+  position:fixed;bottom:0;left:0;right:0;z-index:500;
+  background:#1c3050;border-top:2px solid var(--border);
+  border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));
+  transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,0,1);
+  display:flex;flex-direction:column;gap:12px;
+}
+#cone-editor.open{transform:translateY(0)}
+#cone-editor-title{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--sound);text-transform:uppercase;text-align:center}
+#cone-editor-label{font-size:14px;font-weight:bold;color:#fff;text-align:center;margin-top:-4px}
+.ce-row{display:flex;align-items:center;gap:12px}
+.ce-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;min-width:64px}
+.ce-val{font-family:var(--mono);font-size:14px;color:var(--sound);min-width:42px;text-align:right}
+#compass-wrap{display:flex;justify-content:center;align-items:center}
+#compass-canvas{touch-action:none;cursor:crosshair;border-radius:50%;background:#0d1825;
+  border:2px solid var(--border);display:block}
+.ce-btn-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
 </style>
 </head>
 <body>
@@ -292,7 +318,7 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0}
 
     <!-- ══ PAGE: MAP ══ -->
     <div class="page" id="page-map">
-      <div style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none" id="map-filter-bar">
+      <div style="display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;scrollbar-width:none" id="map-filter-bar">
         <button class="tab active" onclick="filterMap(this,'all')" data-i18n="all">TODOS</button>
         <button class="tab" onclick="filterMap(this,'vision')">👁</button>
         <button class="tab" onclick="filterMap(this,'sound')">🔊</button>
@@ -300,6 +326,14 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0}
         <button class="tab" onclick="filterMap(this,'taste')">👅</button>
         <button class="tab" onclick="filterMap(this,'temperature')">🌡</button>
         <button class="tab" onclick="filterMap(this,'haptic')">✋</button>
+      </div>
+      <!-- Zoom controls -->
+      <div id="map-zoom-bar">
+        <button class="zoom-btn" onclick="zoomMap(1.35)">＋</button>
+        <button class="zoom-btn" onclick="zoomMap(1/1.35)">－</button>
+        <button class="zoom-btn" onclick="resetMapView()" title="Reset">⟳</button>
+        <span id="zoom-label">100%</span>
+        <span id="map-hint">🤏 pellizca · 👆 arrastra</span>
       </div>
       <div id="conflict-summary"></div>
       <canvas id="map-canvas"></canvas>
@@ -1137,63 +1171,171 @@ function filterMap(btn,sense){
   btn.classList.add('active');
   renderMap();
 }
+// ── MAP VIEW STATE ─────────────────────────────────────────────────────────
+let mv={scale:1,px:0,py:0}; // pan/zoom transform
+let mapW=0,mapH=0;           // canvas logical size
+const MAP_W=700,MAP_H=580;   // virtual coordinate space
+
+function zoomMap(factor,cx,cy){
+  const canvas=document.getElementById('map-canvas');
+  if(!canvas) return;
+  const W=canvas.clientWidth, H=canvas.height;
+  // zoom around centre of canvas if no focal point given
+  if(cx===undefined){cx=W/2;cy=H/2;}
+  const newScale=Math.min(8,Math.max(1,mv.scale*factor));
+  // adjust pan so focal point stays fixed on screen
+  mv.px=cx-(cx-mv.px)*(newScale/mv.scale);
+  mv.py=cy-(cy-mv.py)*(newScale/mv.scale);
+  mv.scale=newScale;
+  clampPan(); renderMap();
+}
+function resetMapView(){mv={scale:1,px:0,py:0};renderMap();}
+function clampPan(){
+  const canvas=document.getElementById('map-canvas');
+  if(!canvas)return;
+  const W=canvas.clientWidth,H=canvas.height;
+  // don't let pan move plan fully out of view
+  mv.px=Math.min(W*(mv.scale-1),Math.max(W*(1-mv.scale),mv.px));
+  mv.py=Math.min(H*(mv.scale-1),Math.max(H*(1-mv.scale),mv.py));
+}
+function updateZoomLabel(){
+  const el=document.getElementById('zoom-label');
+  if(el) el.textContent=Math.round(mv.scale*100)+'%';
+}
+// Convert canvas CSS px → map logical coords
+function cssPxToMap(cpx,cpy){
+  const canvas=document.getElementById('map-canvas');
+  const W=canvas.clientWidth, H=canvas.height;
+  const lx=(cpx-mv.px)/mv.scale; // canvas logical px (same as virtual at scale=1)
+  const ly=(cpy-mv.py)/mv.scale;
+  return {mx:Math.round(lx/W*MAP_W), my:Math.round(ly/H*MAP_H)};
+}
+// Map logical → canvas CSS px
+function mapToCSS(mx,my){
+  const canvas=document.getElementById('map-canvas');
+  const W=canvas.clientWidth, H=canvas.height;
+  return {cx:mx/MAP_W*W*mv.scale+mv.px, cy:my/MAP_H*H*mv.scale+mv.py};
+}
+
 function renderMap(){
   const canvas=document.getElementById('map-canvas');
   const W=canvas.parentElement.clientWidth; const H=Math.round(W*.75);
   canvas.width=W; canvas.height=H;
+  mapW=W; mapH=H;
   const ctx=canvas.getContext('2d');
-  ctx.fillStyle='#0a0e1a'; ctx.fillRect(0,0,W,H);
-  ctx.strokeStyle='#1e2d47'; ctx.lineWidth=.5;
-  for(let x=0;x<W;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-  for(let y=0;y<H;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  clampPan(); updateZoomLabel();
+
+  // Apply pan/zoom transform for all content
+  ctx.setTransform(mv.scale,0,0,mv.scale,mv.px,mv.py);
+
+  // Background
+  ctx.fillStyle='#0c1824'; ctx.fillRect(0,0,W,H);
+  // Grid (drawn at logical scale, zoom handles the rest)
+  const gStep=Math.max(10,30/mv.scale);
+  ctx.strokeStyle='#1e2d47'; ctx.lineWidth=.5/mv.scale;
+  for(let x=0;x<W;x+=gStep){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=gStep){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
   const sensors=mapFilter==='all'?state.sensors:state.sensors.filter(s=>s.sense===mapFilter);
+
   if(state.space.planImage){
     const img=new Image();
-    img.onload=()=>{ctx.save();ctx.globalAlpha=.55;const r=Math.min(W/img.width,H/img.height);ctx.drawImage(img,(W-img.width*r)/2,(H-img.height*r)/2,img.width*r,img.height*r);ctx.restore();drawSensors(ctx,sensors,W,H);};
+    img.onload=()=>{
+      ctx.save();ctx.globalAlpha=.65;
+      const r=Math.min(W/img.width,H/img.height);
+      ctx.drawImage(img,(W-img.width*r)/2,(H-img.height*r)/2,img.width*r,img.height*r);
+      ctx.restore();
+      drawSensors(ctx,sensors,W,H);
+      ctx.setTransform(1,0,0,1,0,0); // reset for UI overlay
+    };
     img.src=state.space.planImage;
   } else {
-    ctx.strokeStyle='#1e3a5a'; ctx.lineWidth=1.2;
+    ctx.strokeStyle='#1e3a5a'; ctx.lineWidth=1.2/mv.scale;
     [[.1,.1,.35,.4],[.45,.1,.3,.4],[.75,.1,.22,.3],[.1,.52,.22,.35],[.33,.52,.4,.35],[.75,.42,.22,.45],[.1,.88,.87,.1]].forEach(([rx,ry,rw,rh])=>{
       ctx.fillStyle='#0d1829'; ctx.fillRect(rx*W,ry*H,rw*W,rh*H); ctx.strokeRect(rx*W,ry*H,rw*W,rh*H);
     });
-    ctx.fillStyle='#2a3d5a'; ctx.font=`${Math.max(8,W*.015)}px monospace`; ctx.textAlign='center';
-    ctx.fillText('↑ '+T.planBtn, W/2, H-15);
+    ctx.fillStyle='#2a3d5a'; ctx.font=`${Math.max(8,W*.015)/mv.scale}px monospace`; ctx.textAlign='center';
+    ctx.fillText('↑ '+T.planBtn, W/2, H-15/mv.scale);
     drawSensors(ctx,sensors,W,H);
+    ctx.setTransform(1,0,0,1,0,0);
   }
   buildMapLegend();
 }
+
 function drawSensors(ctx,sensors,W,H){
-  const showC=document.getElementById('show-conflicts').checked;
-  const sx=W/700, sy=H/580;
+  const showC=document.getElementById('show-conflicts')?.checked;
+  const sx=W/MAP_W, sy=H/MAP_H;
+  const sc=1/mv.scale; // scale-corrected size for icons/text
+
   sensors.forEach(s=>{
-    const x=s.x*sx, y=s.y*sy, r=s.propagationRadius*Math.min(sx,sy);
+    const x=s.x*sx, y=s.y*sy;
+    const r=s.propagationRadius*Math.min(sx,sy);
     const col=SENSE_COLORS[s.sense]||'#888';
-    const alpha=Math.min(.55,.06+s.intensity*.07);
+    const alpha=Math.min(.6,.08+s.intensity*.08);
+
+    // Propagation zone
     ctx.save(); ctx.globalAlpha=alpha;
-    const g=ctx.createRadialGradient(x,y,1,x,y,r);
-    g.addColorStop(0,col); g.addColorStop(1,'transparent');
-    ctx.fillStyle=g;
     if(s.propagationType==='directional'){
-      const rad=(s.angle-90)*Math.PI/180, sp=((s.spreadAngle||90)/2)*Math.PI/180;
-      ctx.beginPath(); ctx.moveTo(x,y); ctx.arc(x,y,r,rad-sp,rad+sp); ctx.closePath();
+      const rad=((s.angle||0)-90)*Math.PI/180;
+      const sp=((s.spreadAngle||90)/2)*Math.PI/180;
+      const g=ctx.createRadialGradient(x,y,1,x,y,r);
+      g.addColorStop(0,col); g.addColorStop(1,'transparent');
+      ctx.fillStyle=g;
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.arc(x,y,r,rad-sp,rad+sp); ctx.closePath(); ctx.fill();
+      // Cone outline
+      ctx.globalAlpha=.4; ctx.strokeStyle=col; ctx.lineWidth=1.2*sc;
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.arc(x,y,r,rad-sp,rad+sp); ctx.closePath(); ctx.stroke();
+      // Direction tick
+      ctx.globalAlpha=.8; ctx.lineWidth=1.5*sc;
+      ctx.beginPath();
+      ctx.moveTo(x,y);
+      ctx.lineTo(x+Math.cos(rad)*r*.85, y+Math.sin(rad)*r*.85);
+      ctx.stroke();
+    } else if(s.propagationType==='diffuse'){
+      // Concentric rings
+      for(let i=3;i>=1;i--){
+        ctx.globalAlpha=alpha*(i/4);
+        ctx.fillStyle=col;
+        ctx.beginPath(); ctx.arc(x,y,r*i/3,0,Math.PI*2); ctx.fill();
+      }
     } else {
-      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+      const g=ctx.createRadialGradient(x,y,1,x,y,r);
+      g.addColorStop(0,col); g.addColorStop(1,'transparent');
+      ctx.fillStyle=g;
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
     }
-    ctx.fill(); ctx.globalAlpha=1;
-    ctx.fillStyle=col; ctx.beginPath(); ctx.arc(x,y,7,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='#fff'; ctx.font=`bold ${Math.max(7,W*.019)}px sans-serif`;
-    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(SENSE_EMOJIS[s.sense]||'●',x,y);
     ctx.restore();
+
+    // Dot
+    const dotR=Math.max(5,8*sc);
+    ctx.fillStyle=col;
+    ctx.beginPath(); ctx.arc(x,y,dotR,0,Math.PI*2); ctx.fill();
+    // Stroke for selected
+    if(coneEditId===s.id){
+      ctx.strokeStyle='#fff'; ctx.lineWidth=2*sc;
+      ctx.beginPath(); ctx.arc(x,y,dotR+3*sc,0,Math.PI*2); ctx.stroke();
+    }
+    // Emoji
+    ctx.fillStyle='#fff'; ctx.font=`bold ${Math.max(8,14*sc)}px sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(SENSE_EMOJIS[s.sense]||'●',x,y);
+    // Label (only when zoomed in enough)
+    if(mv.scale>=2){
+      ctx.fillStyle=col; ctx.font=`bold ${10*sc}px Share Tech Mono,monospace`;
+      ctx.textAlign='center'; ctx.textBaseline='top';
+      ctx.fillText(s.label,x,y+dotR+2*sc);
+    }
   });
+
   if(showC){
     const cs=detectConflicts(sensors,sx,sy);
     cs.forEach(c=>{
-      ctx.save(); ctx.globalAlpha=.5; ctx.strokeStyle='#FF3333'; ctx.lineWidth=1.5; ctx.setLineDash([3,2]);
-      ctx.beginPath(); ctx.arc(c.x,c.y,12+c.severity*15,0,Math.PI*2); ctx.stroke();
+      ctx.save(); ctx.globalAlpha=.5; ctx.strokeStyle='#FF3333'; ctx.lineWidth=1.5*sc; ctx.setLineDash([3*sc,2*sc]);
+      ctx.beginPath(); ctx.arc(c.x,c.y,(12+c.severity*15)*sc,0,Math.PI*2); ctx.stroke();
       ctx.globalAlpha=.2; ctx.fillStyle='#FF3333'; ctx.fill();
-      ctx.globalAlpha=1; ctx.fillStyle='#FF3333'; ctx.font=`bold ${Math.max(10,W*.02)}px sans-serif`;
+      ctx.globalAlpha=1; ctx.fillStyle='#FF3333'; ctx.font=`bold ${Math.max(10,16*sc)}px sans-serif`;
       ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('⚠',c.x,c.y);
-      ctx.restore();
+      ctx.restore(); ctx.setLineDash([]);
     });
     const el=document.getElementById('conflict-summary');
     el.innerHTML=cs.length?`<div class="conflict-badge">⚠ ${cs.length} ${T.conflictBadge}</div>`:'';
@@ -1615,17 +1757,231 @@ function init(){
 }
 window.addEventListener('load',init);
 
-// Canvas touch to set position
+// ══ MAP TOUCH INTERACTIONS ═══════════════════════════════════════════════════
+let _pinch={active:false,d0:0,mx0:0,my0:0,px0:0,py0:0,sc0:1};
+let _tap={t:0,x:0,y:0};
+let _pan={active:false,sx:0,sy:0,px0:0,py0:0};
+// Cone editor state
+let coneEditId=null;
+let _ceDragging=false;
+
 document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('map-canvas').addEventListener('touchstart',e=>{
-    if(e.touches.length!==1)return; e.preventDefault();
-    const t=e.touches[0],rect=e.target.getBoundingClientRect();
-    const px=Math.round((t.clientX-rect.left)/rect.width*700);
-    const py=Math.round((t.clientY-rect.top)/rect.height*580);
-    showToast(`📍 ${px}, ${py}`);
-    const fe=document.getElementById('f-xy'); if(fe) fe.value=px+','+py;
+  const canvas=document.getElementById('map-canvas');
+
+  canvas.addEventListener('touchstart',e=>{
+    e.preventDefault();
+    if(e.touches.length===2){
+      // Pinch start
+      _pan.active=false;
+      _pinch.active=true;
+      const t1=e.touches[0],t2=e.touches[1];
+      _pinch.d0=Math.hypot(t2.clientX-t1.clientX,t2.clientY-t1.clientY);
+      _pinch.mx0=(t1.clientX+t2.clientX)/2;
+      _pinch.my0=(t1.clientY+t2.clientY)/2;
+      _pinch.px0=mv.px; _pinch.py0=mv.py; _pinch.sc0=mv.scale;
+    } else if(e.touches.length===1){
+      _pinch.active=false;
+      const t=e.touches[0],rect=canvas.getBoundingClientRect();
+      const cx=t.clientX-rect.left, cy=t.clientY-rect.top;
+      _pan={active:true,sx:cx,sy:cy,px0:mv.px,py0:mv.py};
+      _tap={t:Date.now(),x:cx,y:cy};
+    }
   },{passive:false});
+
+  canvas.addEventListener('touchmove',e=>{
+    e.preventDefault();
+    if(_pinch.active && e.touches.length===2){
+      const t1=e.touches[0],t2=e.touches[1];
+      const d=Math.hypot(t2.clientX-t1.clientX,t2.clientY-t1.clientY);
+      const factor=d/_pinch.d0;
+      const newScale=Math.min(8,Math.max(1,_pinch.sc0*factor));
+      const rect=canvas.getBoundingClientRect();
+      const fx=_pinch.mx0-rect.left, fy=_pinch.my0-rect.top;
+      mv.px=fx-(fx-_pinch.px0)*(newScale/_pinch.sc0);
+      mv.py=fy-(fy-_pinch.py0)*(newScale/_pinch.sc0);
+      mv.scale=newScale;
+      clampPan(); renderMap();
+    } else if(_pan.active && e.touches.length===1){
+      const t=e.touches[0],rect=canvas.getBoundingClientRect();
+      const cx=t.clientX-rect.left, cy=t.clientY-rect.top;
+      mv.px=_pan.px0+(cx-_pan.sx);
+      mv.py=_pan.py0+(cy-_pan.sy);
+      clampPan(); renderMap();
+    }
+  },{passive:false});
+
+  canvas.addEventListener('touchend',e=>{
+    _pinch.active=false;
+    if(e.changedTouches.length===1 && _pan.active){
+      const t=e.changedTouches[0],rect=canvas.getBoundingClientRect();
+      const cx=t.clientX-rect.left, cy=t.clientY-rect.top;
+      const dx=cx-_tap.x, dy=cy-_tap.y;
+      const elapsed=Date.now()-_tap.t;
+      // Tap if moved < 12px and < 300ms
+      if(Math.hypot(dx,dy)<12 && elapsed<300){
+        const {mx,my}=cssPxToMap(cx,cy);
+        // Check if tapping near a directional sensor
+        const hit=findSensorAt(cx,cy);
+        if(hit && hit.propagationType==='directional'){
+          openConeEditor(hit);
+        } else {
+          // Set position for register form
+          showToast(`📍 ${mx}, ${my}`);
+          const fe=document.getElementById('f-xy'); if(fe) fe.value=mx+','+my;
+          closeConeEditor();
+        }
+      }
+    }
+    _pan.active=false;
+  },{passive:false});
+
+  // Also support mouse for desktop testing
+  canvas.addEventListener('click',e=>{
+    const rect=canvas.getBoundingClientRect();
+    const cx=e.clientX-rect.left, cy=e.clientY-rect.top;
+    const hit=findSensorAt(cx,cy);
+    if(hit && hit.propagationType==='directional'){
+      openConeEditor(hit);
+    } else {
+      const {mx,my}=cssPxToMap(cx,cy);
+      showToast(`📍 ${mx}, ${my}`);
+      const fe=document.getElementById('f-xy'); if(fe) fe.value=mx+','+my;
+    }
+  });
+
+  // Compass touch
+  const cc=document.getElementById('compass-canvas');
+  cc.addEventListener('touchstart',e=>{e.preventDefault();_ceDragging=true;compassDrag(e.touches[0],cc);},{passive:false});
+  cc.addEventListener('touchmove',e=>{e.preventDefault();if(_ceDragging)compassDrag(e.touches[0],cc);},{passive:false});
+  cc.addEventListener('touchend',()=>{_ceDragging=false;});
+  cc.addEventListener('mousedown',e=>{_ceDragging=true;compassDrag(e,cc);});
+  window.addEventListener('mousemove',e=>{if(_ceDragging)compassDrag(e,document.getElementById('compass-canvas'));});
+  window.addEventListener('mouseup',()=>{_ceDragging=false;});
 });
+
+function findSensorAt(cx,cy){
+  // Find directional sensor whose dot is near tap point
+  if(!state.sensors.length) return null;
+  const canvas=document.getElementById('map-canvas');
+  const W=canvas.clientWidth, H=canvas.height;
+  let best=null, bestD=32; // px threshold
+  state.sensors.forEach(s=>{
+    const {cx:sx,cy:sy}=mapToCSS(s.x,s.y);
+    const d=Math.hypot(cx-sx,cy-sy);
+    if(d<bestD){bestD=d;best=s;}
+  });
+  return best;
+}
+
+// ── CONE EDITOR ──────────────────────────────────────────────────────────────
+let ceEdit={}; // working copy
+
+function openConeEditor(sensor){
+  coneEditId=sensor.id;
+  ceEdit={angle:sensor.angle||0, spreadAngle:sensor.spreadAngle||90, propagationRadius:sensor.propagationRadius||100};
+  document.getElementById('cone-editor-label').textContent=SENSE_EMOJIS[sensor.sense]+' '+sensor.label;
+  document.getElementById('ce-dir').value=ceEdit.angle;
+  document.getElementById('ce-dir-val').textContent=ceEdit.angle+'°';
+  document.getElementById('ce-spread').value=ceEdit.spreadAngle;
+  document.getElementById('ce-spread-val').textContent=ceEdit.spreadAngle+'°';
+  document.getElementById('ce-radius').value=ceEdit.propagationRadius;
+  document.getElementById('ce-radius-val').textContent=ceEdit.propagationRadius;
+  document.getElementById('cone-editor').classList.add('open');
+  drawCompass();
+  renderMap();
+}
+function closeConeEditor(){
+  coneEditId=null;
+  document.getElementById('cone-editor').classList.remove('open');
+  renderMap();
+}
+function saveConeEdit(){
+  const s=state.sensors.find(x=>x.id===coneEditId);
+  if(s){Object.assign(s,ceEdit);saveAll();}
+  closeConeEditor();
+  showToast('✅ Cone guardado');
+}
+function ceConeDir(v){
+  ceEdit.angle=+v;
+  document.getElementById('ce-dir-val').textContent=v+'°';
+  drawCompass(); renderMap();
+}
+function ceConeSpread(v){
+  ceEdit.spreadAngle=+v;
+  document.getElementById('ce-spread-val').textContent=v+'°';
+  drawCompass(); renderMap();
+}
+function ceConeRadius(v){
+  ceEdit.propagationRadius=+v;
+  document.getElementById('ce-radius-val').textContent=v;
+  renderMap();
+}
+function compassDrag(touch,canvas){
+  const rect=canvas.getBoundingClientRect();
+  const cx=touch.clientX-rect.left-canvas.clientWidth/2;
+  const cy=touch.clientY-rect.top-canvas.clientHeight/2;
+  if(Math.hypot(cx,cy)<8) return; // dead zone
+  const ang=Math.round((Math.atan2(cy,cx)*180/Math.PI+90+360)%360);
+  ceEdit.angle=ang;
+  document.getElementById('ce-dir').value=ang;
+  document.getElementById('ce-dir-val').textContent=ang+'°';
+  drawCompass(); renderMap();
+}
+function drawCompass(){
+  const canvas=document.getElementById('compass-canvas');
+  const ctx=canvas.getContext('2d');
+  const S=canvas.width; // 180
+  const cx=S/2, cy=S/2, R=S/2-4;
+  ctx.clearRect(0,0,S,S);
+  // Background
+  ctx.fillStyle='#0d1825'; ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#3a5880'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
+  // Cardinal marks
+  const cards=[{a:0,l:'N'},{a:90,l:'E'},{a:180,l:'S'},{a:270,l:'W'}];
+  ctx.font='bold 11px Share Tech Mono,monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  cards.forEach(({a,l})=>{
+    const ar=(a-90)*Math.PI/180;
+    const tx=cx+Math.cos(ar)*(R-14), ty=cy+Math.sin(ar)*(R-14);
+    ctx.fillStyle='#5a80a8'; ctx.fillText(l,tx,ty);
+    // Tick
+    ctx.strokeStyle='#3a5880'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(cx+Math.cos(ar)*(R-4),cy+Math.sin(ar)*(R-4));
+    ctx.lineTo(cx+Math.cos(ar)*(R-8),cy+Math.sin(ar)*(R-8)); ctx.stroke();
+  });
+  // Ring guide
+  ctx.strokeStyle='#2a4060'; ctx.lineWidth=.8;
+  ctx.beginPath(); ctx.arc(cx,cy,R*.65,0,Math.PI*2); ctx.stroke();
+  // Cone
+  const ang=(ceEdit.angle-90)*Math.PI/180;
+  const sp=(ceEdit.spreadAngle/2)*Math.PI/180;
+  const coneR=R*.6;
+  const sensor=state.sensors.find(x=>x.id===coneEditId);
+  const col=(sensor?SENSE_COLORS[sensor.sense]:null)||'#5DD4F0';
+  const g=ctx.createRadialGradient(cx,cy,2,cx,cy,coneR);
+  g.addColorStop(0,col+'cc'); g.addColorStop(1,col+'22');
+  ctx.fillStyle=g; ctx.globalAlpha=.8;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,coneR,ang-sp,ang+sp); ctx.closePath(); ctx.fill();
+  ctx.globalAlpha=1;
+  // Outline
+  ctx.strokeStyle=col; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,coneR,ang-sp,ang+sp); ctx.closePath(); ctx.stroke();
+  // Direction arrow
+  ctx.strokeStyle='#fff'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(ang)*coneR*.9, cy+Math.sin(ang)*coneR*.9); ctx.stroke();
+  // Arrow head
+  ctx.fillStyle='#fff';
+  const ax=cx+Math.cos(ang)*coneR*.9, ay=cy+Math.sin(ang)*coneR*.9;
+  ctx.beginPath(); ctx.moveTo(ax,ay);
+  ctx.lineTo(ax-8*Math.cos(ang-.4),ay-8*Math.sin(ang-.4));
+  ctx.lineTo(ax-8*Math.cos(ang+.4),ay-8*Math.sin(ang+.4));
+  ctx.closePath(); ctx.fill();
+  // Centre dot
+  ctx.fillStyle=col; ctx.beginPath(); ctx.arc(cx,cy,5,0,Math.PI*2); ctx.fill();
+  // Angle label
+  ctx.fillStyle=col; ctx.font='bold 10px Share Tech Mono,monospace';
+  ctx.textAlign='center'; ctx.textBaseline='top';
+  ctx.fillText(ceEdit.spreadAngle+'°',cx,cy+coneR+4);
+}
 
 // ══ SERVICE WORKER ═════════════════════════════════════════════════════════════
 if('serviceWorker'in navigator){
@@ -1633,5 +1989,37 @@ if('serviceWorker'in navigator){
   navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
 }
 </script>
+
+<!-- ══ CONE EDITOR PANEL ══ -->
+<div id="cone-editor">
+  <div id="cone-editor-title">EDITAR DIREÇÃO / ABERTURA</div>
+  <div id="cone-editor-label"></div>
+  <div style="display:flex;gap:16px;align-items:flex-start;justify-content:center">
+    <div id="compass-wrap">
+      <canvas id="compass-canvas" width="180" height="180"></canvas>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:14px;padding-top:8px">
+      <div class="ce-row">
+        <span class="ce-lbl">DIREÇÃO</span>
+        <input type="range" id="ce-dir" min="0" max="360" step="1" oninput="ceConeDir(this.value)" style="flex:1">
+        <span class="ce-val" id="ce-dir-val">0°</span>
+      </div>
+      <div class="ce-row">
+        <span class="ce-lbl">ABERTURA</span>
+        <input type="range" id="ce-spread" min="10" max="300" step="5" oninput="ceConeSpread(this.value)" style="flex:1">
+        <span class="ce-val" id="ce-spread-val">90°</span>
+      </div>
+      <div class="ce-row">
+        <span class="ce-lbl">RAIO</span>
+        <input type="range" id="ce-radius" min="10" max="400" step="5" oninput="ceConeRadius(this.value)" style="flex:1">
+        <span class="ce-val" id="ce-radius-val">100</span>
+      </div>
+    </div>
+  </div>
+  <div class="ce-btn-row">
+    <button class="btn btn-ghost" onclick="closeConeEditor()">✕ CANCELAR</button>
+    <button class="btn btn-green" onclick="saveConeEdit()">✅ GUARDAR</button>
+  </div>
+</div>
 </body>
 </html>
