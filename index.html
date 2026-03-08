@@ -643,6 +643,63 @@ hr{border:none;border-top:1px solid var(--border);margin:12px 0}
   #voice-fab{bottom:calc(52px + env(safe-area-inset-bottom,0px) + 12px)!important;}
 }
 
+
+/* ══ PAS TEST ══════════════════════════════════════════════════════════════ */
+.pas-page{padding:4px 4px 20px;max-width:480px;margin:0 auto;}
+.pas-header{margin-bottom:16px;}
+.pas-title{font-size:14px;font-weight:700;color:var(--accent);letter-spacing:2px;margin-bottom:4px;}
+.pas-subtitle{font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px;}
+.pas-desc{font-size:12px;color:var(--muted);line-height:1.7;}
+.pas-intro-note{font-size:12px;color:var(--muted);padding:10px;background:var(--bg3);border-radius:6px;margin:12px 0;}
+.pas-prev-result{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px;margin:12px 0;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.pas-prev-label{font-size:10px;color:var(--muted);letter-spacing:1px;}
+.pas-score-ring{position:relative;width:70px;height:70px;display:flex;align-items:center;justify-content:center;}
+.pas-score-ring svg{position:absolute;inset:0;width:100%;height:100%;}
+.pas-score-ring span{font-size:18px;font-weight:700;color:var(--text);position:relative;}
+.pas-level-label{font-size:12px;color:var(--text);font-weight:600;}
+.pas-conflict-mod{font-size:11px;color:var(--muted);}
+.pas-btn-start{width:100%;padding:12px;border-radius:8px;background:var(--accent);color:#0b1220;border:none;font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;margin-top:12px;transition:opacity .15s;}
+.pas-btn-start:hover{opacity:.85;}
+.pas-legend{margin-top:20px;background:var(--bg3);border-radius:8px;padding:12px;}
+.pas-legend-title{font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;}
+.pas-legend-row{display:flex;gap:12px;font-size:12px;margin-bottom:5px;align-items:flex-start;}
+.pas-legend-row span:first-child{flex-shrink:0;min-width:50px;font-weight:700;}
+/* Question screen */
+.pas-q-progress{height:4px;background:var(--bg4);border-radius:2px;margin-bottom:16px;overflow:hidden;}
+.pas-q-bar{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;}
+.pas-q-num{font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:1px;}
+.pas-q-text{font-size:15px;color:var(--text);line-height:1.6;margin-bottom:20px;font-weight:500;}
+.pas-scale{display:flex;gap:6px;justify-content:space-between;margin-bottom:6px;}
+.pas-scale-btn{flex:1;padding:10px 4px;border-radius:6px;border:1.5px solid var(--border);background:var(--bg3);cursor:pointer;transition:all .12s;display:flex;flex-direction:column;align-items:center;}
+.pas-scale-btn:hover{border-color:var(--border2);}
+.pas-scale-btn.active{border-color:var(--accent);background:rgba(93,212,240,.12);}
+.pas-scale-num{font-size:14px;font-weight:700;color:var(--text);}
+.pas-scale-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:16px;line-height:1.4;}
+.pas-q-nav{display:flex;gap:8px;justify-content:space-between;}
+/* Result screen */
+.pas-result-ring{position:relative;width:120px;height:120px;margin:16px auto;display:flex;align-items:center;justify-content:center;}
+.pas-result-ring svg{position:absolute;inset:0;width:100%;height:100%;}
+.pas-result-inner{display:flex;flex-direction:column;align-items:center;position:relative;}
+.pas-result-pct{font-size:28px;font-weight:900;color:var(--text);}
+.pas-result-lbl{font-size:10px;color:var(--muted);letter-spacing:1px;}
+.pas-level{font-size:15px;font-weight:700;text-align:center;margin-bottom:6px;}
+.pas-result-mod{font-size:12px;color:var(--muted);text-align:center;margin-bottom:8px;}
+.pas-result-note{font-size:12px;color:var(--muted);line-height:1.7;background:var(--bg3);border-radius:6px;padding:12px;margin-bottom:12px;}
+.pas-subscores{background:var(--bg3);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px;}
+.pas-sub{display:grid;grid-template-columns:1fr 80px 36px;gap:8px;align-items:center;}
+.pas-sub-label{font-size:11px;font-weight:600;}
+.pas-sub-bar-wrap{height:6px;background:var(--bg4);border-radius:3px;overflow:hidden;}
+.pas-sub-bar{height:100%;border-radius:3px;transition:width .4s;}
+.pas-sub-pct{font-size:11px;color:var(--muted);text-align:right;}
+/* Conflict reason badge */
+.cf-reason{font-size:9px;letter-spacing:.5px;padding:1px 5px;border-radius:3px;background:var(--bg4);color:var(--muted);white-space:nowrap;margin-left:2px;}
+/* PAS indicator in header */
+#pas-indicator{font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid transparent;cursor:pointer;transition:all .15s;white-space:nowrap;}
+#pas-indicator.pas-normal{border-color:var(--border);color:var(--muted);}
+#pas-indicator.pas-sensitive{border-color:var(--accent);color:var(--accent);background:rgba(93,212,240,.08);}
+#pas-indicator.pas-high{border-color:var(--warn);color:var(--warn);background:rgba(251,191,36,.08);}
+#pas-indicator.pas-very-high{border-color:var(--danger);color:var(--danger);background:rgba(248,113,113,.08);}
+
 </style>
 </head>
 <body>
@@ -677,6 +734,7 @@ hr{border:none;border-top:1px solid var(--border);margin:12px 0}
         <span class="hdr-mb-val" id="hdr-mb-conf" style="color:var(--danger)">0</span>
         <span class="hdr-mb-lbl">conf</span>
       </div>
+      <button id="pas-indicator" class="pas-normal" onclick="openPASPage()" title="Sensibilidade individual">🧠 —</button>
       <button class="hdr-icon-btn" onclick="openExportModal()" title="Exportar">📦</button>
       <button class="hdr-icon-btn" onclick="openCustomTypeEditor(null)" title="Novo tipo">◆</button>
       <button id="lang-btn" onclick="openLang()">🌐 PT</button>
@@ -707,6 +765,10 @@ hr{border:none;border-top:1px solid var(--border);margin:12px 0}
         <a class="sb-item" onclick="goPage('analysis',this);renderAnalysis()" data-page="analysis">
           <span class="sb-icon">🤖</span>
           <div><div class="sb-lbl" data-i18n="navAI">IA</div><div class="sb-sub">Diagnóstico · Projeto · POE</div></div>
+        </a>
+        <a class="sb-item" onclick="openPASPage()" data-page="pas">
+          <span class="sb-icon">🧠</span>
+          <div><div class="sb-lbl">SENSIBILIDADE</div><div class="sb-sub" id="sb-pas-sub">Teste PAS diário</div></div>
         </a>
       </nav>
       <div class="sb-footer">
@@ -870,6 +932,8 @@ hr{border:none;border-top:1px solid var(--border);margin:12px 0}
         <!-- PAGE: MAP (mobile only — map-panel shown fullscreen) -->
         <div class="ppage" id="page-map"></div>
 
+        <div class="ppage" id="page-pas"><!-- Rendered by renderPAS() --></div>
+
       </div><!-- /panel-content -->
     </div><!-- /panel -->
 
@@ -989,6 +1053,10 @@ hr{border:none;border-top:1px solid var(--border);margin:12px 0}
     <button class="nav-btn" onclick="goPage('analysis',this);renderAnalysis()" data-page="analysis">
       <span class="nav-icon">🤖</span>
       <span data-i18n="navAI">IA</span>
+    </button>
+    <button class="nav-btn" onclick="openPASPage()" data-page="pas">
+      <span class="nav-icon">🧠</span>
+      <span>PAS</span>
     </button>
   </nav>
   </div><!-- /body-row -->
@@ -2115,20 +2183,86 @@ function drawSensors(ctx,sensors,W,H){
   if(tb){tb.style.display=cs.length?'inline-flex':'none'; if(cc)cc.textContent=cs.length;};
   }
 }
+// ── Conflict compatibility matrix ──────────────────────────────────────────
+// Values: 0=neutral 1=mild concern 2=moderate conflict 3=severe conflict
+// Only pairs where BOTH stimuli are negative/undesirable produce real conflicts
+const CONFLICT_MATRIX = {
+  'sound|sound':3,'sound|haptic':3,'sound|temperature':1,'sound|smell':2,
+  'sound|vision':1,'sound|taste':1,
+  'haptic|haptic':3,'haptic|temperature':2,'haptic|smell':1,
+  'haptic|vision':1,'haptic|taste':1,
+  'temperature|temperature':3,'temperature|smell':2,'temperature|vision':1,
+  'temperature|taste':2,
+  'smell|smell':3,'smell|vision':1,'smell|taste':3,
+  'vision|vision':2,'vision|taste':1,
+  'taste|taste':2,
+};
+function getSensePairWeight(sA,sB){
+  const k1=sA+'|'+sB, k2=sB+'|'+sA;
+  return CONFLICT_MATRIX[k1]??CONFLICT_MATRIX[k2]??1;
+}
+
+// Returns 0–1 "negativity score" for a stimulus
+// Based on: disturbance rating, inverse of pleasantness, intensity
+function sensorNegativity(s){
+  const disturb=(s.ratings?.disturb||0)/5;       // 0-1
+  const pleasant=1-((s.ratings?.pleasant||0)/5);  // inverted: high pleasant = low negative
+  const intensity=(s.intensity||0)/6;             // 0-1
+  // Only count as negative if disturbance > pleasantness OR high intensity
+  const ratingScore=(disturb*0.6+pleasant*0.4);
+  // If no ratings given, fall back purely to intensity
+  const hasRatings=(s.ratings?.disturb||0)+(s.ratings?.pleasant||0)>0;
+  return hasRatings ? (ratingScore*0.6+intensity*0.4) : intensity*0.7;
+}
+
 function detectConflicts(sensors,sx=1,sy=1){
   if(!sensors||!sensors.length) return [];
   const out=[];
+  const pasMod=getPASConflictModifier(); // 1.0 normal, >1 heightened sensitivity
   for(let i=0;i<sensors.length;i++) for(let j=i+1;j<sensors.length;j++){
     const a=sensors[i],b=sensors[j];
     if(conflictTypeFilter.has(a.sense)||conflictTypeFilter.has(b.sense)) continue;
     const key=[a.id,b.id].sort().join('|');
     if(ignoredConflicts.has(key)) continue;
+
+    // 1. Geometric overlap (required)
     const ax=a.x*sx,ay=a.y*sy,bx=b.x*sx,by=b.y*sy;
     const dist=Math.hypot(ax-bx,ay-by);
-    const ov=(a.propagationRadius*Math.min(sx,sy)+b.propagationRadius*Math.min(sx,sy))-dist;
-    if(ov>15) out.push({sensorA:a,sensorB:b,x:(ax+bx)/2,y:(ay+by)/2,severity:Math.min(1,ov/80),key});
+    const sc=Math.min(sx,sy);
+    const ov=(a.propagationRadius*sc+b.propagationRadius*sc)-dist;
+    if(ov<=10) continue;
+
+    // 2. Negativity check — BOTH must be negative/undesirable OR combined intensity very high
+    const negA=sensorNegativity(a), negB=sensorNegativity(b);
+    const combinedNeg=(negA+negB)/2;
+    const combinedIntensity=((a.intensity||0)+(b.intensity||0))/12; // 0-1
+    // Apply PAS modifier: sensitive person experiences more as negative
+    const effectiveNeg=Math.min(1, combinedNeg*pasMod);
+    const effectiveInt=Math.min(1, combinedIntensity*pasMod);
+
+    // Threshold: combined effect must be significant
+    // Either both very negative, or one very intense + some negativity
+    const negThreshold=0.35/pasMod; // lower threshold for sensitive individuals
+    if(effectiveNeg<negThreshold && effectiveInt<0.5) continue;
+
+    // 3. Sense pair weight (some combinations are inherently worse)
+    const pairWeight=getSensePairWeight(a.sense,b.sense)/3; // normalize 0-1
+
+    // 4. Compute severity
+    const overlapScore=Math.min(1,ov/100);
+    const severity=Math.min(1,(overlapScore*0.35+effectiveNeg*0.35+pairWeight*0.2+effectiveInt*0.1)*pasMod);
+
+    // Conflict reason label
+    let reason='';
+    if(negA>0.6&&negB>0.6) reason='overload';
+    else if(effectiveInt>0.7) reason='intensity';
+    else if(pairWeight>0.6) reason='synergy';
+    else reason='accumulation';
+
+    out.push({sensorA:a,sensorB:b,x:(ax+bx)/2,y:(ay+by)/2,severity,key,reason,negA,negB,pasMod});
   }
-  return out;
+  // Sort by severity descending
+  return out.sort((a,b)=>b.severity-a.severity);
 }
 function buildMapLegend(){
   document.getElementById('map-legend').innerHTML=getAllSenseKeys().map(k=>{
@@ -2360,6 +2494,19 @@ function updateCountHeader(){
   const nc=detectConflicts(state.sensors).length;
   ['hdr-count-stim','sb-stim-count','hdr-mb-stim'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=n;});
   ['hdr-count-conf','sb-conf-count','hdr-mb-conf'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=nc;});
+  // PAS header indicator
+  const pasEl=document.getElementById('pas-indicator');
+  const pasSub=document.getElementById('sb-pas-sub');
+  const pasData=loadPASResult();
+  if(pasEl){
+    pasEl.className='';
+    if(!pasData){pasEl.className='pas-normal';pasEl.textContent='🧠 —';}
+    else if(pasData.pct>=70){pasEl.className='pas-very-high';pasEl.textContent='🧠 '+pasData.pct+'%';}
+    else if(pasData.pct>=55){pasEl.className='pas-high';pasEl.textContent='🧠 '+pasData.pct+'%';}
+    else if(pasData.pct>=40){pasEl.className='pas-sensitive';pasEl.textContent='🧠 '+pasData.pct+'%';}
+    else{pasEl.className='pas-normal';pasEl.textContent='🧠 '+pasData.pct+'%';}
+  }
+  if(pasSub&&pasData) pasSub.textContent=getPASLevel(pasData.pct);
 }
 
 // ══ VOICE ENGINE ══════════════════════════════════════════════════════════════
@@ -3149,10 +3296,13 @@ function buildConflictUI(){
   // Active conflicts list
   const cs=detectConflicts(state.sensors);
   const ignored=Array.from(ignoredConflicts);
+  const reasonLabels={overload:'sobrecarga',intensity:'intensidade',synergy:'sinergia',accumulation:'acumulação'};
+  const sevColor=s=>s>0.65?'var(--danger)':s>0.35?'var(--warn)':'var(--muted)';
   const rows=cs.map(c=>`<div class="cf-row">
     <span style="color:${getSenseColor(c.sensorA.sense)}">${getSenseEmoji(c.sensorA.sense)} ${c.sensorA.label}</span>
     <span class="cf-arrow">↔</span>
     <span style="color:${getSenseColor(c.sensorB.sense)}">${getSenseEmoji(c.sensorB.sense)} ${c.sensorB.label}</span>
+    <span class="cf-reason" style="color:${sevColor(c.severity)}">${reasonLabels[c.reason]||''}</span>
     <button class="btn btn-ghost btn-xs" onclick="ignoreConflict('${c.key}')">✕</button>
   </div>`).join('') || '<div class="cf-empty">Sem conflitos activos</div>';
   const ignoredNote=ignored.length?`<div class="cf-ignored">${ignored.length} par(es) ignorado(s) — <button class="btn btn-ghost btn-xs" onclick="resetConflicts()">↺ repor</button></div>`:'';
@@ -3177,14 +3327,83 @@ function copySensor(id){
     timestamp:new Date().toISOString(),
     photos:[...(src.photos||[])],
     ratings:{...(src.ratings||{})},
+    waypoints:[],
   };
   state.sensors.push(clone);
   saveAll(); updateCountHeader(); renderMap(); renderList();
-  showToast('📋 Cópia criada — selecione para editar');
-  // Select on map and open detail
+  showToast('📋 Cópia criada — a abrir editor…');
   selectedSensorId=clone.id;
-  showSensorInfo(clone);
   renderMap();
+  // Open edit form after brief delay for map to update
+  setTimeout(()=>editSensorInForm(clone.id), 120);
+}
+
+// ── Edit sensor in form ─────────────────────────────────────────────────────
+function editSensorInForm(id){
+  const s=state.sensors.find(x=>x.id===id); if(!s) return;
+  // Switch to REGISTAR page
+  goPage('register', document.querySelector('.sb-item[data-page="register"]'));
+  // Set the sense type
+  state.activeSense=s.sense;
+  buildSenseSelector();
+  buildSensorForm();
+  // Now populate all fields
+  const set=(elId,val)=>{const el=document.getElementById(elId);if(el&&val!=null)el.value=val;};
+  set('f-label',s.label);
+  set('f-intensity',s.intensity);
+  set('f-prop',s.propagationType);
+  set('f-radius',s.propagationRadius);
+  set('f-xy',s.x+','+s.y);
+  set('f-notes',s.notes||'');
+  // Star ratings
+  starRatings={pleasant:s.ratings?.pleasant||0,disturb:s.ratings?.disturb||0};
+  renderStarRating('f-pleasant-stars','pleasant',starRatings.pleasant);
+  renderStarRating('f-disturb-stars','disturb',starRatings.disturb);
+  // Sense-specific fields
+  if(s.sense==='sound'){set('f-sound-type',s.soundType);set('f-sound-freq',s.soundFreq);set('f-sound-db',s.soundDb);set('f-sound-period',s.soundPeriod);}
+  else if(s.sense==='smell'){set('f-smell-cat',s.smellCat);set('f-smell-item',s.smellItem);set('f-smell-origin',s.smellOrigin);set('f-smell-persist',s.smellPersist);}
+  else if(s.sense==='temperature'){set('f-temp-val',s.tempVal);set('f-temp-hum',s.tempHum);set('f-temp-source',s.tempSource);}
+  else if(s.sense==='haptic'){set('f-hap-mat',s.hapMat);set('f-hap-tex',s.hapTex);set('f-hap-elem',s.hapElem);}
+  else if(s.sense==='vision'){set('f-vis-type',s.visType);set('f-vis-lux',s.visLux);set('f-vis-kelvin',s.visKelvin);set('f-vis-source',s.visSource);}
+  else if(s.sense==='taste'){set('f-taste-cat',s.tasteCat);}
+  else if(s.customValue!=null){set('f-custom-value',s.customValue);}
+  // Swap save button to UPDATE mode
+  const btn=document.querySelector('[onclick="saveSensor()"]');
+  if(btn){
+    btn.textContent='✅ ACTUALIZAR ESTÍMULO';
+    btn.setAttribute('onclick',`updateSensor('${id}')`);
+  }
+  showToast('✏ Editar: '+s.label);
+  // Photos
+  tempPhotos=[...(s.photos||[])];
+  const grid=document.getElementById('capture-photos');
+  if(grid) grid.innerHTML=tempPhotos.map((p,i)=>`<div class="photo-thumb"><img src="${p.src}"><div class="photo-label">${p.name||''}</div><button class="photo-remove" onclick="removePhoto(${i})">✕</button></div>`).join('');
+}
+
+function updateSensor(id){
+  const s=state.sensors.find(x=>x.id===id); if(!s) return;
+  const label=document.getElementById('f-label').value.trim()||s.label;
+  const intensity=parseInt(document.getElementById('f-intensity').value);
+  const prop=document.getElementById('f-prop').value;
+  const radius=parseInt(document.getElementById('f-radius').value)||80;
+  const notes=document.getElementById('f-notes').value;
+  const xy=document.getElementById('f-xy').value.trim();
+  if(xy){const p=xy.split(',');if(p.length===2){s.x=parseFloat(p[0])||s.x;s.y=parseFloat(p[1])||s.y;}}
+  Object.assign(s,{label,intensity,propagationType:prop,propagationRadius:radius,notes,photos:tempPhotos,ratings:{...starRatings}});
+  // Sense-specific
+  const se=s.sense;
+  if(se==='sound'){const f=(id)=>document.getElementById(id)?.value;s.soundType=f('f-sound-type');s.soundFreq=f('f-sound-freq');s.soundDb=f('f-sound-db');s.soundPeriod=f('f-sound-period');}
+  else if(se==='smell'){const f=(id)=>document.getElementById(id)?.value;s.smellCat=f('f-smell-cat');s.smellItem=f('f-smell-item');s.smellOrigin=f('f-smell-origin');s.smellPersist=f('f-smell-persist');}
+  else if(se==='temperature'){const f=(id)=>document.getElementById(id)?.value;s.tempVal=f('f-temp-val');s.tempHum=f('f-temp-hum');s.tempSource=f('f-temp-source');}
+  else if(se==='haptic'){const f=(id)=>document.getElementById(id)?.value;s.hapMat=f('f-hap-mat');s.hapTex=f('f-hap-tex');s.hapElem=f('f-hap-elem');}
+  else if(se==='vision'){const f=(id)=>document.getElementById(id)?.value;s.visType=f('f-vis-type');s.visLux=f('f-vis-lux');s.visKelvin=f('f-vis-kelvin');s.visSource=f('f-vis-source');}
+  else{const cv=document.getElementById('f-custom-value');if(cv)s.customValue=cv.value;}
+  saveAll(); updateCountHeader(); renderMap(); renderList();
+  showToast('✅ Estímulo actualizado');
+  // Restore save button
+  const btn=document.querySelector(`[onclick="updateSensor('${id}')"]`);
+  if(btn){btn.textContent='✅ GUARDAR ESTÍMULO';btn.setAttribute('onclick','saveSensor()');}
+  buildSensorForm();
 }
 
 // ── Export / Import ───────────────────────────────────────────────────────────
@@ -3548,8 +3767,7 @@ function hideSensorInfo(){
   if(ov) ov.classList.remove('visible');
 }
 function sioEdit(){
-  const s=state.sensors.find(x=>x.id===selectedSensorId);
-  if(s) openSensorDetail(s.id);
+  if(selectedSensorId) editSensorInForm(selectedSensorId);
 }
 function sioConeEdit(){
   const s=state.sensors.find(x=>x.id===selectedSensorId);
@@ -3740,14 +3958,9 @@ document.getElementById('map-canvas')?.addEventListener('dblclick',e=>{
     goPage('register',null);
   }
 });
-// Desktop: patch load event to also trigger resizeMapCanvas
-window.addEventListener('load',function(){setTimeout(resizeMapCanvas,60);setTimeout(resizeMapCanvas,350);});
-
-
-r('load',function(){setTimeout(resizeMapCanvas,60);setTimeout(resizeMapCanvas,350);});
-
-
-dit);saveAll();}
+function saveConeEdit(){
+  const s=state.sensors.find(x=>x.id===coneEditId);
+  if(s){Object.assign(s,ceEdit);saveAll();}
   closeConeEditor();
   showToast('✅ Cone guardado');
 }
@@ -3839,70 +4052,239 @@ if('serviceWorker'in navigator){
   navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
 }
 
-// ── DESKTOP EXTRAS ───────────────────────────────────────────────────────────
-let _resizePending=false;
-function resizeMapCanvas(){
-  if(_resizePending)return;
-  _resizePending=true;
-  requestAnimationFrame(()=>{
-    _resizePending=false;
-    const wrap=document.getElementById('map-canvas-wrap');
-    const canvas=document.getElementById('map-canvas');
-    if(!wrap||!canvas)return;
-    const W=Math.max(200,wrap.clientWidth);
-    const H=Math.max(200,wrap.clientHeight);
-    if(canvas.width!==W||canvas.height!==H){canvas.width=W;canvas.height=H;}
-    renderMap();
-  });
+
+
+// ══ PAS — PERSONA ALTAMENTE SENSIBLE ════════════════════════════════════════
+
+const PAS_QUESTIONS = [
+  "Sinto-me facilmente sobrecarregado(a) quando há muito a fazer em pouco tempo.",
+  "Fico perturbado(a) quando as pessoas estão desconfortáveis ou incomodadas à minha volta.",
+  "A música intensa, os odores fortes ou as luzes brilhantes perturbam-me.",
+  "Tenho uma vida interior rica e complexa.",
+  "Fico facilmente assustado(a).",
+  "Pareço ser afectado(a) mais profundamente pela vida do que os outros.",
+  "Sou sensível à dor.",
+  "Os dias movimentados esgotam-me — preciso de me retirar para um espaço calmo.",
+  "Sou perturbado(a) por estímulos intensos: barulho, confusão ou caos.",
+  "Aprecio muito os aromas, sabores, sons e obras de arte delicados.",
+  "Evito filmes violentos ou situações perturbadoras.",
+  "Fico incomodado(a) quando há muito barulho à minha volta.",
+  "Quando era criança, os adultos consideravam-me sensível ou tímido(a).",
+  "Sou consciencioso(a) a ponto de me preocupar com o que precisa de ser feito.",
+  "Fico agitado(a) quando tenho muito a fazer em simultâneo.",
+  "Tenho consciência e aprecio aromas, sabores, sons e obras de arte subtis.",
+  "Para mim é desconfortável ter o coração acelerado.",
+  "Pareço notar detalhes subtis que outros não vêem.",
+  "Fico facilmente sobrecarregado(a) com entradas sensoriais intensas.",
+  "A arte, a música ou a ficção tocam-me profundamente.",
+  "Costumo estar consciente dos meus sentimentos corporais.",
+  "Quando era criança, considerava-me diferente dos outros.",
+  "Sinto-me sobrecarregado(a) em locais com muito estímulo sensorial.",
+  "Dou muito valor à cortesia e às boas maneiras.",
+  "Fico incomodado(a) com mudanças súbitas e inesperadas.",
+  "Noto e aprecio pormenores subtis nas texturas, sons ou cheiros do espaço.",
+  "A minha tolerância à estimulação sensorial é menor quando estou cansado(a) ou com fome.",
+];
+
+// Storage key includes date so the test resets each day
+function getPASStorageKey(){
+  return 'sa_pas_'+new Date().toISOString().slice(0,10);
 }
-document.addEventListener('keydown',e=>{
-  const tag=document.activeElement.tagName;
-  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT')return;
-  const s={'1':'space','2':'register','3':'list','4':'analysis'};
-  if(s[e.key])goPage(s[e.key],null);
-  if(e.key==='Escape'){closeConeEditor();closeModal();closeCustomTypeEditor();closeExportModal();}
-  if(e.key==='e'||e.key==='E') openExportModal();
-});
-let _roTimer;
-if(window.ResizeObserver){
-  const ro=new ResizeObserver(()=>{clearTimeout(_roTimer);_roTimer=setTimeout(resizeMapCanvas,80);});
-  const wrap=document.getElementById('map-canvas-wrap');
-  if(wrap)ro.observe(wrap);
+
+function loadPASResult(){
+  try { return JSON.parse(localStorage.getItem(getPASStorageKey())||'null'); } catch{ return null; }
 }
-window.addEventListener('resize',()=>{clearTimeout(_roTimer);_roTimer=setTimeout(resizeMapCanvas,150);});
-document.getElementById('map-canvas')?.addEventListener('dblclick',e=>{
-  const canvas=document.getElementById('map-canvas');
-  const rect=canvas.getBoundingClientRect();
-  const cx=e.clientX-rect.left, cy=e.clientY-rect.top;
-  const hit=findSensorAt(cx,cy);
-  if(hit){
-    // Double click on sensor → open detail
-    openSensorDetail(hit.id);
-  } else {
-    // Double click on empty space → set position + go to register
-    const {mx,my}=cssPxToMap(cx,cy);
-    const fe=document.getElementById('f-xy'); if(fe) fe.value=mx+','+my;
-    showToast('📍 '+mx+', '+my+' — REGISTAR');
-    goPage('register',null);
+
+function savePASResult(scores){
+  const total=scores.reduce((a,b)=>a+b,0);
+  const pct=Math.round(total/scores.length*100/7);
+  const data={scores,total,pct,date:new Date().toISOString()};
+  localStorage.setItem(getPASStorageKey(),JSON.stringify(data));
+  return data;
+}
+
+// Returns modifier 1.0–1.6 for conflict detection
+// >55% = slightly sensitive, >70% = highly sensitive
+function getPASConflictModifier(){
+  const r=loadPASResult(); if(!r) return 1.0;
+  if(r.pct>=70) return 1.5;
+  if(r.pct>=55) return 1.25;
+  if(r.pct>=40) return 1.1;
+  return 1.0;
+}
+
+let _pasScores=new Array(PAS_QUESTIONS.length).fill(0);
+let _pasCurrentQ=0;
+let _pasMode='start'; // 'start'|'question'|'result'
+
+function openPASPage(){
+  goPage('pas', document.querySelector('.sb-item[data-page="pas"]'));
+  renderPAS();
+}
+
+function renderPAS(){
+  const el=document.getElementById('page-pas'); if(!el) return;
+  const existing=loadPASResult();
+
+  if(_pasMode==='start'){
+    const existingHtml=existing?`
+      <div class="pas-prev-result">
+        <div class="pas-prev-label">Resultado de hoje</div>
+        <div class="pas-score-ring" style="--pct:${existing.pct}">
+          <svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="34" fill="none" stroke="var(--border2)" stroke-width="7"/>
+          <circle cx="40" cy="40" r="34" fill="none" stroke="${existing.pct>=70?'var(--danger)':existing.pct>=55?'var(--warn)':'var(--accent)'}" stroke-width="7"
+            stroke-dasharray="${Math.round(34*2*Math.PI*existing.pct/100)} 999" stroke-linecap="round" transform="rotate(-90 40 40)"/></svg>
+          <span>${existing.pct}%</span>
+        </div>
+        <div class="pas-level-label">${getPASLevel(existing.pct)}</div>
+        <div class="pas-conflict-mod">Modificador de conflitos: <strong>${getPASConflictModifier()}×</strong></div>
+      </div>`:
+      '<div class="pas-intro-note">Ainda não fez o teste hoje.</div>';
+
+    el.innerHTML=`
+      <div class="pas-page">
+        <div class="pas-header">
+          <div class="pas-title">🧠 SENSIBILIDADE INDIVIDUAL</div>
+          <div class="pas-subtitle">Teste PAS — Persona Altamente Sensible</div>
+          <div class="pas-desc">Este teste diário avalia o seu estado de sensibilidade actual. O resultado modifica os critérios de detecção de conflitos sensoriais, tornando-os mais ou menos exigentes conforme a sua tolerância do dia. As respostas ficam guardadas localmente.</div>
+        </div>
+        ${existingHtml}
+        <button class="pas-btn-start" onclick="startPASTest()">${existing?'↺ Repetir teste de hoje':'▶ Iniciar teste (3 min)'}</button>
+        ${existing?`<button class="btn btn-ghost" style="margin-top:8px;font-size:11px" onclick="clearPASToday()">✕ Limpar resultado de hoje</button>`:''}
+        <div class="pas-legend">
+          <div class="pas-legend-title">Como o resultado influencia os conflitos:</div>
+          <div class="pas-legend-row"><span style="color:var(--muted)">0–39%</span><span>Normal (1.0×) — critérios padrão</span></div>
+          <div class="pas-legend-row"><span style="color:var(--accent)">40–54%</span><span>Sensível (1.1×) — limiar ligeiramente mais baixo</span></div>
+          <div class="pas-legend-row"><span style="color:var(--warn)">55–69%</span><span>Muito sensível (1.25×) — mais conflitos detectados</span></div>
+          <div class="pas-legend-row"><span style="color:var(--danger)">70–100%</span><span>PAS (1.5×) — limiar muito baixo, conflitos amplificados</span></div>
+        </div>
+      </div>`;
+    return;
   }
-});
-// Desktop: patch load event to also trigger resizeMapCanvas
-window.addEventListener('load',function(){setTimeout(resizeMapCanvas,60);setTimeout(resizeMapCanvas,350);});
 
-
-r('load',function(){setTimeout(resizeMapCanvas,60);setTimeout(resizeMapCanvas,350);});
-
-
-
+  if(_pasMode==='question'){
+    const q=_pasCurrentQ;
+    const total=PAS_QUESTIONS.length;
+    const pct=Math.round(q/total*100);
+    el.innerHTML=`
+      <div class="pas-page">
+        <div class="pas-q-progress">
+          <div class="pas-q-bar" style="width:${pct}%"></div>
+        </div>
+        <div class="pas-q-num">${q+1} / ${total}</div>
+        <div class="pas-q-text">${PAS_QUESTIONS[q]}</div>
+        <div class="pas-scale">
+          ${[1,2,3,4,5,6,7].map(v=>`
+            <button class="pas-scale-btn${_pasScores[q]===v?' active':''}" onclick="setPASScore(${v})" title="${v}">
+              <span class="pas-scale-num">${v}</span>
+            </button>`).join('')}
+        </div>
+        <div class="pas-scale-labels">
+          <span>Nada parecido<br>comigo</span>
+          <span>Completamente<br>parecido</span>
+        </div>
+        <div class="pas-q-nav">
+          <button class="btn btn-ghost btn-sm" onclick="pasNav(-1)" ${q===0?'disabled':''}>◀ Anterior</button>
+          <button class="btn btn-ghost btn-sm" onclick="pasNav(1)" ${_pasScores[q]===0?'disabled':''}>
+            ${q===total-1?'Ver resultado ✓':'Seguinte ▶'}
+          </button>
+        </div>
+      </div>`;
+    return;
   }
-});
-// Desktop: patch load event to also trigger resizeMapCanvas
-window.addEventListener('load',function(){setTimeout(resizeMapCanvas,60);setTimeout(resizeMapCanvas,350);});
 
+  if(_pasMode==='result'){
+    const r=savePASResult(_pasScores);
+    updateCountHeader();
+    el.innerHTML=`
+      <div class="pas-page">
+        <div class="pas-header">
+          <div class="pas-title">Resultado do dia</div>
+        </div>
+        <div class="pas-result-ring">
+          <svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--border2)" stroke-width="9"/>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="${r.pct>=70?'var(--danger)':r.pct>=55?'var(--warn)':r.pct>=40?'var(--accent)':'var(--muted)'}" stroke-width="9"
+            stroke-dasharray="${Math.round(50*2*Math.PI*r.pct/100)} 999" stroke-linecap="round" transform="rotate(-90 60 60)"/></svg>
+          <div class="pas-result-inner"><span class="pas-result-pct">${r.pct}%</span><span class="pas-result-lbl">PAS</span></div>
+        </div>
+        <div class="pas-level" style="color:${r.pct>=70?'var(--danger)':r.pct>=55?'var(--warn)':r.pct>=40?'var(--accent)':'var(--muted)'}">
+          ${getPASLevel(r.pct)}
+        </div>
+        <div class="pas-result-mod">Modificador de conflitos activo: <strong>${getPASConflictModifier()}×</strong></div>
+        <div class="pas-result-note">${getPASNote(r.pct)}</div>
+        <div class="pas-subscores">
+          ${renderPASSubscores(r.scores)}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+          <button class="pas-btn-start" style="flex:1" onclick="_pasMode='start';renderPAS()">✓ Aplicar e voltar</button>
+        </div>
+      </div>`;
+    renderMap(); // recompute conflicts with new modifier
+    updateCountHeader();
+  }
+}
 
-r('load',function(){setTimeout(resizeMapCanvas,60);setTimeout(resizeMapCanvas,350);});
+function getPASLevel(pct){
+  if(pct>=70) return '🔴 Persona Altamente Sensible';
+  if(pct>=55) return '🟠 Muito sensível';
+  if(pct>=40) return '🟡 Sensibilidade elevada';
+  return '🟢 Sensibilidade normal';
+}
 
+function getPASNote(pct){
+  if(pct>=70) return 'Hoje a sua sensibilidade está muito elevada. Os critérios de conflito foram amplificados — estímulos que normalmente são toleráveis podem ser registados como conflitos. Considere fazer levantamentos em sessões mais curtas e em períodos de menor ruído.';
+  if(pct>=55) return 'Sensibilidade acima da média hoje. Os critérios de conflito foram ligeiramente alargados para reflectir a sua maior receptividade a estímulos sobrepostos.';
+  if(pct>=40) return 'Sensibilidade algo elevada. Um pequeno ajuste foi aplicado aos critérios de conflito.';
+  return 'Sensibilidade dentro dos parâmetros normais. Os critérios de conflito estão a funcionar com a configuração padrão.';
+}
 
+function renderPASSubscores(scores){
+  // 4 subscales (approximate PAS subscales)
+  const sub=[
+    {label:'Processamento profundo',qs:[3,13,17,25],color:'var(--vision)'},
+    {label:'Sobreestimulação',qs:[0,7,8,11,18,22,26],color:'var(--temp)'},
+    {label:'Reactividade emocional',qs:[1,5,10,19],color:'var(--haptic)'},
+    {label:'Sensibilidade estética',qs:[9,15,19,25],color:'var(--smell)'},
+  ];
+  return sub.map(s=>{
+    const vals=s.qs.filter(i=>i<scores.length).map(i=>scores[i]);
+    const avg=vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*100/7):0;
+    return `<div class="pas-sub">
+      <div class="pas-sub-label" style="color:${s.color}">${s.label}</div>
+      <div class="pas-sub-bar-wrap"><div class="pas-sub-bar" style="width:${avg}%;background:${s.color}"></div></div>
+      <div class="pas-sub-pct">${avg}%</div>
+    </div>`;
+  }).join('');
+}
+
+function startPASTest(){
+  _pasScores=new Array(PAS_QUESTIONS.length).fill(0);
+  _pasCurrentQ=0;
+  _pasMode='question';
+  renderPAS();
+}
+
+function setPASScore(v){
+  _pasScores[_pasCurrentQ]=v;
+  renderPAS();
+}
+
+function pasNav(dir){
+  const newQ=_pasCurrentQ+dir;
+  if(newQ<0){_pasMode='start';renderPAS();return;}
+  if(newQ>=PAS_QUESTIONS.length){_pasMode='result';renderPAS();return;}
+  _pasCurrentQ=newQ;
+  renderPAS();
+}
+
+function clearPASToday(){
+  localStorage.removeItem(getPASStorageKey());
+  renderMap(); updateCountHeader();
+  renderPAS();
+  showToast('Resultado PAS removido');
+}
+
+// ══ END PAS ══════════════════════════════════════════════════════════════════
 </script>
 
 <!-- ── Custom Type Editor Modal ───────────────────────────────────────── -->
