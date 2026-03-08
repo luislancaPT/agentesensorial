@@ -388,6 +388,22 @@ hr{border:none;border-top:1px solid var(--border);margin:12px 0}
 #drag-hint.show{opacity:1;}
 
 
+/* ── Conflict Panel ────────────────────────────── */
+.cf-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.cf-title{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;color:var(--warn);}
+.cf-section-label{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--muted);margin-bottom:5px;}
+.cf-pills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px;}
+.cf-pill{padding:3px 8px;border-radius:12px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;transition:all .12s;}
+.cf-pill.cf-active{opacity:1;}.cf-pill:not(.cf-active){opacity:0.35;}
+.cf-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;flex-wrap:wrap;}
+.cf-arrow{color:var(--muted);flex-shrink:0;}.cf-empty{color:var(--muted);font-size:12px;text-align:center;padding:10px;}
+.cf-ignored{font-size:11px;color:var(--muted);margin-top:8px;padding-top:6px;border-top:1px solid var(--border);}
+/* ── Waypoint indicator ───────────────────────── */
+#waypoint-indicator{display:none;position:absolute;top:8px;left:50%;transform:translateX(-50%);
+  background:rgba(11,18,32,.93);border:1px solid var(--accent);border-radius:6px;
+  padding:5px 14px;font-family:var(--mono);font-size:11px;color:var(--accent);
+  letter-spacing:1px;z-index:60;pointer-events:none;white-space:nowrap;}
+
 /* ── Custom Type Editor ─────────────────────────────────────────────────── */
 #custom-type-modal{
   display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;
@@ -492,6 +508,23 @@ hr{border:none;border-top:1px solid var(--border);margin:12px 0}
 }
 .export-option:hover{border-color:var(--accent);}
 .export-option-icon{font-size:28px;flex-shrink:0;}
+/* AI Export section */
+.ai-export-section{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-top:4px;}
+.ai-export-title{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.ai-opt-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center;}
+.ai-opt-label{font-size:11px;color:var(--muted);min-width:70px;font-family:var(--mono);letter-spacing:.5px;}
+.ai-seg{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.ai-seg button{padding:5px 11px;background:transparent;border:none;color:var(--muted);font-family:var(--mono);font-size:11px;cursor:pointer;transition:all .12s;white-space:nowrap;}
+.ai-seg button.active{background:var(--accent);color:#0b1220;}
+.ai-seg button:hover:not(.active){background:var(--bg4);color:var(--text);}
+.ai-export-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.btn-ai-export{padding:9px 16px;border-radius:6px;border:1.5px solid var(--accent);background:rgba(93,212,240,.08);
+  color:var(--accent);font-family:var(--mono);font-size:11px;letter-spacing:1px;cursor:pointer;transition:all .15s;flex:1;min-width:140px;text-align:center;}
+.btn-ai-export:hover{background:rgba(93,212,240,.18);}
+.btn-ai-batch{padding:9px 16px;border-radius:6px;border:1.5px solid var(--haptic);background:rgba(187,153,255,.08);
+  color:var(--haptic);font-family:var(--mono);font-size:11px;letter-spacing:1px;cursor:pointer;transition:all .15s;flex:1;min-width:140px;text-align:center;}
+.btn-ai-batch:hover{background:rgba(187,153,255,.18);}
+.ai-progress{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:8px;min-height:16px;}
 .export-option-text strong{display:block;font-family:var(--mono);font-size:12px;margin-bottom:2px;}
 .export-option-text span{font-size:11px;color:var(--muted);}
 
@@ -864,6 +897,7 @@ hr{border:none;border-top:1px solid var(--border);margin:12px 0}
       <div id="conflict-summary"></div>
       <div id="map-canvas-wrap">
         <canvas id="map-canvas"></canvas>
+        <div id="waypoint-indicator">📍 PERCURSO · clique no mapa para adicionar pontos · clique ✓ TERMINAR para concluir</div>
         <div id="drag-hint">⬡ arrasta o estímulo para o reposicionar</div>
         <div id="sensor-info-overlay">
           <div id="sio-color-bar"></div>
@@ -872,7 +906,10 @@ hr{border:none;border-top:1px solid var(--border);margin:12px 0}
             <div id="sio-meta"></div>
             <div id="sio-actions">
               <button class="btn btn-ghost btn-xs" onclick="sioEdit()">✏ EDITAR</button>
+              <button class="btn btn-ghost btn-xs" onclick="sioCopy()">⧉ COPIAR</button>
+              <button class="btn btn-ghost btn-xs" id="sio-waypoint-btn" onclick="sioWaypoint()">📍 PERCURSO</button>
               <button class="btn btn-ghost btn-xs" onclick="sioConeEdit()">🧭 DIREÇÃO</button>
+              <button id="sio-clear-wp" class="btn btn-ghost btn-xs" onclick="clearWaypoints(selectedSensorId)" style="display:none">↺ PERCURSO</button>
               <button class="btn btn-danger btn-xs" onclick="sioDelete()">✕ APAGAR</button>
             </div>
           </div>
@@ -908,14 +945,27 @@ hr{border:none;border-top:1px solid var(--border);margin:12px 0}
         </div>
       </div>
       <div id="map-footer">
-        <label>
-          <input type="checkbox" id="show-conflicts" checked onchange="renderMap()">
-          <span data-i18n="showConflicts">Mostrar conflitos</span>
-        </label>
+        <div id="map-footer-left" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:6px">
+            <input type="checkbox" id="show-conflicts" checked onchange="renderMap()">
+            <span data-i18n="showConflicts">Mostrar conflitos</span>
+          </label>
+          <button class="btn btn-ghost btn-sm" onclick="toggleConflictPanel()" id="conflict-toggle-btn" style="display:none">⚠ <span id="conflict-count-btn">0</span> ▸</button>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)">
+            <span>◈</span>
+            <input type="range" id="symbol-scale" min="0.2" max="2.5" step="0.05" value="1"
+              style="width:80px;accent-color:var(--accent)"
+              oninput="symbolScale=parseFloat(this.value);document.getElementById('sym-val').textContent=Math.round(symbolScale*100)+'%';renderMap()">
+            <span id="sym-val">100%</span>
+          </label>
+        </div>
         <div id="map-legend"></div>
         <button class="btn btn-ghost btn-sm" onclick="openExportModal()" data-i18n="exportBtn">📤 EXPORTAR</button>
       </div>
-    </div><!-- /map-panel -->
+      <div id="conflict-panel" style="display:none;position:absolute;bottom:52px;left:8px;right:8px;
+    background:var(--bg2);border:1px solid var(--border);border-radius:8px;
+    padding:12px;max-height:280px;overflow-y:auto;z-index:50;font-size:12px"></div>
+</div><!-- /map-panel -->
 
 
   <!-- ══ MOBILE BOTTOM NAV ══════════════════════════════════════ -->
@@ -993,11 +1043,7 @@ hr{border:none;border-top:1px solid var(--border);margin:12px 0}
 <button id="voice-fab" onclick="toggleVoiceFab()" title="Microfone">🎤</button>
 
 <!-- Sensor detail modal -->
-<div class="modal-overlay" id="modal" style="display:none" onclick="closeModal(event)">
-  <div class="modal" id="modal-content"></div>
-</div>
-
-<script>
+<div class="modal-overlay" id="modal" style="display:none" onc
 
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1329,24 +1375,7 @@ const LANGS = {
     propMap:{
       'radial':'radial','todas las direcciones':'radial','circular':'radial','omnidireccional':'radial',
       'direccional':'directional','dirección':'directional','cono':'directional',
-      'difuso':'diffuse','disperso':'diffuse','gradual':'diffuse',
-      'puntual':'point','localizado':'point','concentrado':'point',
-    },
-    smellCats:['Naturales','Materiales','Jardines Interiores','Industrial','Humanos'],
-    smellItems:{
-      'Naturales':['Sal','Algas','Hierbas Aromáticas','Madera Húmeda','Tierra'],
-      'Materiales':['Madera de Conífera','Madera de Frondosa','Pintura Fresca','Goma','Hormigón'],
-      'Jardines Interiores':['Floral','Vegetación','Tierra Mojada'],
-      'Industrial':['Gasóleo','Aceite de Motor','Goma Quemada','Químico'],
-      'Humanos':['Perfume','Comida','Café','Sudor','Limpieza'],
-    },
-    smellOrigins:['Natural','Artificial','Ambos'],
-    smellPersists:['Momentáneo (<1min)','Corto (1–10min)','Duradero (>10min)','Permanente'],
-    soundTypes:['Tráfico urbano','HVAC / Ventilación','Voces','Música','Construcción','Agua / Fuentes','Pájaros / Naturaleza','Alarmas / Señales','Maquinaria','Otro'],
-    soundFreqs:['Graves (<250 Hz) — Tráfico, HVAC','Medios (250–2000 Hz) — Voces, Música','Agudos (>2000 Hz) — Alarmas, Metales','Banda Ancha — Ruido Blanco, Viento'],
-    soundPeriods:['Continuo','Intermitente','Pico / Explosivo','Rítmico'],
-    tempSources:['Radiación Solar Directa','HVAC / Aire Acondicionado','Equipamiento','Densidad de Personas','Masa Térmica del Material','Ventilación Natural'],
-    hapMats:['Hormigón — Frío, Rugoso','Madera — Cálida, Orgánica','Metal — Frío, Liso','Vidrio — Frío, Liso','Textil — Cálido, Suave','Piedra Natural — Frío, Variable','Tierra / Vegetal — Natural','Agua','Plástico — Variable'],
+      'difuso':'diffuse','distico — Variable'],
     hapTexs:['Lisa','Rugosa','Porosa','Estriada','Blanda / Deformable'],
     hapElems:['Pavimento','Pared','Techo','Barandilla / Pasamanos','Mobiliario','Puerta / Ventana','Exterior / Suelo'],
     visTypes:['Deslumbramiento / Brillo','Sombra / Oscuridad','Vista / Conexión Exterior','Oclusión Visual','Biofilia / Naturaleza','Color Dominante','Patrón / Textura Visual','Escala / Proporción'],
@@ -1360,11 +1389,7 @@ const LANGS = {
 };
 
 const SENSE_EMOJIS = {vision:'👁',sound:'🔊',smell:'🌬',taste:'👅',temperature:'🌡',haptic:'✋'};
-const SENSE_COLORS = {vision:'#F4B942',sound:'#4AC8E8',smell:'#7DDA58',taste:'#FF7F50',temperature:'#FF5C5C',haptic:'#A78BFA'};
-// ══ CUSTOM STIMULUS TYPES ════════════════════════════════════════════════════
-let customTypes = [];  // [{id,title,type,emoji,color,iconData,propDefault,radDefault,canDir,opacity}]
-
-function getAllSenseKeys(){
+const SENSE_COLORS = {vision:'#F4B942',sounfunction getAllSenseKeys(){
   return [...Object.keys(SENSE_EMOJIS), ...customTypes.map(t=>t.id)];
 }
 function getSenseEmoji(k){
@@ -1427,6 +1452,9 @@ let state = {
 };
 let tempPhotos = [];
 let starRatings = {pleasant:0,disturb:0};
+let ignoredConflicts = new Set();   // "idA|idB" pairs user suppressed
+let conflictTypeFilter = new Set(); // sense keys EXCLUDED from conflict detection
+let symbolScale = 1.0;              // user-controlled symbol size multiplier
 let listFilter = 'all';
 let mapFilter = 'all';
 
@@ -2007,7 +2035,7 @@ function drawSensors(ctx,sensors,W,H){
     ctx.restore();
 
     // Dot
-    const dotR=Math.max(5,8*sc);
+    const dotR=Math.max(3,8*sc*symbolScale);
     ctx.fillStyle=col;
     ctx.beginPath(); ctx.arc(x,y,dotR,0,Math.PI*2); ctx.fill();
     // Stroke for selected
@@ -2028,20 +2056,21 @@ function drawSensors(ctx,sensors,W,H){
     // Emoji / custom icon
     const ct_s=customTypes.find(t=>t.id===s.sense);
     if(ct_s&&ct_s.iconImg&&ct_s.iconImg.complete){
-      const is=Math.max(10,16*sc);
+      const is=Math.max(5,16*sc*symbolScale);
       ctx.save();
       ctx.globalAlpha=ct_s.opacity!==undefined?ct_s.opacity:1;
       ctx.drawImage(ct_s.iconImg,x-is/2,y-is/2,is,is);
       ctx.restore();
     } else {
-      ctx.fillStyle='#fff'; ctx.font=`bold ${Math.max(8,14*sc)}px sans-serif`;
+      ctx.fillStyle='#fff'; ctx.font=`bold ${Math.max(5,14*sc*symbolScale)}px sans-serif`;
       ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText(getSenseEmoji(s.sense)||'●',x,y);
     }
-    // Label — always shown, fade at low zoom
+    // Label — always shown, fade at low zoom (hidden in AI export when labels=hide)
+    if(!window._aiHideLabels){
     const labelAlpha = Math.min(1, mv.scale*0.7+0.3);
     ctx.save(); ctx.globalAlpha=labelAlpha;
-    const labelSize=Math.max(9,11*sc);
+    const labelSize=Math.max(6,11*sc*symbolScale);
     ctx.fillStyle=isSel?'#fff':col;
     ctx.font=`bold ${labelSize}px Share Tech Mono,monospace`;
     ctx.textAlign='center'; ctx.textBaseline='top';
@@ -2057,6 +2086,7 @@ function drawSensors(ctx,sensors,W,H){
     ctx.fillStyle=isSel?'#fff':col;
     ctx.fillText(lbl,x,ly+2);
     ctx.restore();
+    } // end !_aiHideLabels
     // Drag handle icon on selected
     if(isSel && !_drag.active){
       ctx.save(); ctx.globalAlpha=0.7;
@@ -2078,7 +2108,11 @@ function drawSensors(ctx,sensors,W,H){
       ctx.restore(); ctx.setLineDash([]);
     });
     const el=document.getElementById('conflict-summary');
-    el.innerHTML=cs.length?`<div class="conflict-badge">⚠ ${cs.length} ${T.conflictBadge}</div>`:'';
+    el.innerHTML=cs.length?`<div class="conflict-badge" onclick="toggleConflictPanel()" style="cursor:pointer">⚠ ${cs.length} ${T.conflictBadge} ▸</div>`:'';
+  // sync toggle button
+  const tb=document.getElementById('conflict-toggle-btn');
+  const cc=document.getElementById('conflict-count-btn');
+  if(tb){tb.style.display=cs.length?'inline-flex':'none'; if(cc)cc.textContent=cs.length;};
   }
 }
 function detectConflicts(sensors,sx=1,sy=1){
@@ -2086,10 +2120,13 @@ function detectConflicts(sensors,sx=1,sy=1){
   const out=[];
   for(let i=0;i<sensors.length;i++) for(let j=i+1;j<sensors.length;j++){
     const a=sensors[i],b=sensors[j];
+    if(conflictTypeFilter.has(a.sense)||conflictTypeFilter.has(b.sense)) continue;
+    const key=[a.id,b.id].sort().join('|');
+    if(ignoredConflicts.has(key)) continue;
     const ax=a.x*sx,ay=a.y*sy,bx=b.x*sx,by=b.y*sy;
     const dist=Math.hypot(ax-bx,ay-by);
     const ov=(a.propagationRadius*Math.min(sx,sy)+b.propagationRadius*Math.min(sx,sy))-dist;
-    if(ov>15) out.push({sensorA:a,sensorB:b,x:(ax+bx)/2,y:(ay+by)/2,severity:Math.min(1,ov/80)});
+    if(ov>15) out.push({sensorA:a,sensorB:b,x:(ax+bx)/2,y:(ay+by)/2,severity:Math.min(1,ov/80),key});
   }
   return out;
 }
@@ -2131,7 +2168,7 @@ function renderList(){
       <div class="sensor-item-header">
         <div><div class="sensor-name" style="color:${col}">${SENSE_EMOJIS[s.sense]} ${s.label}</div>
         <div class="sensor-meta">${T.intensityLabels[s.intensity]||s.intensity} · ${T.propLabels[s.propagationType]||''} · ${ts}</div></div>
-        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteSensor('${s.id}')">✕</button>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();copySensor('${s.id}')" title="Duplicar">⧉</button> <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteSensor('${s.id}')">✕</button>
       </div>
       ${s.photos?.length?`<div style="margin-top:8px;display:flex;gap:4px;overflow-x:auto">${s.photos.slice(0,3).map(p=>`<img src="${p.src}" style="height:50px;width:50px;object-fit:cover;border-radius:4px;border:1px solid var(--border);flex-shrink:0">`).join('')}</div>`:''}
       ${s.notes?`<div style="margin-top:6px;font-size:12px;color:#b8d8f8;line-height:1.5">${s.notes.substring(0,100)}${s.notes.length>100?'…':''}</div>`:''}
@@ -2854,6 +2891,302 @@ function deleteCustomType(id){
   showToast('🗑 Tipo removido');
 }
 
+
+
+
+
+// ══ AI / LAYER EXPORT ════════════════════════════════════════════════════════
+
+const aiOpts = { bg:'dark', res:2, labels:'show', plan:'show' };
+
+function aiSetOpt(key, val, btn){
+  aiOpts[key] = val;
+  // update segment active state
+  const seg = btn.parentElement;
+  seg.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Render to offscreen canvas with AI options applied
+function aiRenderToCanvas(filterSense, opts){
+  return new Promise(resolve=>{
+    const srcCanvas = document.getElementById('map-canvas');
+    const W = srcCanvas.width  * opts.res;
+    const H = srcCanvas.height * opts.res;
+
+    const oc = document.createElement('canvas');
+    oc.width = W; oc.height = H;
+    const ctx = oc.getContext('2d');
+
+    // Background
+    if(opts.bg === 'transparent'){
+      ctx.clearRect(0,0,W,H);
+    } else if(opts.bg === 'white'){
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,W,H);
+      // light grid for white bg
+      ctx.strokeStyle = '#e8edf2'; ctx.lineWidth = .5;
+      const gs = 30 * opts.res;
+      for(let x=0;x<W;x+=gs){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+      for(let y=0;y<H;y+=gs){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+    } else {
+      ctx.fillStyle = '#0c1824'; ctx.fillRect(0,0,W,H);
+      ctx.strokeStyle = '#1e2d47'; ctx.lineWidth = .5;
+      const gs = 30 * opts.res;
+      for(let x=0;x<W;x+=gs){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+      for(let y=0;y<H;y+=gs){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+    }
+
+    // Scale transform to match pan/zoom + resolution multiplier
+    ctx.setTransform(mv.scale * opts.res, 0, 0, mv.scale * opts.res, mv.px * opts.res, mv.py * opts.res);
+
+    const W0 = srcCanvas.width;
+    const H0 = srcCanvas.height;
+
+    const drawContent = () => {
+      // Sensors
+      const sensors = filterSense === 'all'
+        ? state.sensors
+        : state.sensors.filter(s => s.sense === filterSense);
+
+      if(opts.plan !== 'hide' && filterSense === 'all' || opts.plan === 'only'){
+        // plan only — just draw plan, skip sensors below
+      }
+
+      // Temporarily override hideLabels if needed
+      const prevHideLabels = window._aiHideLabels;
+      window._aiHideLabels = (opts.labels === 'hide');
+
+      if(opts.plan !== 'hide'){
+        if(state.space.planImage){
+          const img = new Image();
+          img.onload = () => {
+            ctx.save(); ctx.globalAlpha = opts.bg==='white'?.85:.65;
+            // Plan alpha higher on white bg for visibility
+            const r = Math.min(W0/img.width, H0/img.height);
+            ctx.drawImage(img,(W0-img.width*r)/2,(H0-img.height*r)/2,img.width*r,img.height*r);
+            ctx.restore();
+            if(opts.plan !== 'only') drawSensors(ctx, sensors, W0, H0);
+            ctx.setTransform(1,0,0,1,0,0);
+            window._aiHideLabels = prevHideLabels;
+            resolve(oc);
+          };
+          img.src = state.space.planImage;
+          return;
+        }
+      }
+      if(opts.plan !== 'only') drawSensors(ctx, sensors, W0, H0);
+      ctx.setTransform(1,0,0,1,0,0);
+      window._aiHideLabels = prevHideLabels;
+      resolve(oc);
+    };
+    drawContent();
+  });
+}
+
+function aiDownload(canvas, filename){
+  const a = document.createElement('a');
+  a.download = filename;
+  const fmt = aiOpts.bg === 'transparent' ? 'image/png' : 'image/png';
+  a.href = canvas.toDataURL(fmt, 0.95);
+  a.click();
+}
+
+async function aiExportCurrent(){
+  const prog = document.getElementById('ai-progress');
+  prog.textContent = '⟳ A exportar…';
+  const spaceName = (state.space.name||'sensory').replace(/\s+/g,'-').slice(0,30);
+  const oc = await aiRenderToCanvas('all', aiOpts);
+  const res = aiOpts.res;
+  const bg = aiOpts.bg;
+  aiDownload(oc, `${spaceName}-mapa-completo-${res}x-${bg}.png`);
+  prog.textContent = '✓ Mapa exportado';
+  setTimeout(()=>prog.textContent='',3000);
+}
+
+async function aiExportAllLayers(){
+  const prog = document.getElementById('ai-progress');
+  const keys = getAllSenseKeys();
+  const spaceName = (state.space.name||'sensory').replace(/\s+/g,'-').slice(0,30);
+  const res = aiOpts.res;
+  const bg = aiOpts.bg;
+  let count = 0;
+
+  // Export full map first
+  prog.textContent = `⟳ 0 / ${keys.length+2}…`;
+  const full = await aiRenderToCanvas('all', aiOpts);
+  aiDownload(full, `${spaceName}-00-completo-${res}x.png`);
+  count++;
+
+  // Export plan only
+  const planOnly = await aiRenderToCanvas('all', {...aiOpts, plan:'only'});
+  aiDownload(planOnly, `${spaceName}-01-planta-${res}x.png`);
+  count++;
+
+  // Export each sense layer
+  for(let i=0; i<keys.length; i++){
+    const k = keys[i];
+    const hasSensors = state.sensors.some(s=>s.sense===k);
+    if(!hasSensors) continue;
+    prog.textContent = `⟳ ${count} / ${keys.length+2} — ${getSenseLabel(k)}…`;
+    await new Promise(r=>setTimeout(r,80)); // let DOM breathe
+    const oc = await aiRenderToCanvas(k, aiOpts);
+    const label = getSenseLabel(k).toLowerCase().replace(/\s+/g,'-').slice(0,20);
+    const idx = String(i+2).padStart(2,'0');
+    aiDownload(oc, `${spaceName}-${idx}-${label}-${res}x.png`);
+    count++;
+  }
+
+  prog.textContent = `✓ ${count} camadas exportadas`;
+  setTimeout(()=>prog.textContent='',5000);
+  showToast(`✓ ${count} PNGs exportados`);
+}
+// ══ END AI EXPORT ══════════════════════════════════════════════════════════
+
+// ── Waypoints (Mobile Source Path) ────────────────────────────────────────────
+let waypointMode = null; // sensor id being edited, or null
+
+function toggleWaypointMode(id){
+  const ind=document.getElementById('waypoint-indicator');
+  if(waypointMode===id){
+    waypointMode=null;
+    if(ind) ind.style.display='none';
+    showToast('✓ Percurso guardado'); renderMap(); return;
+  }
+  waypointMode=id;
+  const s=state.sensors.find(x=>x.id===id); if(!s) return;
+  if(!s.waypoints) s.waypoints=[];
+  if(ind) ind.style.display='block';
+  renderMap();
+}
+function addWaypoint(id,x,y){
+  const s=state.sensors.find(x=>x.id===id); if(!s) return;
+  if(!s.waypoints) s.waypoints=[];
+  s.waypoints.push({x,y});
+  saveAll(); renderMap();
+}
+function clearWaypoints(id){
+  const s=state.sensors.find(x=>x.id===id); if(!s) return;
+  s.waypoints=[];
+  waypointMode=null;
+  const ind=document.getElementById('waypoint-indicator'); if(ind) ind.style.display='none';
+  saveAll(); renderMap();
+  showToast('↺ Percurso apagado');
+}
+function drawWaypoints(ctx,s,ox,oy,scaleX,scaleY){
+  if(!s.waypoints||s.waypoints.length<1) return;
+  const col=getSenseColor(s.sense);
+  const pts=[{x:s.x,y:s.y},...s.waypoints];
+  ctx.save();
+  // Dashed path line
+  ctx.strokeStyle=col; ctx.lineWidth=2; ctx.setLineDash([6,4]); ctx.globalAlpha=0.7;
+  ctx.beginPath();
+  pts.forEach((p,i)=>{
+    const px=ox+p.x*scaleX, py=oy+p.y*scaleY;
+    i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+  });
+  ctx.stroke(); ctx.setLineDash([]);
+  // Arrow direction markers
+  for(let i=1;i<pts.length;i++){
+    const ax=ox+pts[i-1].x*scaleX, ay=oy+pts[i-1].y*scaleY;
+    const bx=ox+pts[i].x*scaleX, by=oy+pts[i].y*scaleY;
+    const mx=(ax+bx)/2, my=(ay+by)/2;
+    const ang=Math.atan2(by-ay,bx-ax);
+    ctx.save(); ctx.translate(mx,my); ctx.rotate(ang);
+    ctx.fillStyle=col; ctx.globalAlpha=0.9; ctx.beginPath();
+    ctx.moveTo(5,0); ctx.lineTo(-4,3); ctx.lineTo(-4,-3); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+  // Waypoint dots
+  s.waypoints.forEach((p,i)=>{
+    const px=ox+p.x*scaleX, py=oy+p.y*scaleY;
+    ctx.fillStyle=col; ctx.globalAlpha=0.85; ctx.beginPath();
+    ctx.arc(px,py,4,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font='bold 9px monospace';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(i+1,px,py);
+  });
+  // Highlight mode
+  if(waypointMode===s.id){
+    ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.globalAlpha=0.6;
+    pts.forEach(p=>{
+      const px=ox+p.x*scaleX, py=oy+p.y*scaleY;
+      ctx.beginPath(); ctx.arc(px,py,6,0,Math.PI*2); ctx.stroke();
+    });
+  }
+  ctx.restore();
+}
+
+function toggleConflictPanel(){
+  const p=document.getElementById('conflict-panel'); if(!p) return;
+  if(p.style.display==='none'){p.style.display='block'; buildConflictUI();}
+  else p.style.display='none';
+}
+// ── Conflict Control ──────────────────────────────────────────────────────────
+function resetConflicts(){
+  ignoredConflicts.clear(); renderMap(); updateCountHeader();
+  showToast('↺ Conflitos repostos'); buildConflictUI();
+}
+function ignoreConflict(key){
+  ignoredConflicts.add(key); renderMap(); updateCountHeader(); buildConflictUI();
+}
+function toggleConflictType(sense){
+  if(conflictTypeFilter.has(sense)) conflictTypeFilter.delete(sense);
+  else conflictTypeFilter.add(sense);
+  renderMap(); updateCountHeader(); buildConflictUI();
+}
+function buildConflictUI(){
+  const panel=document.getElementById('conflict-panel'); if(!panel) return;
+  const keys=getAllSenseKeys();
+  // Type filter pills
+  const pills=keys.map(k=>{
+    const col=getSenseColor(k); const active=!conflictTypeFilter.has(k);
+    const ct=customTypes.find(t=>t.id===k);
+    const icon=ct&&ct.iconData?`<img src="${ct.iconData}" style="width:11px;height:11px;vertical-align:middle">`:(getSenseEmoji(k)||'●');
+    return `<button class="cf-pill${active?' cf-active':''}" onclick="toggleConflictType('${k}')"
+      style="${active?`background:${col}22;border-color:${col};color:${col}`:''}"
+      title="${getSenseLabel(k)}">${icon}</button>`;
+  }).join('');
+  // Active conflicts list
+  const cs=detectConflicts(state.sensors);
+  const ignored=Array.from(ignoredConflicts);
+  const rows=cs.map(c=>`<div class="cf-row">
+    <span style="color:${getSenseColor(c.sensorA.sense)}">${getSenseEmoji(c.sensorA.sense)} ${c.sensorA.label}</span>
+    <span class="cf-arrow">↔</span>
+    <span style="color:${getSenseColor(c.sensorB.sense)}">${getSenseEmoji(c.sensorB.sense)} ${c.sensorB.label}</span>
+    <button class="btn btn-ghost btn-xs" onclick="ignoreConflict('${c.key}')">✕</button>
+  </div>`).join('') || '<div class="cf-empty">Sem conflitos activos</div>';
+  const ignoredNote=ignored.length?`<div class="cf-ignored">${ignored.length} par(es) ignorado(s) — <button class="btn btn-ghost btn-xs" onclick="resetConflicts()">↺ repor</button></div>`:'';
+  panel.innerHTML=`
+    <div class="cf-header">
+      <span class="cf-title">⚠ CONFLITOS</span>
+      <button class="btn btn-ghost btn-xs" onclick="document.getElementById('conflict-panel').style.display='none'">✕</button>
+    </div>
+    <div class="cf-section-label">Filtrar tipos</div>
+    <div class="cf-pills">${pills}</div>
+    <div class="cf-section-label" style="margin-top:8px">Pares activos</div>
+    ${rows}
+    ${ignoredNote}`;
+}
+
+// ── Copy Sensor ───────────────────────────────────────────────────────────────
+function copySensor(id){
+  const src=state.sensors.find(x=>x.id===id); if(!src) return;
+  const clone={...src,
+    id:crypto.randomUUID(),
+    label:src.label+' (cópia)',
+    timestamp:new Date().toISOString(),
+    photos:[...(src.photos||[])],
+    ratings:{...(src.ratings||{})},
+  };
+  state.sensors.push(clone);
+  saveAll(); updateCountHeader(); renderMap(); renderList();
+  showToast('📋 Cópia criada — selecione para editar');
+  // Select on map and open detail
+  selectedSensorId=clone.id;
+  showSensorInfo(clone);
+  renderMap();
+}
+
 // ── Export / Import ───────────────────────────────────────────────────────────
 function openExportModal(){
   document.getElementById('export-modal').classList.add('open');
@@ -3132,6 +3465,11 @@ document.addEventListener('DOMContentLoaded',()=>{
     const cx=e.clientX-rect.left, cy=e.clientY-rect.top;
     const hit=findSensorAt(cx,cy);
     if(!hit){
+      if(waypointMode){
+        const {mx,my}=cssPxToMap(cx,cy);
+        addWaypoint(waypointMode,mx,my);
+        return;
+      }
       deselectSensor();
       const {mx,my}=cssPxToMap(cx,cy);
       showToast('📍 '+mx+', '+my);
@@ -3217,6 +3555,20 @@ function sioConeEdit(){
   const s=state.sensors.find(x=>x.id===selectedSensorId);
   if(s) openConeEditor(s);
 }
+
+function sioWaypoint(){
+  const id=selectedSensorId; if(!id) return;
+  const s=state.sensors.find(x=>x.id===id); if(!s) return;
+  toggleWaypointMode(id);
+  setTimeout(()=>{
+    const btn=document.getElementById('sio-waypoint-btn');
+    if(btn) btn.textContent=waypointMode===id?'✓ TERMINAR':'📍 PERCURSO';
+    const clearEl=document.getElementById('sio-clear-wp');
+    if(clearEl) clearEl.style.display=s.waypoints&&s.waypoints.length?'inline':'none';
+  },20);
+}
+
+function sioCopy(){const s=state.sensors.find(x=>x.id===selectedSensorId);if(s)copySensor(s.id);}
 function sioDelete(){
   if(!selectedSensorId)return;
   state.sensors=state.sensors.filter(s=>s.id!==selectedSensorId);
@@ -3392,6 +3744,165 @@ document.getElementById('map-canvas')?.addEventListener('dblclick',e=>{
 window.addEventListener('load',function(){setTimeout(resizeMapCanvas,60);setTimeout(resizeMapCanvas,350);});
 
 
+r('load',function(){setTimeout(resizeMapCanvas,60);setTimeout(resizeMapCanvas,350);});
+
+
+dit);saveAll();}
+  closeConeEditor();
+  showToast('✅ Cone guardado');
+}
+function ceConeDir(v){
+  ceEdit.angle=+v;
+  document.getElementById('ce-dir-val').textContent=v+'°';
+  drawCompass(); renderMap();
+}
+function ceConeSpread(v){
+  ceEdit.spreadAngle=+v;
+  document.getElementById('ce-spread-val').textContent=v+'°';
+  drawCompass(); renderMap();
+}
+function ceConeRadius(v){
+  ceEdit.propagationRadius=+v;
+  document.getElementById('ce-radius-val').textContent=v;
+  renderMap();
+}
+function compassDrag(touch,canvas){
+  const rect=canvas.getBoundingClientRect();
+  const cx=touch.clientX-rect.left-canvas.clientWidth/2;
+  const cy=touch.clientY-rect.top-canvas.clientHeight/2;
+  if(Math.hypot(cx,cy)<8) return; // dead zone
+  const ang=Math.round((Math.atan2(cy,cx)*180/Math.PI+90+360)%360);
+  ceEdit.angle=ang;
+  document.getElementById('ce-dir').value=ang;
+  document.getElementById('ce-dir-val').textContent=ang+'°';
+  drawCompass(); renderMap();
+}
+function drawCompass(){
+  const canvas=document.getElementById('compass-canvas');
+  const ctx=canvas.getContext('2d');
+  const S=canvas.width; // 180
+  const cx=S/2, cy=S/2, R=S/2-4;
+  ctx.clearRect(0,0,S,S);
+  // Background
+  ctx.fillStyle='#0d1825'; ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#3a5880'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
+  // Cardinal marks
+  const cards=[{a:0,l:'N'},{a:90,l:'E'},{a:180,l:'S'},{a:270,l:'W'}];
+  ctx.font='bold 11px Share Tech Mono,monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  cards.forEach(({a,l})=>{
+    const ar=(a-90)*Math.PI/180;
+    const tx=cx+Math.cos(ar)*(R-14), ty=cy+Math.sin(ar)*(R-14);
+    ctx.fillStyle='#5a80a8'; ctx.fillText(l,tx,ty);
+    // Tick
+    ctx.strokeStyle='#3a5880'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(cx+Math.cos(ar)*(R-4),cy+Math.sin(ar)*(R-4));
+    ctx.lineTo(cx+Math.cos(ar)*(R-8),cy+Math.sin(ar)*(R-8)); ctx.stroke();
+  });
+  // Ring guide
+  ctx.strokeStyle='#2a4060'; ctx.lineWidth=.8;
+  ctx.beginPath(); ctx.arc(cx,cy,R*.65,0,Math.PI*2); ctx.stroke();
+  // Cone
+  const ang=(ceEdit.angle-90)*Math.PI/180;
+  const sp=(ceEdit.spreadAngle/2)*Math.PI/180;
+  const coneR=R*.6;
+  const sensor=state.sensors.find(x=>x.id===coneEditId);
+  const col=(sensor?SENSE_COLORS[sensor.sense]:null)||'#5DD4F0';
+  const g=ctx.createRadialGradient(cx,cy,2,cx,cy,coneR);
+  g.addColorStop(0,col+'cc'); g.addColorStop(1,col+'22');
+  ctx.fillStyle=g; ctx.globalAlpha=.8;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,coneR,ang-sp,ang+sp); ctx.closePath(); ctx.fill();
+  ctx.globalAlpha=1;
+  // Outline
+  ctx.strokeStyle=col; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,coneR,ang-sp,ang+sp); ctx.closePath(); ctx.stroke();
+  // Direction arrow
+  ctx.strokeStyle='#fff'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(ang)*coneR*.9, cy+Math.sin(ang)*coneR*.9); ctx.stroke();
+  // Arrow head
+  ctx.fillStyle='#fff';
+  const ax=cx+Math.cos(ang)*coneR*.9, ay=cy+Math.sin(ang)*coneR*.9;
+  ctx.beginPath(); ctx.moveTo(ax,ay);
+  ctx.lineTo(ax-8*Math.cos(ang-.4),ay-8*Math.sin(ang-.4));
+  ctx.lineTo(ax-8*Math.cos(ang+.4),ay-8*Math.sin(ang+.4));
+  ctx.closePath(); ctx.fill();
+  // Centre dot
+  ctx.fillStyle=col; ctx.beginPath(); ctx.arc(cx,cy,5,0,Math.PI*2); ctx.fill();
+  // Angle label
+  ctx.fillStyle=col; ctx.font='bold 10px Share Tech Mono,monospace';
+  ctx.textAlign='center'; ctx.textBaseline='top';
+  ctx.fillText(ceEdit.spreadAngle+'°',cx,cy+coneR+4);
+}
+
+// ══ SERVICE WORKER ═════════════════════════════════════════════════════════════
+if('serviceWorker'in navigator){
+  const sw=`self.addEventListener('install',e=>{self.skipWaiting()});self.addEventListener('activate',e=>{self.clients.claim()});self.addEventListener('fetch',e=>{if(e.request.url.includes('api.anthropic.com'))return;e.respondWith(caches.open('sa-v1').then(c=>c.match(e.request).then(r=>r||fetch(e.request).then(res=>{if(res.ok)c.put(e.request,res.clone());return res}).catch(()=>r))));});`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
+}
+
+// ── DESKTOP EXTRAS ───────────────────────────────────────────────────────────
+let _resizePending=false;
+function resizeMapCanvas(){
+  if(_resizePending)return;
+  _resizePending=true;
+  requestAnimationFrame(()=>{
+    _resizePending=false;
+    const wrap=document.getElementById('map-canvas-wrap');
+    const canvas=document.getElementById('map-canvas');
+    if(!wrap||!canvas)return;
+    const W=Math.max(200,wrap.clientWidth);
+    const H=Math.max(200,wrap.clientHeight);
+    if(canvas.width!==W||canvas.height!==H){canvas.width=W;canvas.height=H;}
+    renderMap();
+  });
+}
+document.addEventListener('keydown',e=>{
+  const tag=document.activeElement.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT')return;
+  const s={'1':'space','2':'register','3':'list','4':'analysis'};
+  if(s[e.key])goPage(s[e.key],null);
+  if(e.key==='Escape'){closeConeEditor();closeModal();closeCustomTypeEditor();closeExportModal();}
+  if(e.key==='e'||e.key==='E') openExportModal();
+});
+let _roTimer;
+if(window.ResizeObserver){
+  const ro=new ResizeObserver(()=>{clearTimeout(_roTimer);_roTimer=setTimeout(resizeMapCanvas,80);});
+  const wrap=document.getElementById('map-canvas-wrap');
+  if(wrap)ro.observe(wrap);
+}
+window.addEventListener('resize',()=>{clearTimeout(_roTimer);_roTimer=setTimeout(resizeMapCanvas,150);});
+document.getElementById('map-canvas')?.addEventListener('dblclick',e=>{
+  const canvas=document.getElementById('map-canvas');
+  const rect=canvas.getBoundingClientRect();
+  const cx=e.clientX-rect.left, cy=e.clientY-rect.top;
+  const hit=findSensorAt(cx,cy);
+  if(hit){
+    // Double click on sensor → open detail
+    openSensorDetail(hit.id);
+  } else {
+    // Double click on empty space → set position + go to register
+    const {mx,my}=cssPxToMap(cx,cy);
+    const fe=document.getElementById('f-xy'); if(fe) fe.value=mx+','+my;
+    showToast('📍 '+mx+', '+my+' — REGISTAR');
+    goPage('register',null);
+  }
+});
+// Desktop: patch load event to also trigger resizeMapCanvas
+window.addEventListener('load',function(){setTimeout(resizeMapCanvas,60);setTimeout(resizeMapCanvas,350);});
+
+
+r('load',function(){setTimeout(resizeMapCanvas,60);setTimeout(resizeMapCanvas,350);});
+
+
+
+  }
+});
+// Desktop: patch load event to also trigger resizeMapCanvas
+window.addEventListener('load',function(){setTimeout(resizeMapCanvas,60);setTimeout(resizeMapCanvas,350);});
+
+
+r('load',function(){setTimeout(resizeMapCanvas,60);setTimeout(resizeMapCanvas,350);});
+
+
 </script>
 
 <!-- ── Custom Type Editor Modal ───────────────────────────────────────── -->
@@ -3562,12 +4073,58 @@ window.addEventListener('load',function(){setTimeout(resizeMapCanvas,60);setTime
           <span>JSON compacto com estímulos e metadados do espaço</span>
         </div>
       </div>
-      <div class="export-option" onclick="openExportModal()">
+      <div class="export-option" onclick="exportMapImage()">
         <div class="export-option-icon">🗺</div>
         <div class="export-option-text">
           <strong>EXPORTAR MAPA COMO IMAGEM</strong>
           <span>PNG do mapa atual com todos os estímulos</span>
         </div>
+      </div>
+
+      <!-- AI EXPORT SECTION -->
+      <div class="ai-export-section">
+        <div class="ai-export-title">✦ EXPORTAR PARA IA / REDESENHO</div>
+
+        <div class="ai-opt-row">
+          <span class="ai-opt-label">FUNDO</span>
+          <div class="ai-seg" id="ai-bg-seg">
+            <button class="active" onclick="aiSetOpt('bg','dark',this)">Escuro</button>
+            <button onclick="aiSetOpt('bg','white',this)">Branco</button>
+            <button onclick="aiSetOpt('bg','transparent',this)">Transpar.</button>
+          </div>
+        </div>
+
+        <div class="ai-opt-row">
+          <span class="ai-opt-label">RESOLUÇÃO</span>
+          <div class="ai-seg" id="ai-res-seg">
+            <button onclick="aiSetOpt('res',1,this)">1×</button>
+            <button class="active" onclick="aiSetOpt('res',2,this)">2×</button>
+            <button onclick="aiSetOpt('res',3,this)">3×</button>
+          </div>
+        </div>
+
+        <div class="ai-opt-row">
+          <span class="ai-opt-label">LABELS</span>
+          <div class="ai-seg" id="ai-lbl-seg">
+            <button class="active" onclick="aiSetOpt('labels','show',this)">Visíveis</button>
+            <button onclick="aiSetOpt('labels','hide',this)">Ocultos</button>
+          </div>
+        </div>
+
+        <div class="ai-opt-row">
+          <span class="ai-opt-label">PLANTA</span>
+          <div class="ai-seg" id="ai-plan-seg">
+            <button class="active" onclick="aiSetOpt('plan','show',this)">Com planta</button>
+            <button onclick="aiSetOpt('plan','only',this)">Só planta</button>
+            <button onclick="aiSetOpt('plan','hide',this)">Sem planta</button>
+          </div>
+        </div>
+
+        <div class="ai-export-actions">
+          <button class="btn-ai-export" onclick="aiExportCurrent()">🗺 Exportar vista actual</button>
+          <button class="btn-ai-batch" onclick="aiExportAllLayers()">⧉ Exportar por camada</button>
+        </div>
+        <div class="ai-progress" id="ai-progress"></div>
       </div>
       <div class="export-option" onclick="document.getElementById('import-file').click()">
         <div class="export-option-icon">📥</div>
