@@ -2,445 +2,946 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Sensory Agent">
-<meta name="theme-color" content="#070c16">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>◈ Sensory Space Agent</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Share+Tech+Mono&family=Barlow:wght@300;400;500&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  /* Backgrounds — ligeiramente mais claros para maior separação */
-  --bg:#1a2f48;--bg2:#203a57;--bg3:#274668;
-  /* Bordas mais visíveis */
-  --border:#4a7aaa;
-  /* Texto principal: quase branco para máximo contraste */
-  --text:#ffffff;
-  /* Muted: muito mais claro que antes (#5e7a99 → #8faecf) */
-  --muted:#b8d8f8;
-  /* Cores de acento — ligeiramente mais brilhantes */
-  --sound:#5DD4F0;--safe:#7DDA58;--danger:#FF4444;--warn:#FF8C42;
-  --vision:#FFCA4F;--sound-c:#5DD4F0;--smell:#88E863;--taste:#FF8C42;--temp:#FF6666;--haptic:#BB99FF;
+  --bg:#0e1a2b; --bg2:#142235; --bg3:#1c2e44; --bg4:#243650;
+  --border:#2e4a6e; --border2:#3a5a80;
+  --text:#f0f8ff; --muted:#8faecf; --muted2:#b8d0e8;
+  --sound:#5DD4F0; --safe:#7DDA58; --danger:#FF4444; --warn:#FF8C42;
+  --vision:#FFCA4F; --smell:#88E863; --taste:#FF8C42;
+  --temp:#FF6666; --haptic:#BB99FF;
   --mono:'Share Tech Mono','Courier New',monospace;
-  --nav-h:68px;--hdr-h:56px;
+  --cond:'Barlow Condensed',sans-serif;
+  --body:'Barlow',sans-serif;
+  --sidebar-w:220px;
+  --panel-l:380px;
+  --header-h:52px;
 }
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--mono);overflow:hidden}
 
-/* ── LAYOUT ── */
-#app{display:flex;flex-direction:column;height:100vh;height:100dvh}
-#header{height:var(--hdr-h);background:#162a40;border-bottom:2px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;z-index:10}
-#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--nav-h) + 120px + env(safe-area-inset-bottom))}
-#nav{height:var(--nav-h);background:#162a40;border-top:2px solid var(--border);display:flex;align-items:stretch;position:fixed;bottom:0;left:0;right:0;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
-/* Nav labels mais grandes e mais brilhantes */
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:none;background:transparent;color:#90b8d8;cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:.5px;padding:8px 2px}
-.nav-btn.active{color:var(--sound)}
-.nav-btn .icon{font-size:22px;line-height:1}
-.page{display:none;padding:14px}
-.page.active{display:block}
+html,body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--mono);overscroll-behavior:none;-webkit-overflow-scrolling:touch}
 
-/* ── CARDS / BASE ── */
-/* Cards com fundo mais contrastante e borda bem visível */
-.card{background:var(--bg3);border:2px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px}
-/* Labels: maiores, mais brilhantes, mais legíveis */
-.lbl{color:#a0cef5;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px;font-weight:bold}
-/* Inputs: fundo mais claro, texto branco, borda visível */
+/* ══ LAYOUT ══════════════════════════════════════════════════ */
+#app{display:grid;grid-template-rows:var(--header-h) 1fr;height:100dvh}
+
+#header{
+  background:#0a1522;border-bottom:2px solid var(--border);
+  display:flex;align-items:center;gap:0;padding:0;
+  grid-column:1;z-index:50;
+}
+.hdr-brand{
+  width:var(--sidebar-w);padding:0 18px;border-right:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;flex-shrink:0;height:100%;
+}
+.hdr-logo{font-size:18px}
+.hdr-name{font-family:var(--cond);font-size:20px;font-weight:900;color:#f0f8ff;letter-spacing:-.5px;line-height:1}
+.hdr-ver{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1px}
+.hdr-space-info{
+  flex:1;padding:0 20px;display:flex;align-items:center;gap:16px;
+  border-right:1px solid var(--border);
+}
+.hdr-space-name{font-family:var(--cond);font-size:22px;font-weight:700;color:#f0f8ff;letter-spacing:-.3px}
+.hdr-space-sub{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px}
+.hdr-sep{width:1px;height:28px;background:var(--border)}
+.hdr-stat{text-align:center;padding:0 12px}
+.hdr-stat-val{font-family:var(--cond);font-size:26px;font-weight:900;color:#f0f8ff;line-height:1}
+.hdr-stat-lbl{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1px}
+.hdr-right{display:flex;align-items:center;gap:8px;padding:0 16px;flex-shrink:0}
+#gps-status{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+.gps-dot{width:8px;height:8px;border-radius:50%;background:#2e4a6e;flex-shrink:0}
+#lang-btn{background:var(--bg3);border:1px solid var(--border);border-radius:6px;
+  color:var(--text);font-family:var(--mono);font-size:11px;padding:5px 10px;cursor:pointer;letter-spacing:1px}
+#lang-btn:hover{border-color:var(--sound)}
+#offline-bar{display:none}
+
+/* ══ BODY ROW ══════════════════════════════════════════════════ */
+#body-row{display:grid;grid-template-columns:var(--sidebar-w) var(--panel-l) 1fr;height:calc(100dvh - var(--header-h));overflow:hidden}
+
+/* ══ LEFT SIDEBAR — NAVIGATION ═══════════════════════════════ */
+#sidebar{
+  background:#0a1522;border-right:2px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.sb-nav{flex:1;padding:8px 0;overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch}
+.sb-nav::-webkit-scrollbar{width:3px}
+.sb-nav::-webkit-scrollbar-thumb{background:var(--border)}
+.sb-group{font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--border);
+  text-transform:uppercase;padding:10px 16px 4px;margin-top:4px}
+.sb-item{
+  display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;
+  border-left:3px solid transparent;transition:all .15s;color:var(--muted);
+  font-family:var(--mono);font-size:10px;letter-spacing:.5px;
+  text-decoration:none;
+}
+.sb-item:hover{background:var(--bg3);color:var(--text)}
+.sb-item.active{
+  border-left-color:var(--sound);background:linear-gradient(90deg,var(--bg3),transparent);
+  color:var(--text);
+}
+.sb-item .sb-icon{font-size:16px;width:22px;text-align:center;flex-shrink:0}
+.sb-item .sb-lbl{line-height:1.3}
+.sb-item .sb-sub{font-size:8px;color:var(--muted);letter-spacing:.3px;margin-top:1px}
+.sb-footer{padding:12px 16px;border-top:1px solid var(--border);flex-shrink:0}
+.sb-counts{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.sb-count{background:var(--bg3);border:1px solid var(--border);border-radius:6px;
+  padding:8px;text-align:center}
+.sb-count-val{font-family:var(--cond);font-size:22px;font-weight:900;color:#f0f8ff;line-height:1}
+.sb-count-lbl{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1px;margin-top:2px}
+
+/* ══ CENTRE PANEL ══════════════════════════════════════════════ */
+#panel{
+  background:var(--bg2);border-right:2px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+#panel-tabs{
+  display:flex;background:#0a1522;border-bottom:2px solid var(--border);
+  flex-shrink:0;
+}
+.ptab{
+  flex:1;padding:12px 8px;border:none;background:transparent;color:var(--muted);
+  font-family:var(--mono);font-size:9px;letter-spacing:.5px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;
+}
+.ptab:hover{color:var(--text);background:var(--bg3)}
+.ptab.active{color:var(--sound);border-bottom-color:var(--sound);background:var(--bg2)}
+.ptab .pt-icon{font-size:16px}
+#panel-content{flex:1;overflow-y:auto;padding:18px 16px;min-height:0;-webkit-overflow-scrolling:touch}
+#panel-content::-webkit-scrollbar{width:4px}
+#panel-content::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+.ppage{display:none}
+.ppage.active{display:block}
+
+/* ══ RIGHT PANEL — MAP ════════════════════════════════════════ */
+#map-panel{
+  display:flex;flex-direction:column;background:var(--bg);overflow:hidden;
+  position:relative;
+}
+#map-header{
+  display:flex;align-items:center;gap:8px;padding:10px 14px;
+  background:#0a1522;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+#map-header .mh-title{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--sound);flex:1}
+#map-filter-bar{display:flex;gap:4px}
+.tab{border:1.5px solid var(--border);border-radius:16px;padding:4px 10px;cursor:pointer;
+  font-family:var(--mono);font-size:9px;letter-spacing:1px;white-space:nowrap;
+  background:var(--bg3);color:var(--muted);transition:all .15s}
+.tab:hover{border-color:var(--border2);color:var(--text)}
+.tab.active{color:#050e1c;border-color:transparent}
+#map-zoom-bar{
+  display:flex;align-items:center;gap:6px;padding:8px 14px;
+  border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg2);
+}
+.zoom-btn{background:var(--bg3);border:1px solid var(--border);border-radius:6px;
+  color:var(--text);font-family:var(--mono);font-size:13px;padding:5px 11px;
+  cursor:pointer;transition:all .15s}
+.zoom-btn:hover{border-color:var(--sound);color:var(--sound)}
+#zoom-label{font-family:var(--mono);font-size:10px;color:var(--muted);min-width:40px;text-align:center}
+#map-hint{font-family:var(--mono);font-size:9px;color:var(--border);margin-left:auto;letter-spacing:.5px}
+#map-canvas-wrap{flex:1;position:relative;overflow:hidden;cursor:crosshair;min-height:0}
+#map-canvas{position:absolute;inset:0;touch-action:none;display:block}
+#conflict-summary{padding:6px 14px;flex-shrink:0}
+#map-footer{
+  display:flex;align-items:center;gap:10px;padding:8px 14px;
+  background:var(--bg2);border-top:1px solid var(--border);flex-shrink:0;
+}
+#map-footer label{display:flex;align-items:center;gap:7px;font-size:11px;cursor:pointer;flex:1}
+#map-footer input[type=checkbox]{width:auto;accent-color:var(--danger)}
+#map-legend{display:flex;flex-wrap:wrap;gap:6px;flex:1}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+.legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+/* ══ CONE EDITOR — desktop side panel ══════════════════════ */
+#cone-editor{
+  position:absolute;right:0;top:0;bottom:0;width:280px;
+  background:#1c3050;border-left:2px solid var(--border);
+  transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;gap:0;z-index:30;
+  overflow-y:auto;
+}
+#cone-editor.open{transform:translateX(0)}
+#cone-editor-inner{padding:16px;display:flex;flex-direction:column;gap:14px}
+#cone-editor-title{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--sound);text-transform:uppercase;text-align:center}
+#cone-editor-label{font-family:var(--cond);font-size:18px;font-weight:700;color:#fff;text-align:center}
+.ce-row{display:flex;align-items:center;gap:10px}
+.ce-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;min-width:68px}
+.ce-val{font-family:var(--mono);font-size:13px;color:var(--sound);min-width:38px;text-align:right}
+#compass-wrap{display:flex;justify-content:center}
+#compass-canvas{cursor:crosshair;border-radius:50%;background:#0d1825;border:1px solid var(--border)}
+
+/* ══ SHARED FORM ELEMENTS ═══════════════════════════════════ */
+.card{background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px}
+.lbl{color:var(--sound);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;font-weight:bold}
 input,select,textarea{
-  background:#152333;border:1.5px solid #5080b0;border-radius:7px;
-  color:#ffffff;padding:11px 13px;font-size:16px;font-family:var(--mono);
-  outline:none;width:100%;-webkit-appearance:none
+  background:var(--bg);border:1.5px solid var(--border2);border-radius:7px;
+  color:var(--text);padding:9px 12px;font-size:16px;font-family:var(--mono);
+  outline:none;width:100%;-webkit-appearance:none;appearance:none;
 }
-textarea{resize:vertical;min-height:72px}
-input:focus,select:focus,textarea:focus{border-color:var(--sound);background:#0d1a2e}
-/* Placeholder mais visível */
-input::placeholder,textarea::placeholder{color:#6a96bb}
+textarea{resize:vertical;min-height:64px}
+input:focus,select:focus,textarea:focus{border-color:var(--sound);background:#0a1522}
+input::placeholder,textarea::placeholder{color:var(--muted)}
 select option{background:#111a2e;color:#eaf2ff}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field-row{margin-bottom:12px}
+.input-mic-row{display:flex;gap:6px}
+.input-mic-row input,.input-mic-row textarea{flex:1}
 
-/* ── BUTTONS ── */
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:9px;padding:14px 18px;font-family:var(--mono);font-size:14px;font-weight:bold;letter-spacing:1px;cursor:pointer;transition:opacity .15s,transform .1s;width:100%;-webkit-user-select:none}
-.btn:active{transform:scale(.97);opacity:.85}
-.btn-sm{padding:9px 14px;font-size:12px;width:auto;border-radius:7px}
+/* BUTTONS */
+.btn{display:flex;align-items:center;justify-content:center;gap:7px;border:none;
+  border-radius:8px;padding:10px 14px;font-family:var(--mono);font-size:11px;
+  font-weight:bold;letter-spacing:1px;cursor:pointer;transition:all .15s;width:100%}
+.btn:hover{filter:brightness(1.1)}
+.btn:active{transform:scale(.97)}
+.btn-sm{padding:7px 12px;font-size:10px;width:auto;border-radius:6px}
 .btn-primary{background:var(--sound);color:#050e1c}
 .btn-danger{background:#FF4444;color:#fff}
 .btn-green{background:var(--safe);color:#050e1c}
-/* Save button always above FAB: FAB top = nav(68)+16+64 = 148px from bottom */
-#save-sensor-btn{
-  position:sticky;
-  bottom:calc(var(--nav-h) + 96px + env(safe-area-inset-bottom));
-  z-index:50;
-  margin-top:14px;
-  box-shadow:0 -8px 24px rgba(10,18,30,.7);
-}
-/* Ghost com borda mais espessa e texto bem legível */
-.btn-ghost{background:#203a57;color:#ffffff;border:2px solid #5080b0}
-.btn-cam{background:#162030;color:var(--sound);border:2px dashed var(--sound);padding:20px;flex-direction:column;gap:6px;font-size:12px;border-radius:12px}
+.btn-ghost{background:var(--bg2);color:var(--text);border:1.5px solid var(--border2)}
+.btn-ghost:hover{border-color:var(--sound)}
+.btn-cam{background:var(--bg);color:var(--sound);border:1.5px dashed var(--sound);
+  padding:14px;flex-direction:column;gap:5px;font-size:11px;border-radius:10px}
+.mic-btn{background:var(--bg3);border:1px solid var(--border);border-radius:6px;
+  color:var(--muted);font-size:14px;padding:8px 10px;cursor:pointer;flex-shrink:0}
+.mic-btn:hover{border-color:var(--sound);color:var(--sound)}
+.mic-btn.active{border-color:#E53E3E;color:#E53E3E;background:#E53E3E18}
 
-/* ── SENSE PILLS — inactive com texto mais legível ── */
+/* SENSE GRID */
 .sense-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.sense-pill{border:1.5px solid #5080b0;border-radius:9px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#c0dff8;background:#203a57}
+.sense-pill{border:1.5px solid var(--border2);border-radius:8px;padding:9px 5px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;
+  font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--muted);background:var(--bg2);transition:all .15s}
+.sense-pill:hover{border-color:var(--sound);color:var(--text)}
 .sense-pill.active{color:#050e1c}
-.sense-pill .pill-icon{font-size:24px}
+.sense-pill .pill-icon{font-size:20px}
 
-/* ── SLIDER ── */
+/* SLIDER */
 .slider-row{display:flex;gap:8px;align-items:center}
-input[type=range]{flex:1;height:7px;-webkit-appearance:none;background:#3a5e88;border-radius:4px;outline:none;padding:0;border:none}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;cursor:pointer}
-.slider-val{min-width:76px;font-size:11px;text-align:right;color:var(--text)}
+input[type=range]{flex:1;height:6px;-webkit-appearance:none;background:#2e4a6e;border-radius:3px;outline:none;padding:0;border:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;cursor:pointer}
+.slider-val{min-width:72px;font-size:11px;text-align:right;color:var(--text)}
 
-/* ── MAP ── */
-#map-canvas{width:100%;border-radius:8px;border:2px solid var(--border);display:block;touch-action:none;background:#1a2f48}
-
-/* ── CONFLICT ── */
-.conflict-badge{background:#FF444430;border:1.5px solid #FF6666;border-radius:7px;padding:10px 14px;margin-bottom:8px;font-size:13px;color:#FFA0A0;display:flex;align-items:center;gap:8px}
-
-/* ── PHOTOS ── */
-.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
-.photo-thumb{position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;border:1.5px solid var(--border)}
+/* PHOTOS */
+.photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.photo-thumb{position:relative;aspect-ratio:1;border-radius:5px;overflow:hidden;border:1px solid var(--border)}
 .photo-thumb img{width:100%;height:100%;object-fit:cover}
-.photo-del{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.8);color:#fff;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center}
-.photo-label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.75);font-size:9px;padding:3px 4px;color:#ccd;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.photo-del{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.8);color:#fff;border:none;
+  border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center}
+.photo-label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.75);font-size:8px;padding:2px 3px;color:#ccd;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 
-/* ── SENSOR LIST ── */
-.sensor-item{background:var(--bg3);border-radius:9px;padding:13px;margin-bottom:9px;border-left:3px solid var(--border)}
+/* SENSOR LIST */
+.sensor-item{background:var(--bg3);border-radius:8px;padding:11px 12px;margin-bottom:8px;border-left:3px solid var(--border);cursor:pointer;transition:all .15s}
+.sensor-item:hover{border-left-color:var(--sound);background:var(--bg4)}
 .sensor-item-header{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
-.sensor-name{font-size:16px;font-weight:bold;color:#ffffff}
-/* Meta text mais legível */
-.sensor-meta{font-size:12px;color:#b8d8f8;margin-top:4px}
+.sensor-name{font-size:14px;font-weight:bold;color:var(--text)}
+.sensor-meta{font-size:11px;color:var(--muted2);margin-top:3px}
+.tab-bar{display:flex;gap:4px;padding-bottom:2px;margin-bottom:10px;flex-wrap:wrap}
 
-/* ── GPS ── */
-@keyframes gpsPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.3)}}
-.gps-dot{width:9px;height:9px;border-radius:50%;background:var(--safe);animation:gpsPulse 1.5s infinite;display:inline-block}
+/* ANALYSIS */
+#analysis-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
+.stat-card-val{font-family:var(--cond);font-size:32px;font-weight:900;color:#f0f8ff;line-height:1}
+.stat-card-lbl{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1px;margin-top:3px}
+#apikey-card{background:var(--bg3);border:1.5px solid var(--sound)44;border-radius:10px;padding:14px;margin-bottom:12px}
+.apikey-row{display:flex;gap:6px;margin-top:6px}
+.apikey-row input{flex:1}
+#apikey-status{font-size:11px;margin-top:6px;color:var(--muted)}
+.mode-tab{flex:1;background:var(--bg3);border:1.5px solid var(--border);border-radius:8px;
+  padding:12px 8px;font-family:var(--mono);font-size:10px;cursor:pointer;color:var(--muted);
+  text-align:center;line-height:1.5;transition:all .15s}
+.mode-tab:hover{border-color:var(--sound)}
+.mode-tab.active{border-color:var(--sound);color:var(--text);background:var(--sound)15}
+#mode-desc{font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.7;padding:10px 12px;
+  background:var(--bg3);border-radius:8px;border:1px solid var(--border)}
+#ai-result{margin-top:12px;font-size:12px;line-height:1.8;color:var(--muted2)}
+#ai-result h3{color:var(--sound);font-family:var(--cond);font-size:18px;margin:14px 0 6px;border-bottom:1px solid var(--border);padding-bottom:4px}
+#ai-result h4{color:var(--text);font-size:13px;margin:10px 0 4px}
+#ai-result ul{padding-left:18px;margin:4px 0}
+#ai-result li{margin-bottom:4px}
+#ai-result p{margin-bottom:8px}
+.conflict-badge{background:#FF444320;border:1px solid #FF4444;border-radius:6px;padding:8px 12px;
+  margin-bottom:6px;font-size:11px;color:#FFA0A0;display:flex;align-items:center;gap:7px}
 
-/* ── TOAST ── */
-#toast{position:fixed;top:calc(var(--hdr-h)+8px);left:50%;transform:translateX(-50%);background:var(--sound);color:#050e1c;padding:11px 22px;border-radius:22px;font-size:13px;font-weight:bold;z-index:1000;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 16px rgba(93,212,240,.4)}
+/* VOICE MODE BAR */
+#voice-mode-bar{background:var(--bg3);border:1px solid var(--border);border-radius:8px;
+  padding:9px 12px;margin-bottom:10px;display:flex;align-items:center;gap:9px}
+#vmi{width:8px;height:8px;border-radius:50%;background:#4a6a8a;flex-shrink:0}
+#vmi.on{background:#E53E3E;animation:gpsPulse 1s infinite}
+#vmt{flex:1;font-size:11px;color:var(--muted2)}
+
+/* STAR */
+.star-row{display:flex;gap:5px;margin-top:5px}
+.star{font-size:22px;color:#2e4a6e;cursor:pointer;transition:color .15s}
+.star.on{color:#FFCA4F}
+
+hr{border:none;border-top:1px solid var(--border);margin:12px 0}
+
+/* SECTION HEADS */
+.section-head{color:var(--sound);font-size:13px;font-weight:bold;border-bottom:1px solid var(--border);padding-bottom:5px;margin:14px 0 9px}
+
+/* TOAST */
+#toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--sound);
+  color:#050e1c;padding:9px 20px;border-radius:20px;font-size:12px;font-weight:bold;
+  z-index:1000;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
 #toast.show{opacity:1}
 
-/* ── MISC ── */
-@keyframes spin{to{transform:rotate(360deg)}}
-.field-row{margin-bottom:13px}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-/* Tabs: texto mais legível */
-.tab-bar{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;margin-bottom:12px}
-.tab-bar::-webkit-scrollbar{display:none}
-.tab{border:1.5px solid #5080b0;border-radius:20px;padding:8px 14px;cursor:pointer;font-family:var(--mono);font-size:12px;letter-spacing:1px;white-space:nowrap;background:#203a57;color:#c0dff8}
-.tab.active{color:#050e1c;border-color:transparent}
-hr{border:none;border-top:1.5px solid var(--border);margin:14px 0}
-.star-row{display:flex;gap:6px;margin-top:6px}
-.star{font-size:26px;color:#2e4a6e;cursor:pointer;transition:color .15s}
-.star.on{color:#FFCA4F}
-/* Modal mais legível */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;display:flex;align-items:flex-end}
-.modal{background:#274668;border-radius:18px 18px 0 0;padding:22px 18px;width:100%;max-height:90vh;overflow-y:auto;border-top:2px solid var(--border)}
-.modal-title{font-size:17px;font-weight:bold;margin-bottom:16px;color:var(--sound)}
-#offline-bar{background:#4a2a00;border-bottom:2px solid #aa7a00;padding:9px 16px;font-size:12px;color:#ffc55a;letter-spacing:1px;text-align:center;display:none}
-#offline-bar.show{display:block}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;
+  display:flex;align-items:center;justify-content:center}
+.modal{background:var(--bg3);border-radius:14px;padding:24px 20px;width:100%;max-width:600px;
+  max-height:85vh;overflow-y:auto;border:1.5px solid var(--border)}
+.modal-title{font-size:15px;font-weight:bold;margin-bottom:14px;color:var(--sound);
+  font-family:var(--cond);font-size:22px}
 
-/* ── LANGUAGE SELECTOR ── */
-#lang-btn{background:#203a57;border:1.5px solid #5080b0;border-radius:7px;color:var(--text);font-family:var(--mono);font-size:12px;padding:6px 10px;cursor:pointer;letter-spacing:1px;flex-shrink:0}
-.lang-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:700;display:flex;align-items:flex-end;display:none}
-.lang-modal-overlay.show{display:flex}
-.lang-modal{background:#274668;border-radius:18px 18px 0 0;padding:22px 18px;width:100%;border-top:2px solid var(--border)}
-.lang-opt{display:flex;align-items:center;gap:14px;padding:16px 13px;border:1.5px solid #5080b0;border-radius:10px;margin-bottom:10px;cursor:pointer;transition:border-color .2s;background:#1a2f48}
-.lang-opt:active{opacity:.7}
-.lang-opt.selected{border-color:var(--sound)}
-.lang-flag{font-size:28px}
-.lang-name{flex:1}
-.lang-name-main{font-size:16px;font-weight:bold;color:var(--text)}
-.lang-name-sub{font-size:11px;color:#8faecf;letter-spacing:1px}
-.lang-check{color:var(--sound);font-size:20px}
-
-/* ══ VOICE ══════════════════════════════════════════════════════════════════ */
-#voice-fab{position:fixed;bottom:calc(var(--nav-h)+16px);right:16px;z-index:200;width:56px;height:56px;border-radius:50%;border:2px solid #5080b0;cursor:pointer;background:#203a57;color:#fff;font-size:26px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:all .2s;-webkit-user-select:none}
-#voice-fab.listening{background:#E53E3E;animation:voicePulse 1.2s ease-in-out infinite;box-shadow:0 4px 32px rgba(229,62,62,.8)}
-@keyframes voicePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
-.mic-btn{background:#1a2e44;border:1.5px solid #3a5a80;border-radius:7px;color:#8faecf;font-size:17px;padding:10px 11px;cursor:pointer;flex-shrink:0;display:flex;align-items:center}
-.mic-btn.active{border-color:#E53E3E;color:#E53E3E;background:#E53E3E18}
-.input-mic-row{display:flex;gap:6px}
-.input-mic-row input,.input-mic-row textarea{flex:1}
-#voice-overlay{position:fixed;inset:0;z-index:600;background:rgba(7,12,22,.97);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:calc(env(safe-area-inset-bottom)+20px);opacity:0;pointer-events:none;transition:opacity .25s}
+/* VOICE OVERLAY */
+#voice-overlay{position:fixed;inset:0;z-index:600;background:rgba(7,12,22,.97);
+  display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
 #voice-overlay.show{opacity:1;pointer-events:all}
-#voice-panel{background:#274668;border:1.5px solid var(--border);border-radius:20px 20px 16px 16px;width:100%;max-width:500px;padding:24px 20px 20px;display:flex;flex-direction:column;gap:14px}
-#voice-wave{display:flex;align-items:center;justify-content:center;gap:4px;height:40px}
+#voice-panel{background:var(--bg3);border:1.5px solid var(--border);border-radius:16px;
+  width:100%;max-width:480px;padding:24px 22px;display:flex;flex-direction:column;gap:14px}
+#voice-wave{display:flex;align-items:center;justify-content:center;gap:4px;height:36px}
 .wave-bar{width:4px;border-radius:2px;background:#E53E3E;animation:waveAnim .8s ease-in-out infinite alternate}
-.wave-bar:nth-child(1){height:10px;animation-delay:0s}.wave-bar:nth-child(2){height:24px;animation-delay:.1s}.wave-bar:nth-child(3){height:36px;animation-delay:.15s}.wave-bar:nth-child(4){height:28px;animation-delay:.2s}.wave-bar:nth-child(5){height:40px;animation-delay:.05s}.wave-bar:nth-child(6){height:28px;animation-delay:.25s}.wave-bar:nth-child(7){height:36px;animation-delay:.1s}.wave-bar:nth-child(8){height:22px;animation-delay:.3s}.wave-bar:nth-child(9){height:10px;animation-delay:.15s}
+.wave-bar:nth-child(1){height:10px;animation-delay:0s}.wave-bar:nth-child(2){height:22px;animation-delay:.1s}
+.wave-bar:nth-child(3){height:34px;animation-delay:.15s}.wave-bar:nth-child(4){height:26px;animation-delay:.2s}
+.wave-bar:nth-child(5){height:36px;animation-delay:.05s}.wave-bar:nth-child(6){height:26px;animation-delay:.25s}
+.wave-bar:nth-child(7){height:34px;animation-delay:.1s}.wave-bar:nth-child(8){height:20px;animation-delay:.3s}
+.wave-bar:nth-child(9){height:10px;animation-delay:.15s}
 @keyframes waveAnim{to{transform:scaleY(.3);opacity:.4}}
-#voice-wave.paused .wave-bar{animation:none;height:6px;background:#3a5a80}
-/* Transcript box bem legível */
-#voice-transcript{min-height:56px;background:#162a40;border:1.5px solid #4a75a0;border-radius:10px;padding:13px 15px;font-size:16px;line-height:1.6;color:#f5faff}
-#voice-transcript.interim{color:#8faecf;font-style:italic}
-#voice-field-label{font-size:11px;letter-spacing:2px;color:var(--sound);text-transform:uppercase;text-align:center;font-weight:bold}
-#voice-status{font-size:13px;color:#c8e0f8;text-align:center}
+#voice-wave.paused .wave-bar{animation:none;height:5px;background:#3a5a80}
+#voice-transcript{min-height:52px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:11px 14px;font-size:14px;line-height:1.6;color:#f5faff}
+#voice-transcript.interim{color:var(--muted);font-style:italic}
+#voice-field-label{font-size:10px;letter-spacing:2px;color:var(--sound);text-transform:uppercase;text-align:center;font-weight:bold}
+#voice-status{font-size:12px;color:var(--muted2);text-align:center}
 #voice-commands{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
-/* Command chips: bordas e texto mais visíveis */
-.vcmd{border:1.5px solid #5080b0;border-radius:20px;padding:5px 11px;font-size:11px;color:#c8e0f8;letter-spacing:.5px;background:#203a57}
-#voice-mode-bar{background:#203a57;border:1.5px solid var(--border);border-radius:9px;padding:11px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px}
-#vmi{width:9px;height:9px;border-radius:50%;background:#4a6a8a;flex-shrink:0}
-#vmi.on{background:#E53E3E;animation:gpsPulse 1s infinite}
-/* Voice mode text mais legível */
-#vmt{flex:1;font-size:12px;color:#b8d8f8}
-#guided-steps{display:flex;gap:4px;flex-wrap:wrap}
-.step-dot{width:9px;height:9px;border-radius:50%;background:#2e4a6e;transition:background .2s}
-.step-dot.done{background:var(--safe)}
-.step-dot.current{background:#E53E3E;animation:gpsPulse 1s infinite}
-.section-head{color:var(--sound);font-size:15px;font-weight:bold;border-bottom:1.5px solid var(--border);padding-bottom:6px;margin:16px 0 10px}
+.vcmd{border:1px solid var(--border2);border-radius:16px;padding:4px 10px;font-size:10px;color:var(--muted2);background:var(--bg3)}
+#voice-mode-bar-overlay{background:var(--bg);border:1px solid var(--border);border-radius:8px;
+  padding:8px 12px;display:flex;align-items:center;gap:8px}
+#guided-steps{display:flex;gap:4px;flex-wrap:wrap;justify-content:center}
+.step-dot{width:8px;height:8px;border-radius:50%;background:#2e4a6e;transition:background .2s}
+.step-dot.done{background:var(--safe)}.step-dot.current{background:#E53E3E;animation:gpsPulse 1s infinite}
 
-/* ── MAP ZOOM CONTROLS ── */
-#map-zoom-bar{display:flex;align-items:center;gap:6px;margin-bottom:8px}
-.zoom-btn{background:var(--bg3);border:1.5px solid var(--border);border-radius:8px;color:var(--text);
-  font-family:var(--mono);font-size:16px;padding:7px 14px;cursor:pointer;flex-shrink:0;line-height:1}
-#zoom-label{font-family:var(--mono);font-size:11px;color:var(--muted);min-width:44px;text-align:center}
-#map-hint{font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:auto;letter-spacing:.5px}
+/* LANG MODAL */
+.lang-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:700;
+  display:none;align-items:center;justify-content:center}
+.lang-modal-overlay.show{display:flex}
+.lang-modal{background:var(--bg3);border-radius:14px;padding:24px 20px;width:100%;
+  max-width:360px;border:1.5px solid var(--border)}
+.lang-opt{display:flex;align-items:center;gap:13px;padding:13px 12px;border:1.5px solid var(--border2);
+  border-radius:9px;margin-bottom:8px;cursor:pointer;transition:all .15s;background:var(--bg2)}
+.lang-opt:hover,.lang-opt.selected{border-color:var(--sound)}
+.lang-flag{font-size:24px}.lang-name{flex:1}
+.lang-name-main{font-size:14px;font-weight:bold;color:var(--text)}
+.lang-name-sub{font-size:10px;color:var(--muted);letter-spacing:1px}
+.lang-check{color:var(--sound);font-size:18px}
 
-/* ── CONE EDITOR PANEL ── */
-#cone-editor{
-  position:fixed;bottom:0;left:0;right:0;z-index:500;
-  background:#1c3050;border-top:2px solid var(--border);
-  border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));
-  transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,0,1);
-  display:flex;flex-direction:column;gap:12px;
+/* VOICE FAB — desktop position */
+#voice-fab{position:fixed;bottom:24px;right:24px;z-index:200;width:52px;height:52px;
+  border-radius:50%;border:1.5px solid var(--border2);cursor:pointer;background:var(--bg3);
+  color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(0,0,0,.5);transition:all .2s}
+#voice-fab:hover{border-color:var(--sound);background:var(--bg4)}
+#voice-fab.listening{background:#E53E3E;animation:voicePulse 1.2s ease-in-out infinite}
+@keyframes voicePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+
+/* GPS dot animation */
+@keyframes gpsPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.3)}}
+.gps-dot.active{background:var(--safe);animation:gpsPulse 1.5s infinite}
+
+/* SCROLLBAR global */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-track{background:transparent}
+
+/* RESIZABLE PANELS */
+#resize-handle-1{width:4px;background:var(--border);cursor:col-resize;position:relative;flex-shrink:0;transition:background .15s}
+#resize-handle-1:hover{background:var(--sound)}
+
+/* ── Sensor Info Overlay ───────────────────────────────────────── */
+#sensor-info-overlay{
+  display:none;position:absolute;top:10px;left:50%;transform:translateX(-50%);
+  background:rgba(8,16,28,.92);border:1px solid var(--border);border-radius:8px;
+  overflow:hidden;min-width:220px;max-width:320px;z-index:30;
+  box-shadow:0 4px 20px #000a;backdrop-filter:blur(6px);
 }
-#cone-editor.open{transform:translateY(0)}
-#cone-editor-title{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--sound);text-transform:uppercase;text-align:center}
-#cone-editor-label{font-size:14px;font-weight:bold;color:#fff;text-align:center;margin-top:-4px}
-.ce-row{display:flex;align-items:center;gap:12px}
-.ce-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;min-width:64px}
-.ce-val{font-family:var(--mono);font-size:14px;color:var(--sound);min-width:42px;text-align:right}
-#compass-wrap{display:flex;justify-content:center;align-items:center}
-#compass-canvas{touch-action:none;cursor:crosshair;border-radius:50%;background:#0d1825;
-  border:2px solid var(--border);display:block}
-.ce-btn-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+#sensor-info-overlay.visible{display:flex;flex-direction:row;align-items:stretch;}
+#sio-color-bar{width:4px;flex-shrink:0;}
+#sio-body{padding:8px 12px;flex:1;}
+#sio-title{font-family:var(--mono);font-size:13px;font-weight:bold;color:#e0f0ff;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#sio-meta{font-size:11px;color:var(--muted);margin-bottom:8px;}
+#sio-actions{display:flex;gap:6px;flex-wrap:wrap;}
+#sio-actions .btn-xs{padding:3px 8px;font-size:10px;}
+/* Drag hint on sensor */
+#map-canvas.dragging{cursor:grabbing!important;}
+#map-canvas.over-sensor{cursor:grab!important;}
+/* Sensor drag tooltip */
+#drag-hint{
+  position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,.7);color:#8899b4;font-size:11px;font-family:var(--mono);
+  padding:4px 10px;border-radius:4px;pointer-events:none;z-index:20;
+  opacity:0;transition:opacity .3s;white-space:nowrap;
+}
+#drag-hint.show{opacity:1;}
 
-/* ── ANALYSIS MODE TABS ── */
-.mode-tab{flex:1;padding:12px 8px;border:2px solid var(--border);border-radius:10px;
-  background:var(--bg3);color:var(--muted);font-family:var(--mono);font-size:11px;
-  letter-spacing:1px;cursor:pointer;text-align:center;line-height:1.4;transition:all .2s}
-.mode-tab.active{border-color:var(--sound);color:var(--sound);background:#162a40}
-/* ── API KEY CARD ── */
-#apikey-card{background:#1a2e20;border:1.5px solid #2a5a3a;border-radius:10px;padding:12px 14px;margin-bottom:14px}
-#apikey-card .lbl{color:#5aaa70}
-.apikey-row{display:flex;gap:8px;align-items:center}
-#api-key-input{flex:1;background:#0d1e14;border:1.5px solid #2a5a3a;border-radius:7px;
-  color:#e8ffe8;padding:10px 12px;font-size:14px;font-family:var(--mono);width:auto}
-#api-key-input::placeholder{color:#3a6a4a}
-#apikey-status{font-size:10px;letter-spacing:1px;margin-top:6px;font-family:var(--mono)}
-/* ── ANALYSIS RESULT ── */
-.ar-section{background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden}
-.ar-head{padding:11px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
-.ar-title{font-family:var(--mono);font-size:11px;letter-spacing:2px;font-weight:bold}
-.ar-body{padding:14px;font-size:13px;color:#d0e8ff;line-height:1.8}
-.sol-card{background:#0d1e30;border-left:3px solid var(--sound);border-radius:0 7px 7px 0;padding:10px 12px;margin-bottom:8px}
-.sol-card.prio-high{border-left-color:#FF6B6B}
-.sol-card.prio-med{border-left-color:#FFCA4F}
-.sol-card.prio-low{border-left-color:#88E863}
-.sol-prio{font-family:var(--mono);font-size:9px;letter-spacing:1px;margin-bottom:3px}
-.sol-title{font-size:13px;font-weight:bold;color:#fff;margin-bottom:4px}
-.sol-body{font-size:12px;color:#a8c8e8;line-height:1.6}
-.phase-badge{display:inline-block;font-family:var(--mono);font-size:9px;border-radius:4px;padding:3px 7px;margin-right:6px}
+
+/* ── Custom Type Editor ─────────────────────────────────────────────────── */
+#custom-type-modal{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;
+  align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);
+}
+#custom-type-modal.open{display:flex;}
+#cte-panel{
+  background:var(--bg2);border:1px solid var(--border2);border-radius:12px;
+  width:100%;max-width:580px;max-height:90vh;overflow-y:auto;
+  box-shadow:0 20px 60px #000c;
+}
+#cte-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  font-family:var(--mono);font-size:13px;font-weight:bold;color:var(--text);letter-spacing:.5px;
+}
+#cte-header .cte-close{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:2px 6px;}
+#cte-header .cte-close:hover{color:var(--danger);}
+#cte-body{padding:20px;display:flex;flex-direction:column;gap:16px;}
+.cte-section{border:1px solid var(--border);border-radius:8px;padding:14px;background:var(--bg3);}
+.cte-section-title{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--accent);margin-bottom:12px;}
+.cte-row{display:flex;gap:12px;flex-wrap:wrap;}
+.cte-field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:140px;}
+.cte-field label{font-size:10px;font-family:var(--mono);letter-spacing:.5px;color:var(--muted);}
+.cte-field input,.cte-field select,.cte-field textarea{
+  background:var(--bg);border:1px solid var(--border);border-radius:6px;
+  color:var(--text);padding:7px 10px;font-size:13px;font-family:var(--mono);
+  outline:none;transition:border .15s;width:100%;box-sizing:border-box;
+}
+.cte-field input:focus,.cte-field select:focus{border-color:var(--accent);}
+/* Color + preview */
+#cte-color-preview{
+  display:flex;align-items:center;gap:10px;
+}
+#cte-color-swatch{width:32px;height:32px;border-radius:6px;border:2px solid var(--border);flex-shrink:0;}
+/* Icon grid */
+#cte-icon-grid{
+  display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;
+}
+.cte-icon-btn{
+  width:38px;height:38px;border-radius:6px;border:1.5px solid var(--border);
+  background:var(--bg);display:flex;align-items:center;justify-content:center;
+  font-size:20px;cursor:pointer;transition:all .15s;
+}
+.cte-icon-btn:hover,.cte-icon-btn.selected{border-color:var(--accent);background:var(--bg3);}
+.cte-icon-btn.selected{box-shadow:0 0 0 2px var(--accent);}
+#cte-icon-upload-area{
+  border:2px dashed var(--border);border-radius:8px;padding:14px;
+  text-align:center;font-size:12px;color:var(--muted);cursor:pointer;
+  transition:border .15s;
+}
+#cte-icon-upload-area:hover{border-color:var(--accent);color:var(--text);}
+#cte-icon-preview{max-width:48px;max-height:48px;display:none;border-radius:4px;}
+/* Propagation shape grid */
+#cte-prop-grid{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.cte-prop-btn{
+  border:1.5px solid var(--border);border-radius:8px;background:var(--bg);
+  padding:8px 14px;font-size:11px;font-family:var(--mono);color:var(--muted);
+  cursor:pointer;transition:all .15s;
+}
+.cte-prop-btn:hover,.cte-prop-btn.selected{border-color:var(--accent);color:var(--text);}
+.cte-prop-btn.selected{background:var(--bg3);box-shadow:0 0 0 2px var(--accent);}
+/* Range with value display */
+.cte-range-row{display:flex;align-items:center;gap:10px;}
+.cte-range-row input[type=range]{flex:1;}
+.cte-range-val{font-family:var(--mono);font-size:12px;color:var(--accent);min-width:36px;text-align:right;}
+/* Type list */
+#cte-type-list{display:flex;flex-direction:column;gap:6px;}
+.cte-type-item{
+  display:flex;align-items:center;gap:10px;padding:8px 12px;
+  border:1px solid var(--border);border-radius:6px;background:var(--bg);
+}
+.cte-type-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.cte-type-name{flex:1;font-size:13px;font-family:var(--mono);}
+.cte-type-actions{display:flex;gap:6px;}
+/* New custom pill style */
+.sense-pill-add{
+  border-style:dashed!important;color:var(--accent)!important;
+  font-size:11px;
+}
+.tab-edit{color:var(--muted)!important;border-color:var(--border)!important;}
+/* Export/Import panel */
+#export-modal{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;
+  align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);
+}
+#export-modal.open{display:flex;}
+#export-panel{
+  background:var(--bg2);border:1px solid var(--border2);border-radius:12px;
+  width:100%;max-width:520px;box-shadow:0 20px 60px #000c;overflow:hidden;
+}
+#export-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  font-family:var(--mono);font-size:13px;font-weight:bold;color:var(--text);
+}
+#export-body{padding:20px;display:flex;flex-direction:column;gap:12px;}
+.export-option{
+  display:flex;align-items:center;gap:14px;padding:14px 16px;
+  border:1px solid var(--border);border-radius:8px;background:var(--bg3);cursor:pointer;
+  transition:border .15s;
+}
+.export-option:hover{border-color:var(--accent);}
+.export-option-icon{font-size:28px;flex-shrink:0;}
+.export-option-text strong{display:block;font-family:var(--mono);font-size:12px;margin-bottom:2px;}
+.export-option-text span{font-size:11px;color:var(--muted);}
+
+
+/* ══ RESPONSIVE — MOBILE (<900px) ═══════════════════════════════════════════ */
+@media (max-width:899px){
+
+  /* Hide desktop-only elements */
+  #sidebar{display:none!important;}
+  #panel-tabs{display:none!important;}
+  #map-panel{display:none;}            /* Hidden unless active page */
+
+  /* App becomes single flex column */
+  #app{display:flex;flex-direction:column;}
+
+  /* Body row becomes single column, fills remaining space */
+  #body-row{
+    display:block;
+    flex:1;
+    overflow:hidden;
+    position:relative;
+    height:calc(100dvh - var(--header-h) - 52px); /* 52px = nav-mobile height */
+  }
+
+  /* Panel fills full width */
+  #panel{
+    width:100%;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+  }
+  #panel-content{
+    flex:1;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:12px;
+    padding-bottom:16px;
+  }
+
+  /* Pages full width */
+  .ppage{display:none;width:100%;}
+  .ppage.active{display:block;}
+
+  /* Map page: shows map-panel fullscreen */
+  #page-map{
+    padding:0!important;
+  }
+  #page-map #map-panel{
+    display:flex!important;
+    flex-direction:column;
+    height:100%;
+    position:relative;
+  }
+
+  /* Bottom nav */
+  #nav-mobile{
+    display:flex;
+    position:fixed;
+    bottom:0;left:0;right:0;
+    height:52px;
+    background:#0a1522;
+    border-top:1px solid var(--border);
+    z-index:100;
+    padding-bottom:env(safe-area-inset-bottom,0);
+  }
+  .nav-btn{
+    flex:1;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:none;border:none;
+    color:var(--muted);
+    font-size:9px;font-family:var(--mono);letter-spacing:.5px;
+    gap:2px;cursor:pointer;padding:4px 0;
+    transition:color .15s;
+  }
+  .nav-btn .nav-icon{font-size:18px;line-height:1;}
+  .nav-btn.active{color:var(--accent);}
+  .nav-btn:active{opacity:.7;}
+
+  /* Header: compact for mobile */
+  #header{padding:0 12px;gap:8px;}
+  .hdr-brand .hdr-ver{display:none;}
+  .hdr-actions .hdr-count{display:none;}
+
+  /* Map canvas wrap full height */
+  #page-map #map-canvas-wrap{
+    flex:1;
+    position:relative;
+    overflow:hidden;
+  }
+
+  /* Sensor info overlay adjusts for mobile */
+  #sensor-info-overlay{
+    top:auto;
+    bottom:8px;
+    left:8px;
+    right:8px;
+    transform:none;
+    max-width:none;
+  }
+
+  /* Forms: full width inputs */
+  .row2{grid-template-columns:1fr 1fr!important;}
+  .sense-grid{grid-template-columns:repeat(3,1fr)!important;}
+
+  /* Misc touch targets */
+  .btn{min-height:40px;}
+  input,select,textarea{font-size:16px!important;} /* prevent zoom on iOS */
+}
+
+/* Desktop: hide mobile nav */
+@media (min-width:900px){
+  #nav-mobile{display:none!important;}
+  #page-map{display:none!important;} /* Map is always visible as 3rd column */
+}
+@media (max-width:899px){
+  #voice-fab{bottom:calc(52px + env(safe-area-inset-bottom,0px) + 12px)!important;}
+}
+
 </style>
 </head>
 <body>
 <div id="app">
+
+  <!-- ══ HEADER ══════════════════════════════════════════════ -->
   <div id="header">
-    <div style="flex:1">
-      <div style="font-size:15px;color:var(--sound);letter-spacing:2px;font-weight:bold">◈ SENSORY AGENT</div>
-      <div style="font-size:10px;color:#b8d8f8;letter-spacing:1px" id="space-title-header">—</div>
+    <div class="hdr-brand">
+      <span class="hdr-logo">◈</span>
+      <div>
+        <div class="hdr-name">Sensory Agent</div>
+        <div class="hdr-ver">DESKTOP · v2.0</div>
+      </div>
     </div>
-    <div id="gps-status" style="font-size:10px;color:#9fc4e0">
-      <span class="gps-dot" style="background:#3a5a80"></span>
+    <div class="hdr-space-info">
+      <div>
+        <div class="hdr-space-name" id="space-title-header">—</div>
+        <div class="hdr-space-sub" id="space-sub-header">Sem espaço configurado</div>
+      </div>
+      <div class="hdr-sep"></div>
+      <div class="hdr-stat"><div class="hdr-stat-val" id="hdr-count-stim">0</div><div class="hdr-stat-lbl">ESTÍMULOS</div></div>
+      <div class="hdr-sep"></div>
+      <div class="hdr-stat"><div class="hdr-stat-val" id="hdr-count-conf" style="color:var(--danger)">0</div><div class="hdr-stat-lbl">CONFLITOS</div></div>
     </div>
-    <div style="font-size:12px;color:#b8d8f8;margin-left:8px" id="counts-header">0</div>
-    <button id="lang-btn" onclick="openLang()">🌐 PT</button>
+    <div class="hdr-right">
+      <div id="gps-status"><span class="gps-dot" id="gps-dot-hdr"></span><span id="gps-text-hdr" style="margin-left:5px;font-size:9px;letter-spacing:1px">GPS —</span></div>
+      <div id="offline-bar"></div>
+      <div class="hdr-mobile-counts">
+        <span class="hdr-mb-val" id="hdr-mb-stim">0</span>
+        <span class="hdr-mb-lbl">est</span>
+        <span class="hdr-mb-sep">·</span>
+        <span class="hdr-mb-val" id="hdr-mb-conf" style="color:var(--danger)">0</span>
+        <span class="hdr-mb-lbl">conf</span>
+      </div>
+      <button class="hdr-icon-btn" onclick="openExportModal()" title="Exportar">📦</button>
+      <button class="hdr-icon-btn" onclick="openCustomTypeEditor(null)" title="Novo tipo">◆</button>
+      <button id="lang-btn" onclick="openLang()">🌐 PT</button>
+    </div>
   </div>
 
-  <div id="offline-bar"></div>
+  <!-- ══ BODY ROW ═════════════════════════════════════════════ -->
+  <div id="body-row">
 
-  <div id="content">
+    <!-- LEFT SIDEBAR -->
+    <aside id="sidebar">
+      <nav class="sb-nav">
+        <div class="sb-group">Espaço</div>
+        <a class="sb-item active" onclick="goPage('space',this)" data-page="space">
+          <span class="sb-icon">🏛</span>
+          <div><div class="sb-lbl" data-i18n="navSpace">ESPAÇO</div><div class="sb-sub">Identificação · planta</div></div>
+        </a>
+        <div class="sb-group">Trabalho</div>
+        <a class="sb-item" onclick="goPage('register',this)" data-page="register">
+          <span class="sb-icon">＋</span>
+          <div><div class="sb-lbl" data-i18n="navRegister">REGISTAR</div><div class="sb-sub">Novo estímulo</div></div>
+        </a>
+        <a class="sb-item" onclick="goPage('list',this);renderList()" data-page="list">
+          <span class="sb-icon">📋</span>
+          <div><div class="sb-lbl" data-i18n="navList">LISTA</div><div class="sb-sub">Todos os registos</div></div>
+        </a>
+        <div class="sb-group">Análise</div>
+        <a class="sb-item" onclick="goPage('analysis',this);renderAnalysis()" data-page="analysis">
+          <span class="sb-icon">🤖</span>
+          <div><div class="sb-lbl" data-i18n="navAI">IA</div><div class="sb-sub">Diagnóstico · Projeto · POE</div></div>
+        </a>
+      </nav>
+      <div class="sb-footer">
+        <div class="sb-counts">
+          <div class="sb-count"><div class="sb-count-val" id="sb-stim-count">0</div><div class="sb-count-lbl">ESTÍM.</div></div>
+          <div class="sb-count"><div class="sb-count-val" id="sb-conf-count" style="color:var(--danger)">0</div><div class="sb-count-lbl">CONF.</div></div>
+        </div>
+      </div>
+    </aside>
 
-    <!-- ══ PAGE: SPACE ══ -->
-    <div class="page active" id="page-space">
-      <div class="card">
-        <div class="lbl" data-i18n="spaceId">Identificação do Espaço</div>
-        <div class="field-row">
-          <div class="lbl" data-i18n="spaceName">Nome do Espaço</div>
-          <div class="input-mic-row">
-            <input id="sp-name" type="text" oninput="updateSpaceHeader()" data-i18n-ph="spaceNamePh">
-            <button class="mic-btn" onclick="voiceField('sp-name','spaceName')">🎤</button>
+    <!-- CENTRE PANEL -->
+    <div id="panel">
+      <div id="panel-tabs">
+        <button class="ptab active" data-page="space" onclick="goPage('space',document.querySelector('.sb-item[data-page=space]'))">
+          <span class="pt-icon">🏛</span><span data-i18n="navSpace">ESPAÇO</span>
+        </button>
+        <button class="ptab" data-page="register" onclick="goPage('register',document.querySelector('.sb-item[data-page=register]'))">
+          <span class="pt-icon">＋</span><span data-i18n="navRegister">REGISTAR</span>
+        </button>
+        <button class="ptab" data-page="list" onclick="goPage('list',document.querySelector('.sb-item[data-page=list]'));renderList()">
+          <span class="pt-icon">📋</span><span data-i18n="navList">LISTA</span>
+        </button>
+        <button class="ptab" data-page="analysis" onclick="goPage('analysis',document.querySelector('.sb-item[data-page=analysis]'));renderAnalysis()">
+          <span class="pt-icon">🤖</span><span data-i18n="navAI">IA</span>
+        </button>
+      </div>
+      <div id="panel-content">
+
+        <!-- PAGE: SPACE -->
+        <div class="ppage active" id="page-space">
+          <div class="card">
+            <div class="lbl" data-i18n="spaceId">Identificação do Espaço</div>
+            <div class="field-row">
+              <div class="lbl" data-i18n="spaceName">Nome do Espaço</div>
+              <div class="input-mic-row">
+                <input id="sp-name" type="text" oninput="updateSpaceHeader()" data-i18n-ph="spaceNamePh">
+                <button class="mic-btn" onclick="voiceField('sp-name','spaceName')">🎤</button>
+              </div>
+            </div>
+            <div class="row2">
+              <div>
+                <div class="lbl" data-i18n="spaceArea">Área (m²)</div>
+                <input id="sp-area" type="number" placeholder="0">
+              </div>
+              <div>
+                <div class="lbl" data-i18n="spaceFloor">Piso / Nível</div>
+                <input id="sp-floor" type="text" data-i18n-ph="spaceFloorPh">
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="lbl" data-i18n="spaceType">Tipologia / Uso</div>
+              <select id="sp-type" data-i18n-opts="spaceTypes"></select>
+            </div>
+            <div class="field-row">
+              <div class="lbl" data-i18n="spaceDesc">Descrição / Contexto</div>
+              <div class="input-mic-row" style="align-items:flex-start">
+                <textarea id="sp-desc" data-i18n-ph="spaceDescPh"></textarea>
+                <button class="mic-btn" onclick="voiceField('sp-desc','spaceDesc')">🎤</button>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="lbl">GPS</div>
+            <button class="btn btn-ghost" onclick="getGPS()" data-i18n="gpsBtn">📍 OBTER COORDENADAS</button>
+            <div id="gps-result" style="margin-top:8px;font-size:11px;color:var(--muted);display:none">
+              <span class="gps-dot"></span> <span id="gps-coords"></span>
+            </div>
+          </div>
+          <div class="card">
+            <div class="lbl" data-i18n="planLabel">Planta / Alçado</div>
+            <label class="btn btn-cam">
+              <span style="font-size:28px">📐</span>
+              <span data-i18n="planBtn">CARREGAR PLANTA</span>
+              <input type="file" accept="image/*" style="display:none" onchange="loadPlan(this)">
+            </label>
+            <div id="plan-preview" style="margin-top:8px;display:none">
+              <img id="plan-img" style="width:100%;border-radius:7px;border:1px solid var(--border)">
+              <button class="btn btn-danger btn-sm" style="margin-top:6px" onclick="removePlan()" data-i18n="planRemove">✕ REMOVER</button>
+            </div>
+          </div>
+          <button class="btn btn-green" onclick="saveSpace()" data-i18n="spaceSave">💾 GUARDAR ESPAÇO</button>
+        </div>
+
+        <!-- PAGE: REGISTER -->
+        <div class="ppage" id="page-register">
+          <div id="voice-mode-bar">
+            <div id="vmi"></div>
+            <div id="vmt" data-i18n="voiceHint">🎤 Toque no microfone ou fale livremente</div>
+            <button onclick="startGuidedVoice()" style="background:transparent;border:1px solid #E53E3E;border-radius:16px;color:#E53E3E;font-family:var(--mono);font-size:9px;padding:4px 10px;cursor:pointer;white-space:nowrap" data-i18n="guidedBtn">MODO GUIADO</button>
+          </div>
+          <div class="card">
+            <div class="lbl" data-i18n="senseLabel">Sentido</div>
+            <div class="sense-grid" id="sense-selector"></div>
+          </div>
+          <div id="sensor-form"></div>
+          <div class="card">
+            <div class="lbl" data-i18n="photosLabel">Fotografias</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <label class="btn btn-cam">
+                <span style="font-size:24px">📷</span>
+                <span data-i18n="camBtn">CÂMARA</span>
+                <input type="file" accept="image/*" capture="environment" style="display:none" onchange="addPhoto(this,'capture')">
+              </label>
+              <label class="btn btn-cam" style="border-color:var(--smell);color:var(--smell)">
+                <span style="font-size:24px">🖼</span>
+                <span data-i18n="galleryBtn">GALERIA</span>
+                <input type="file" accept="image/*" multiple style="display:none" onchange="addPhoto(this,'gallery')">
+              </label>
+            </div>
+            <div class="photo-grid" id="capture-photos"></div>
+          </div>
+          <button id="save-sensor-btn" class="btn btn-green" onclick="saveSensor()" data-i18n="saveSensor">✅ GUARDAR ESTÍMULO</button>
+        </div>
+
+        <!-- PAGE: LIST -->
+        <div class="ppage" id="page-list">
+          <div class="tab-bar" id="list-filter-bar">
+            <button class="tab active" onclick="filterList(this,'all')" data-i18n="all">TODOS</button>
+            <button class="tab" onclick="filterList(this,'vision')">👁</button>
+            <button class="tab" onclick="filterList(this,'sound')">🔊</button>
+            <button class="tab" onclick="filterList(this,'smell')">🌬</button>
+            <button class="tab" onclick="filterList(this,'taste')">👅</button>
+            <button class="tab" onclick="filterList(this,'temperature')">🌡</button>
+            <button class="tab" onclick="filterList(this,'haptic')">✋</button>
+          </div>
+          <div id="sensor-list"></div>
+        </div>
+
+        <!-- PAGE: ANALYSIS -->
+        <div class="ppage" id="page-analysis">
+          <div id="analysis-stats"></div>
+          <div id="conflict-list-analysis"></div>
+          <div id="apikey-card">
+            <div class="lbl" data-i18n="apiKeyLabel">CHAVE API ANTHROPIC</div>
+            <div class="apikey-row">
+              <input id="api-key-input" type="password" placeholder="sk-ant-…" oninput="onApiKeyChange()">
+              <button class="zoom-btn" onclick="toggleApiKeyVis()">👁</button>
+            </div>
+            <div id="apikey-status"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+            <button class="mode-tab active" id="mode-design" onclick="setAnalysisMode('design')">
+              🏗️<br><b data-i18n="modeDesign">PROJETO / REFORMA</b>
+            </button>
+            <button class="mode-tab" id="mode-poe" onclick="setAnalysisMode('poe')">
+              📋<br><b data-i18n="modePOE">PÓS-OCUPAÇÃO</b>
+            </button>
+          </div>
+          <div id="mode-desc"></div>
+          <button class="btn btn-green" onclick="runAI()" id="ai-btn" data-i18n="aiBtn">🤖 ANALISAR COM IA</button>
+          <div id="ai-result"></div>
+          <hr>
+          <div class="card" style="border-color:var(--sound)44;margin-top:4px">
+            <div class="lbl" data-i18n="exportTitle">Exportar</div>
+            <button class="btn btn-primary" onclick="exportJSON()" data-i18n="exportJSON">📥 EXPORTAR JSON</button>
+            <div style="margin-top:8px;font-size:10px;color:var(--muted);line-height:2" id="export-hint"></div>
           </div>
         </div>
-        <div class="row2">
-          <div>
-            <div class="lbl" data-i18n="spaceArea">Área (m²)</div>
-            <input id="sp-area" type="number" placeholder="0">
-          </div>
-          <div>
-            <div class="lbl" data-i18n="spaceFloor">Piso / Nível</div>
-            <input id="sp-floor" type="text" data-i18n-ph="spaceFloorPh">
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="lbl" data-i18n="spaceType">Tipologia / Uso</div>
-          <select id="sp-type" data-i18n-opts="spaceTypes"></select>
-        </div>
-        <div class="field-row">
-          <div class="lbl" data-i18n="spaceDesc">Descrição / Contexto</div>
-          <div class="input-mic-row" style="align-items:flex-start">
-            <textarea id="sp-desc" data-i18n-ph="spaceDescPh"></textarea>
-            <button class="mic-btn" onclick="voiceField('sp-desc','spaceDesc')">🎤</button>
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="lbl">GPS</div>
-        <button class="btn btn-ghost" onclick="getGPS()" data-i18n="gpsBtn">📍 OBTER COORDENADAS</button>
-        <div id="gps-result" style="margin-top:10px;font-size:11px;color:var(--muted);display:none">
-          <span class="gps-dot"></span> <span id="gps-coords"></span>
-        </div>
-      </div>
-      <div class="card">
-        <div class="lbl" data-i18n="planLabel">Planta / Alçado</div>
-        <label class="btn btn-cam">
-          <span style="font-size:32px">📐</span>
-          <span data-i18n="planBtn">CARREGAR PLANTA</span>
-          <input type="file" accept="image/*" style="display:none" onchange="loadPlan(this)">
-        </label>
-        <div id="plan-preview" style="margin-top:10px;display:none">
-          <img id="plan-img" style="width:100%;border-radius:8px;border:1px solid var(--border)">
-          <button class="btn btn-danger btn-sm" style="margin-top:6px" onclick="removePlan()" data-i18n="planRemove">✕ REMOVER</button>
-        </div>
-      </div>
-      <button class="btn btn-green" onclick="saveSpace()" data-i18n="spaceSave">💾 GUARDAR ESPAÇO</button>
-    </div>
 
-    <!-- ══ PAGE: REGISTER ══ -->
-    <div class="page" id="page-register">
-      <div id="voice-mode-bar">
-        <div id="vmi"></div>
-        <div id="vmt" data-i18n="voiceHint">🎤 Toque no microfone ou fale livremente</div>
-        <button onclick="startGuidedVoice()" style="background:transparent;border:1px solid #E53E3E;border-radius:20px;color:#E53E3E;font-family:var(--mono);font-size:10px;padding:4px 10px;cursor:pointer;white-space:nowrap" data-i18n="guidedBtn">MODO GUIADO</button>
-      </div>
-      <div class="card">
-        <div class="lbl" data-i18n="senseLabel">Sentido</div>
-        <div class="sense-grid" id="sense-selector"></div>
-      </div>
-      <div id="sensor-form"></div>
-      <div class="card">
-        <div class="lbl" data-i18n="photosLabel">Fotografias</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <label class="btn btn-cam">
-            <span style="font-size:28px">📷</span>
-            <span data-i18n="camBtn">CÂMARA</span>
-            <input type="file" accept="image/*" capture="environment" style="display:none" onchange="addPhoto(this,'capture')">
-          </label>
-          <label class="btn btn-cam" style="border-color:var(--smell);color:var(--smell)">
-            <span style="font-size:28px">🖼</span>
-            <span data-i18n="galleryBtn">GALERIA</span>
-            <input type="file" accept="image/*" multiple style="display:none" onchange="addPhoto(this,'gallery')">
-          </label>
-        </div>
-        <div class="photo-grid" id="capture-photos"></div>
-      </div>
-      <button id="save-sensor-btn" class="btn btn-green" onclick="saveSensor()" data-i18n="saveSensor">✅ GUARDAR ESTÍMULO</button>
-    </div>
 
-    <!-- ══ PAGE: MAP ══ -->
-    <div class="page" id="page-map">
-      <div style="display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;scrollbar-width:none" id="map-filter-bar">
-        <button class="tab active" onclick="filterMap(this,'all')" data-i18n="all">TODOS</button>
-        <button class="tab" onclick="filterMap(this,'vision')">👁</button>
-        <button class="tab" onclick="filterMap(this,'sound')">🔊</button>
-        <button class="tab" onclick="filterMap(this,'smell')">🌬</button>
-        <button class="tab" onclick="filterMap(this,'taste')">👅</button>
-        <button class="tab" onclick="filterMap(this,'temperature')">🌡</button>
-        <button class="tab" onclick="filterMap(this,'haptic')">✋</button>
+        <!-- PAGE: MAP (mobile only — map-panel shown fullscreen) -->
+        <div class="ppage" id="page-map"></div>
+
+      </div><!-- /panel-content -->
+    </div><!-- /panel -->
+
+    <!-- RIGHT: MAP PANEL -->
+    <div id="map-panel">
+      <div id="map-header">
+        <span class="mh-title">🗺 MAPA</span>
+        <div id="map-filter-bar">
+          <button class="tab active" onclick="filterMap(this,'all')" data-i18n="all">TODOS</button>
+          <button class="tab" onclick="filterMap(this,'vision')">👁</button>
+          <button class="tab" onclick="filterMap(this,'sound')">🔊</button>
+          <button class="tab" onclick="filterMap(this,'smell')">🌬</button>
+          <button class="tab" onclick="filterMap(this,'taste')">👅</button>
+          <button class="tab" onclick="filterMap(this,'temperature')">🌡</button>
+          <button class="tab" onclick="filterMap(this,'haptic')">✋</button>
+        </div>
       </div>
-      <!-- Zoom controls -->
       <div id="map-zoom-bar">
         <button class="zoom-btn" onclick="zoomMap(1.35)">＋</button>
         <button class="zoom-btn" onclick="zoomMap(1/1.35)">－</button>
         <button class="zoom-btn" onclick="resetMapView()" title="Reset">⟳</button>
         <span id="zoom-label">100%</span>
-        <span id="map-hint">🤏 pellizca · 👆 arrastra</span>
+        <span id="map-hint">🤏 pinça · 🖱 arrastra · clique = posição</span>
       </div>
       <div id="conflict-summary"></div>
-      <canvas id="map-canvas"></canvas>
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;flex:1">
-          <input type="checkbox" id="show-conflicts" checked onchange="renderMap()" style="width:auto;accent-color:var(--danger)">
+      <div id="map-canvas-wrap">
+        <canvas id="map-canvas"></canvas>
+        <div id="drag-hint">⬡ arrasta o estímulo para o reposicionar</div>
+        <div id="sensor-info-overlay">
+          <div id="sio-color-bar"></div>
+          <div id="sio-body">
+            <div id="sio-title"></div>
+            <div id="sio-meta"></div>
+            <div id="sio-actions">
+              <button class="btn btn-ghost btn-xs" onclick="sioEdit()">✏ EDITAR</button>
+              <button class="btn btn-ghost btn-xs" onclick="sioConeEdit()">🧭 DIREÇÃO</button>
+              <button class="btn btn-danger btn-xs" onclick="sioDelete()">✕ APAGAR</button>
+            </div>
+          </div>
+        </div>
+        <!-- Cone editor — slides from right inside map panel -->
+        <div id="cone-editor">
+          <div id="cone-editor-inner">
+            <div id="cone-editor-title">EDITAR DIREÇÃO</div>
+            <div id="cone-editor-label"></div>
+            <div id="compass-wrap">
+              <canvas id="compass-canvas" width="160" height="160"></canvas>
+            </div>
+            <div class="ce-row">
+              <span class="ce-lbl">DIREÇÃO</span>
+              <input type="range" id="ce-dir" min="0" max="360" value="0" oninput="ceConeDir(+this.value)">
+              <span class="ce-val" id="ce-dir-val">0°</span>
+            </div>
+            <div class="ce-row">
+              <span class="ce-lbl">ABERTURA</span>
+              <input type="range" id="ce-spread" min="10" max="300" value="60" oninput="ceConeSpread(+this.value)">
+              <span class="ce-val" id="ce-spread-val">60°</span>
+            </div>
+            <div class="ce-row">
+              <span class="ce-lbl">RAIO</span>
+              <input type="range" id="ce-radius" min="10" max="400" value="80" oninput="ceConeRadius(+this.value)">
+              <span class="ce-val" id="ce-radius-val">80</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <button class="btn btn-ghost btn-sm" onclick="closeConeEditor()">✕ CANCELAR</button>
+              <button class="btn btn-green btn-sm" onclick="saveConeEdit()">✅ GUARDAR</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="map-footer">
+        <label>
+          <input type="checkbox" id="show-conflicts" checked onchange="renderMap()">
           <span data-i18n="showConflicts">Mostrar conflitos</span>
         </label>
-        <button class="btn btn-ghost btn-sm" onclick="exportMapImage()" data-i18n="exportBtn">📤 EXPORTAR</button>
-      </div>
-      <div style="margin-top:10px">
-        <div class="lbl" data-i18n="legendLabel">Legenda</div>
         <div id="map-legend"></div>
+        <button class="btn btn-ghost btn-sm" onclick="openExportModal()" data-i18n="exportBtn">📤 EXPORTAR</button>
       </div>
-    </div>
+    </div><!-- /map-panel -->
 
-    <!-- ══ PAGE: LIST ══ -->
-    <div class="page" id="page-list">
-      <div class="tab-bar" id="list-filter-bar">
-        <button class="tab active" onclick="filterList(this,'all')" data-i18n="all">TODOS</button>
-        <button class="tab" onclick="filterList(this,'vision')">👁</button>
-        <button class="tab" onclick="filterList(this,'sound')">🔊</button>
-        <button class="tab" onclick="filterList(this,'smell')">🌬</button>
-        <button class="tab" onclick="filterList(this,'taste')">👅</button>
-        <button class="tab" onclick="filterList(this,'temperature')">🌡</button>
-        <button class="tab" onclick="filterList(this,'haptic')">✋</button>
-      </div>
-      <div id="sensor-list"></div>
-    </div>
 
-    <!-- ══ PAGE: ANALYSIS ══ -->
-    <div class="page" id="page-analysis">
-      <div class="row2" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px" id="analysis-stats"></div>
-      <div id="conflict-list-analysis"></div>
-      <div id="apikey-card">
-        <div class="lbl" data-i18n="apiKeyLabel">CHAVE API ANTHROPIC</div>
-        <div class="apikey-row">
-          <input id="api-key-input" type="password" placeholder="sk-ant-…" oninput="onApiKeyChange()">
-          <button class="zoom-btn" onclick="toggleApiKeyVis()">👁</button>
-        </div>
-        <div id="apikey-status"></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-        <button class="mode-tab active" id="mode-design" onclick="setAnalysisMode('design')">
-          🏗️<br><b data-i18n="modeDesign">PROJETO / REFORMA</b>
-        </button>
-        <button class="mode-tab" id="mode-poe" onclick="setAnalysisMode('poe')">
-          📋<br><b data-i18n="modePOE">PÓS-OCUPAÇÃO</b>
-        </button>
-      </div>
-      <div id="mode-desc" style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.7;padding:10px 12px;background:var(--bg3);border-radius:8px;border:1px solid var(--border)"></div>
-      <button class="btn btn-green" onclick="runAI()" id="ai-btn" data-i18n="aiBtn">🤖 ANALISAR COM IA</button>
-      <div id="ai-result" style="margin-top:14px"></div>
-      <hr style="margin:20px 0">
-      <div class="card" style="border-color:var(--sound)44;margin-top:4px">
-        <div class="lbl" data-i18n="exportTitle">Exportar para Desktop</div>
-        <button class="btn btn-primary" onclick="exportJSON()" data-i18n="exportJSON">📥 EXPORTAR JSON</button>
-        <div style="margin-top:10px;font-size:11px;color:var(--muted);line-height:2" id="export-hint"></div>
-      </div>
-    </div>
-
-  </div><!-- /content -->
-
-  <nav id="nav">
-    <button class="nav-btn active" onclick="goPage('space',this)">
-      <span class="icon">🏛</span><span data-i18n="navSpace">ESPAÇO</span>
+  <!-- ══ MOBILE BOTTOM NAV ══════════════════════════════════════ -->
+  <nav id="nav-mobile">
+    <button class="nav-btn active" onclick="goPage('space',this)" data-page="space">
+      <span class="nav-icon">🏛</span>
+      <span data-i18n="navSpace">ESPAÇO</span>
     </button>
-    <button class="nav-btn" onclick="goPage('register',this)">
-      <span class="icon">＋</span><span data-i18n="navRegister">REGISTAR</span>
+    <button class="nav-btn" onclick="goPage('register',this)" data-page="register">
+      <span class="nav-icon">＋</span>
+      <span data-i18n="navRegister">REGISTAR</span>
     </button>
-    <button class="nav-btn" onclick="goPage('map',this);renderMap()">
-      <span class="icon">🗺</span><span data-i18n="navMap">MAPA</span>
+    <button class="nav-btn" onclick="goPage('map',this);renderMap()" data-page="map">
+      <span class="nav-icon">🗺</span>
+      <span data-i18n="navMap">MAPA</span>
     </button>
-    <button class="nav-btn" onclick="goPage('list',this);renderList()">
-      <span class="icon">📋</span><span data-i18n="navList">LISTA</span>
+    <button class="nav-btn" onclick="goPage('list',this);renderList()" data-page="list">
+      <span class="nav-icon">📋</span>
+      <span data-i18n="navList">LISTA</span>
     </button>
-    <button class="nav-btn" onclick="goPage('analysis',this);renderAnalysis()">
-      <span class="icon">🤖</span><span data-i18n="navAI">IA</span>
+    <button class="nav-btn" onclick="goPage('analysis',this);renderAnalysis()" data-page="analysis">
+      <span class="nav-icon">🤖</span>
+      <span data-i18n="navAI">IA</span>
     </button>
   </nav>
+  </div><!-- /body-row -->
 </div><!-- /app -->
 
 <div id="toast"></div>
@@ -448,7 +949,7 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0}
 <!-- Language modal -->
 <div class="lang-modal-overlay" id="lang-modal" onclick="closeLangIfBg(event)">
   <div class="lang-modal">
-    <div style="font-size:13px;letter-spacing:2px;color:var(--sound);margin-bottom:16px" data-i18n="langTitle">ESCOLHER LÍNGUA</div>
+    <div style="font-size:11px;letter-spacing:2px;color:var(--sound);margin-bottom:14px" data-i18n="langTitle">ESCOLHER LÍNGUA</div>
     <div class="lang-opt" onclick="setLang('pt')" id="lo-pt">
       <span class="lang-flag">🇵🇹</span>
       <div class="lang-name"><div class="lang-name-main">Português</div><div class="lang-name-sub">PT-PT</div></div>
@@ -482,21 +983,23 @@ hr{border:none;border-top:1.5px solid var(--border);margin:14px 0}
     <div id="voice-status"></div>
     <div id="voice-commands"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
-      <button onclick="stopVoice()" style="background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:var(--mono);font-size:12px;padding:12px;cursor:pointer" data-i18n="voiceStop">⏹ PARAR</button>
-      <button onclick="applyVoiceAndClose()" style="background:var(--safe);border:none;border-radius:8px;color:var(--bg);font-family:var(--mono);font-size:12px;padding:12px;cursor:pointer;font-weight:bold" data-i18n="voiceApply">✓ APLICAR</button>
+      <button onclick="stopVoice()" class="btn btn-ghost btn-sm" style="width:100%" data-i18n="voiceStop">⏹ PARAR</button>
+      <button onclick="applyVoiceAndClose()" class="btn btn-green btn-sm" style="width:100%" data-i18n="voiceApply">✓ APLICAR</button>
     </div>
   </div>
 </div>
 
-<!-- Floating mic -->
-<button id="voice-fab" onclick="toggleVoiceFab()" title="🎤">🎤</button>
+<!-- Voice FAB -->
+<button id="voice-fab" onclick="toggleVoiceFab()" title="Microfone">🎤</button>
 
-<!-- Sensor modal -->
+<!-- Sensor detail modal -->
 <div class="modal-overlay" id="modal" style="display:none" onclick="closeModal(event)">
   <div class="modal" id="modal-content"></div>
 </div>
 
 <script>
+
+
 // ══════════════════════════════════════════════════════════════════════════════
 // i18n — TRANSLATIONS
 // ══════════════════════════════════════════════════════════════════════════════
@@ -858,6 +1361,59 @@ const LANGS = {
 
 const SENSE_EMOJIS = {vision:'👁',sound:'🔊',smell:'🌬',taste:'👅',temperature:'🌡',haptic:'✋'};
 const SENSE_COLORS = {vision:'#F4B942',sound:'#4AC8E8',smell:'#7DDA58',taste:'#FF7F50',temperature:'#FF5C5C',haptic:'#A78BFA'};
+// ══ CUSTOM STIMULUS TYPES ════════════════════════════════════════════════════
+let customTypes = [];  // [{id,title,type,emoji,color,iconData,propDefault,radDefault,canDir,opacity}]
+
+function getAllSenseKeys(){
+  return [...Object.keys(SENSE_EMOJIS), ...customTypes.map(t=>t.id)];
+}
+function getSenseEmoji(k){
+  if(SENSE_EMOJIS[k]) return SENSE_EMOJIS[k];
+  const ct=customTypes.find(t=>t.id===k);
+  return ct?(ct.iconData?'img:'+ct.id:ct.emoji||'◆'):'◆';
+}
+function getSenseColor(k){
+  if(SENSE_COLORS[k]) return SENSE_COLORS[k];
+  const ct=customTypes.find(t=>t.id===k);
+  return ct?ct.color:'#888';
+}
+function getSenseLabel(k){
+  if(T&&T.senseLabels&&T.senseLabels[k]) return T.senseLabels[k];
+  const ct=customTypes.find(t=>t.id===k);
+  return ct?ct.title:k;
+}
+function drawSenseIcon(ctx,k,x,y,size){
+  // Draw emoji or uploaded icon centered at x,y
+  const ct=customTypes.find(t=>t.id===k);
+  if(ct&&ct.iconImg){
+    ctx.drawImage(ct.iconImg,x-size/2,y-size/2,size,size);
+  } else {
+    const em=getSenseEmoji(k).replace(/^img:/,'');
+    ctx.fillText(em.length>3?'◆':em,x,y);
+  }
+}
+function saveCustomTypes(){
+  try{localStorage.setItem('sa_custom_types',JSON.stringify(
+    customTypes.map(t=>({...t,iconImg:undefined}))
+  ));}catch(e){}
+}
+function loadCustomTypes(){
+  try{
+    const r=localStorage.getItem('sa_custom_types');
+    if(r){
+      customTypes=JSON.parse(r);
+      // Rebuild iconImg from iconData
+      customTypes.forEach(ct=>{
+        if(ct.iconData){
+          const img=new Image();
+          img.src=ct.iconData;
+          ct.iconImg=img;
+        }
+      });
+    }
+  }catch(e){}
+}
+
 
 // ══ STATE ═════════════════════════════════════════════════════════════════════
 let lang = localStorage.getItem('sa_lang') || 'pt';
@@ -883,6 +1439,7 @@ function saveAll(){
     localStorage.setItem('sa_photos',JSON.stringify(photos));
     localStorage.setItem('sa_plan',state.space.planImage||'');
     localStorage.setItem('sa_lang',lang);
+    saveCustomTypes();
   }catch(e){showToast('⚠ Storage full');}
 }
 function loadAll(){
@@ -897,6 +1454,7 @@ function loadAll(){
     }
     lang=localStorage.getItem('sa_lang')||'pt';
     T=LANGS[lang];
+    loadCustomTypes();
   }catch(e){}
 }
 
@@ -958,11 +1516,33 @@ function applyTranslations(){
 }
 
 // ══ NAVIGATION ════════════════════════════════════════════════════════════════
-function goPage(name,btn){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+function isMobile(){ return window.innerWidth < 900; }
+
+function goPage(name,_btn){
+  document.querySelectorAll('.ppage').forEach(p=>p.classList.remove('active'));
+  const p=document.getElementById('page-'+name);if(p) p.classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('active'));
+  const si=document.querySelector('.sb-item[data-page="'+name+'"]');if(si) si.classList.add('active');
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
+  const pt=document.querySelector('.ptab[data-page="'+name+'"]');if(pt) pt.classList.add('active');
+  // Mobile nav sync
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
-  btn.classList.add('active');
+  const nb=document.querySelector('.nav-btn[data-page="'+name+'"]');if(nb) nb.classList.add('active');
+  // On mobile: 'map' page moves map-panel inside page-map; other pages restore it
+  if(isMobile()){
+    const mapPanel=document.getElementById('map-panel');
+    const mapPage=document.getElementById('page-map');
+    const bodyRow=document.getElementById('body-row');
+    if(name==='map'){
+      if(mapPage && mapPanel) mapPage.appendChild(mapPanel);
+    } else {
+      // Return map-panel to body-row
+      if(mapPanel && bodyRow && mapPanel.parentElement!==bodyRow){
+        bodyRow.appendChild(mapPanel);
+      }
+    }
+    if(name==='map') setTimeout(()=>{resizeMapCanvas();renderMap();},50);
+  }
 }
 
 // ══ GPS ═══════════════════════════════════════════════════════════════════════
@@ -983,8 +1563,12 @@ function getGPS(){
 
 // ══ SPACE ═════════════════════════════════════════════════════════════════════
 function updateSpaceHeader(){
-  const v=document.getElementById('sp-name').value;
-  document.getElementById('space-title-header').textContent=v||'—';
+  const name=document.getElementById('sp-name').value||'—';
+  const area=document.getElementById('sp-area').value;
+  const floor=document.getElementById('sp-floor').value;
+  const h=document.getElementById('space-title-header');if(h)h.textContent=name;
+  const hs=document.getElementById('space-sub-header');
+  if(hs){let sub=area?area+' m²':'';if(floor)sub+=(sub?' · ':'')+floor;hs.textContent=sub||'Sem dados';}
 }
 function saveSpace(){
   state.space={...state.space,
@@ -1007,20 +1591,73 @@ function removePlan(){state.space.planImage=null;document.getElementById('plan-p
 
 // ══ SENSE SELECTOR ════════════════════════════════════════════════════════════
 function buildSenseSelector(){
-  document.getElementById('sense-selector').innerHTML=Object.keys(SENSE_EMOJIS).map(k=>`
-    <button class="sense-pill ${k===state.activeSense?'active':''}"
-      style="${k===state.activeSense?`background:${SENSE_COLORS[k]};border-color:${SENSE_COLORS[k]};`:''}"
+  const allKeys=getAllSenseKeys();
+  document.getElementById('sense-selector').innerHTML=allKeys.map(k=>{
+    const col=getSenseColor(k);
+    const isActive=k===state.activeSense;
+    const ct=customTypes.find(t=>t.id===k);
+    let iconHtml='';
+    if(ct&&ct.iconData){
+      iconHtml=`<img src="${ct.iconData}" style="width:14px;height:14px;object-fit:contain;filter:brightness(10)">`;
+    } else {
+      iconHtml=`<span class="pill-icon">${getSenseEmoji(k)}</span>`;
+    }
+    return `<button class="sense-pill ${isActive?'active':''}"
+      style="${isActive?`background:${col};border-color:${col};`:''}"
       onclick="selectSense('${k}')">
-      <span class="pill-icon">${SENSE_EMOJIS[k]}</span>
-      ${(T.senseLabels[k]||k).toUpperCase()}
-    </button>
-  `).join('');
+      ${iconHtml}${getSenseLabel(k).toUpperCase()}
+    </button>`;
+  }).join('')+
+  `<button class="sense-pill sense-pill-add" onclick="openCustomTypeEditor(null)" title="Criar estímulo personalizado">＋ NOVO</button>`;
 }
+
+function buildFilterBars(){
+  const allKeys=getAllSenseKeys();
+  const tabsHtml=(bar,fn)=>allKeys.map(k=>{
+    const ct=customTypes.find(t=>t.id===k);
+    const icon=ct&&ct.iconData
+      ?`<img src="${ct.iconData}" style="width:12px;height:12px;object-fit:contain;vertical-align:middle">`
+      :getSenseEmoji(k);
+    return `<button class="tab" onclick="${fn}(this,'${k}')" title="${getSenseLabel(k)}">${icon}</button>`;
+  }).join('');
+  
+  const mapBar=document.getElementById('map-filter-bar');
+  if(mapBar){
+    // Keep TODOS button, rebuild rest
+    const todos=mapBar.querySelector('[data-i18n="all"]');
+    mapBar.innerHTML='';
+    if(todos) mapBar.appendChild(todos);
+    mapBar.insertAdjacentHTML('beforeend', tabsHtml('map','filterMap'));
+    mapBar.insertAdjacentHTML('beforeend',
+      `<button class="tab tab-edit" onclick="openCustomTypeEditor(null)" title="Gerir tipos">⚙</button>`);
+    // Restore active
+    mapBar.querySelectorAll('.tab').forEach(b=>{
+      if(b.getAttribute('onclick')?.includes("'"+mapFilter+"'")||
+         (mapFilter==='all'&&b.dataset.i18n==='all')) b.classList.add('active');
+    });
+  }
+  const listBar=document.getElementById('list-filter-bar');
+  if(listBar){
+    const todos2=listBar.querySelector('[data-i18n="all"]');
+    listBar.innerHTML='';
+    if(todos2) listBar.appendChild(todos2);
+    listBar.insertAdjacentHTML('beforeend', tabsHtml('list','filterList'));
+    listBar.querySelectorAll('.tab').forEach(b=>{
+      if(b.getAttribute('onclick')?.includes("'"+listFilter+"'")||
+         (listFilter==='all'&&b.dataset.i18n==='all')) b.classList.add('active');
+    });
+  }
+}
+
 function selectSense(s){state.activeSense=s;buildSenseSelector();buildSensorForm();}
 
 // ══ SENSOR FORM ═══════════════════════════════════════════════════════════════
 function buildSensorForm(){
-  const s=state.activeSense; const col=SENSE_COLORS[s];
+  const s=state.activeSense;
+  const _ct=customTypes.find(t=>t.id===s);
+  const col=_ct?_ct.color:(SENSE_COLORS[s]||'#5DD4F0');
+  const defRadius=_ct?_ct.radDefault:80;
+  const defIntensity=_ct?_ct.intensityDefault:3;
   tempPhotos=[]; document.getElementById('capture-photos').innerHTML='';
   starRatings={pleasant:0,disturb:0};
 
@@ -1047,7 +1684,7 @@ function buildSensorForm(){
       <div class="field-row">
         <div class="lbl">${T.fIntensity} — <span id="f-int-lbl">${T.intensityLabels[3]}</span></div>
         <div class="slider-row">
-          <input type="range" id="f-intensity" min="0" max="6" value="3"
+          <input type="range" id="f-intensity" min="0" max="6" value="${defIntensity}"
             oninput="document.getElementById('f-int-lbl').textContent=T.intensityLabels[this.value];document.getElementById('f-int-num').textContent=this.value+'/6'">
           <style>#f-intensity::-webkit-slider-thumb{background:${col}}</style>
           <div class="slider-val" style="color:${col}" id="f-int-num">3/6</div>
@@ -1067,7 +1704,7 @@ function buildSensorForm(){
         <div class="field-row">
           <div class="lbl">${T.fRadius}</div>
           <div class="input-mic-row">
-            <input id="f-radius" type="number" value="80" min="10" max="500">
+            <input id="f-radius" type="number" value="${defRadius}" min="10" max="500">
             <button class="mic-btn" onclick="voiceField('f-radius','${T.fRadius}')">🎤</button>
           </div>
         </div>
@@ -1084,6 +1721,7 @@ function buildSensorForm(){
           <button class="mic-btn" onclick="voiceNotes()">🎤</button>
         </div>
       </div>
+      '+(_ct?'<div class="field-row"><div class="lbl">'+(_ct.unit?'VALOR ('+_ct.unit+')':'VALOR / MEDIÇÃO')+'</div><div class="input-mic-row"><input id="f-custom-value" type="text" placeholder="'+(_ct.unit||'valor medido…')+'"></div></div>':'')+'      
       <div class="field-row">
         <div class="lbl">${T.fPleasant}</div>
         <div class="star-row" id="stars-pleasant">${[1,2,3,4,5].map(i=>`<span class="star" onclick="setStar('pleasant',${i})">★</span>`).join('')}</div>
@@ -1215,7 +1853,8 @@ function saveSensor(){
   else if(s==='vision'){extra.visType=document.getElementById('f-vis-type')?.value;extra.visLux=document.getElementById('f-vis-lux')?.value;extra.visKelvin=document.getElementById('f-vis-kelvin')?.value;extra.visSource=document.getElementById('f-vis-source')?.value;}
   else if(s==='taste'){extra.tasteCat=document.getElementById('f-taste-cat')?.value;}
 
-  state.sensors.push({id:crypto.randomUUID(),sense:s,label,intensity,propagationType:prop,propagationRadius:radius,notes,x,y,gps:state.gps,timestamp:new Date().toISOString(),photos:tempPhotos,ratings:{...starRatings},...extra});
+  const _cv=document.getElementById('f-custom-value')?.value||null;
+  state.sensors.push({id:crypto.randomUUID(),sense:s,label,intensity,propagationType:prop,propagationRadius:radius,notes,x,y,gps:state.gps,timestamp:new Date().toISOString(),photos:tempPhotos,ratings:{...starRatings},...extra,...(_cv?{customValue:_cv}:{})});
   saveAll(); updateCountHeader(); showToast(T.voiceSaved);
   buildSensorForm();
 }
@@ -1229,6 +1868,8 @@ function filterMap(btn,sense){
 }
 // ── MAP VIEW STATE ─────────────────────────────────────────────────────────
 let mv={scale:1,px:0,py:0}; // pan/zoom transform
+let selectedSensorId=null;     // currently selected sensor
+let _drag={active:false,sensorId:null,startCx:0,startCy:0,startSx:0,startSy:0,moved:false};
 let mapW=0,mapH=0;           // canvas logical size
 const MAP_W=700,MAP_H=580;   // virtual coordinate space
 
@@ -1274,9 +1915,12 @@ function mapToCSS(mx,my){
 }
 
 function renderMap(){
+  if(!state||!state.sensors) return;
   const canvas=document.getElementById('map-canvas');
-  const W=canvas.parentElement.clientWidth; const H=Math.round(W*.75);
-  canvas.width=W; canvas.height=H;
+  const wrap=document.getElementById('map-canvas-wrap')||canvas.parentElement;
+  const W=Math.max(200,wrap.clientWidth||canvas.parentElement.clientWidth);
+  const H=Math.max(200,wrap.clientHeight||Math.round(W*.75));
+  if(canvas.width!==W||canvas.height!==H){canvas.width=W;canvas.height=H;}
   mapW=W; mapH=H;
   const ctx=canvas.getContext('2d');
   clampPan(); updateZoomLabel();
@@ -1371,15 +2015,55 @@ function drawSensors(ctx,sensors,W,H){
       ctx.strokeStyle='#fff'; ctx.lineWidth=2*sc;
       ctx.beginPath(); ctx.arc(x,y,dotR+3*sc,0,Math.PI*2); ctx.stroke();
     }
-    // Emoji
-    ctx.fillStyle='#fff'; ctx.font=`bold ${Math.max(8,14*sc)}px sans-serif`;
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(SENSE_EMOJIS[s.sense]||'●',x,y);
-    // Label (only when zoomed in enough)
-    if(mv.scale>=2){
-      ctx.fillStyle=col; ctx.font=`bold ${10*sc}px Share Tech Mono,monospace`;
-      ctx.textAlign='center'; ctx.textBaseline='top';
-      ctx.fillText(s.label,x,y+dotR+2*sc);
+    // Selection ring
+    const isSel = s.id===selectedSensorId;
+    if(isSel){
+      ctx.save();
+      ctx.strokeStyle='#fff'; ctx.lineWidth=2*sc;
+      ctx.setLineDash([4*sc,3*sc]);
+      ctx.beginPath(); ctx.arc(x,y,dotR+5*sc,0,Math.PI*2); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+    }
+    // Emoji / custom icon
+    const ct_s=customTypes.find(t=>t.id===s.sense);
+    if(ct_s&&ct_s.iconImg&&ct_s.iconImg.complete){
+      const is=Math.max(10,16*sc);
+      ctx.save();
+      ctx.globalAlpha=ct_s.opacity!==undefined?ct_s.opacity:1;
+      ctx.drawImage(ct_s.iconImg,x-is/2,y-is/2,is,is);
+      ctx.restore();
+    } else {
+      ctx.fillStyle='#fff'; ctx.font=`bold ${Math.max(8,14*sc)}px sans-serif`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(getSenseEmoji(s.sense)||'●',x,y);
+    }
+    // Label — always shown, fade at low zoom
+    const labelAlpha = Math.min(1, mv.scale*0.7+0.3);
+    ctx.save(); ctx.globalAlpha=labelAlpha;
+    const labelSize=Math.max(9,11*sc);
+    ctx.fillStyle=isSel?'#fff':col;
+    ctx.font=`bold ${labelSize}px Share Tech Mono,monospace`;
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    const lbl=(s.label.length>18?s.label.slice(0,16)+'…':s.label);
+    // Label background pill
+    const tw=ctx.measureText(lbl).width;
+    const lx=x-tw/2-3, ly=y+dotR+3*sc;
+    ctx.fillStyle='rgba(8,16,28,0.75)';
+    const pillR=3;
+    ctx.beginPath();
+    ctx.roundRect?ctx.roundRect(lx,ly,tw+6,labelSize+4,pillR):ctx.rect(lx,ly,tw+6,labelSize+4);
+    ctx.fill();
+    ctx.fillStyle=isSel?'#fff':col;
+    ctx.fillText(lbl,x,ly+2);
+    ctx.restore();
+    // Drag handle icon on selected
+    if(isSel && !_drag.active){
+      ctx.save(); ctx.globalAlpha=0.7;
+      ctx.fillStyle='#fff'; ctx.font=`${10*sc}px sans-serif`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('⊕',x+dotR+6*sc,y-dotR-3*sc);
+      ctx.restore();
     }
   });
 
@@ -1398,6 +2082,7 @@ function drawSensors(ctx,sensors,W,H){
   }
 }
 function detectConflicts(sensors,sx=1,sy=1){
+  if(!sensors||!sensors.length) return [];
   const out=[];
   for(let i=0;i<sensors.length;i++) for(let j=i+1;j<sensors.length;j++){
     const a=sensors[i],b=sensors[j];
@@ -1409,12 +2094,18 @@ function detectConflicts(sensors,sx=1,sy=1){
   return out;
 }
 function buildMapLegend(){
-  document.getElementById('map-legend').innerHTML=Object.keys(SENSE_EMOJIS).map(k=>{
+  document.getElementById('map-legend').innerHTML=getAllSenseKeys().map(k=>{
     const cnt=state.sensors.filter(x=>x.sense===k).length;
-    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
-      <div style="width:10px;height:10px;border-radius:50%;background:${SENSE_COLORS[k]}"></div>
-      <span style="font-size:11px;flex:1;color:#8899b4">${SENSE_EMOJIS[k]} ${T.senseLabels[k]||k}</span>
-      <span style="font-size:12px;color:${SENSE_COLORS[k]};font-weight:bold">${cnt}</span>
+    if(!cnt) return '';
+    const col=getSenseColor(k);
+    const ct=customTypes.find(t=>t.id===k);
+    const iconEl=ct&&ct.iconData
+      ?`<img src="${ct.iconData}" style="width:10px;height:10px;object-fit:contain">`
+      :`${getSenseEmoji(k)}`;
+    return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+      <div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:${col}"></div>
+      <span style="font-size:11px;flex:1;color:#8899b4">${iconEl} ${getSenseLabel(k)}</span>
+      <span style="font-size:12px;color:${col};font-weight:bold">${cnt}</span>
     </div>`;
   }).join('');
 }
@@ -1468,10 +2159,15 @@ function closeModal(e){if(!e||e.target===document.getElementById('modal')) docum
 
 // ══ ANALYSIS ══════════════════════════════════════════════════════════════════
 function renderAnalysis(){
-  document.getElementById('analysis-stats').innerHTML=Object.keys(SENSE_EMOJIS).map(k=>{
+  document.getElementById('analysis-stats').innerHTML=getAllSenseKeys().map(k=>{
     const arr=state.sensors.filter(x=>x.sense===k);
     const maxI=arr.length?Math.max(...arr.map(x=>x.intensity)):0;
-    return `<div class="card" style="border-color:${arr.length?SENSE_COLORS[k]+'44':'var(--border)'}">
+    const col=getSenseColor(k);
+    const ct=customTypes.find(t=>t.id===k);
+    const iconEl=ct&&ct.iconData
+      ?`<img src="${ct.iconData}" style="width:20px;height:20px;object-fit:contain">`
+      :`<div style="font-size:20px">${getSenseEmoji(k)}</div>`;
+    return `<div class="card" style="border-color:${arr.length?colSE_COLORS[k]+'44':'var(--border)'}">
       <div style="font-size:20px">${SENSE_EMOJIS[k]}</div>
       <div style="font-size:12px;font-weight:bold;color:${SENSE_COLORS[k]}">${arr.length}</div>
       <div style="font-size:9px;color:var(--muted)">${T.senseLabels[k]||k}</div>
@@ -1519,72 +2215,15 @@ async function runAI(){
     const extra=[];
     if(s.propagationType==='directional') extra.push('dir:'+( s.angle||0)+'deg spread:'+(s.spreadAngle||90)+'deg');
     if(s.notes) extra.push('NOTAS: '+s.notes);
-    return '  ['+( T.senseLabels[s.sense]||s.sense).toUpperCase()+'] "'+s.label+'" | Int.'+s.intensity+'/6 | '+(T.propLabels[s.propagationType]||s.propagationType)+' | r='+s.propagationRadius+' '+extra.join(' | ');
-  }).join('
-');
-  const cLines=cs.length?cs.map(c=>'  - "'+c.sensorA.label+'" x "'+c.sensorB.label+'" '+Math.round(c.severity*100)+'%').join('
-'):'  Nenhum';
+    return '  ['+getSenseLabel(s.sense).toUpperCase()+'] "'+s.label+'" | Int.'+s.intensity+'/6 | '+(T.propLabels[s.propagationType]||s.propagationType)+' | r='+s.propagationRadius+' '+extra.join(' | ');
+  }).join('\n');
+  const cLines=cs.length?cs.map(c=>'  - "'+c.sensorA.label+'" x "'+c.sensorB.label+'" '+Math.round(c.severity*100)+'%').join('\n'):'  Nenhum';
 
-  const baseCtx='ESPACO: '+( state.space.name||'?')+' | '+( state.space.area||'?')+'m2 | '+(state.space.type||'?')+'
-Contexto: '+(state.space.desc||'nao especificado')+'
+  const baseCtx='ESPACO: '+( state.space.name||'?')+' | '+( state.space.area||'?')+'m2 | '+(state.space.type||'?')+'\nContexto: '+(state.space.desc||'nao especificado')+'\n\nESTIMULOS ('+state.sensors.length+' | intensidade media: '+avgInt+'/6):\n'+sLines+'\n\nCONFLITOS ('+cs.length+'):\n'+cLines;
 
-ESTIMULOS ('+state.sensors.length+' | intensidade media: '+avgInt+'/6):
-'+sLines+'
+  const designPrompt='Responds entirely in '+lang+'.\nEres um arquitecto especialista em conforto sensorial.\n\n'+baseCtx+'\n\nAnalise orientada para FASE DE PROJECTO ou REFORMA. Responde em 5 seccoes:\n\n## DIAGNOSTICO SENSORIAL\nCaracteriza o perfil sensorial: sentidos dominantes, intensidade geral, coerencia com a tipologia de uso.\n\n## CONFLITOS E RISCOS\nPara cada conflito: descreve o impacto concreto no utilizador. Identifica riscos latentes.\n\n## SOLUCOES DE PROJECTO\nMinimo 3 solucoes concretas por problema, com prefixo de prioridade:\n[ALTA] para impacto directo no conforto\n[MEDIA] para melhorias significativas\n[BAIXA] para optimizacoes\nCada solucao: elemento construtivo/material especifico + norma tecnica (ISO/EN/WELL/LEED) + custo estimado (baixo/medio/alto).\n\n## REPRESENTACAO CARTOGRAFICA\nComo ajustar os registos existentes para reflectir as solucoes. Novos estimulos a registar apos intervencao.\n\n## CHECKLIST DE PROJECTO\n8-10 itens de verificacao antes do licenciamento ou inicio de obra.';
 
-CONFLITOS ('+cs.length+'):
-'+cLines;
-
-  const designPrompt='Responds entirely in '+lang+'.
-Eres um arquitecto especialista em conforto sensorial.
-
-'+baseCtx+'
-
-Analise orientada para FASE DE PROJECTO ou REFORMA. Responde em 5 seccoes:
-
-## DIAGNOSTICO SENSORIAL
-Caracteriza o perfil sensorial: sentidos dominantes, intensidade geral, coerencia com a tipologia de uso.
-
-## CONFLITOS E RISCOS
-Para cada conflito: descreve o impacto concreto no utilizador. Identifica riscos latentes.
-
-## SOLUCOES DE PROJECTO
-Minimo 3 solucoes concretas por problema, com prefixo de prioridade:
-[ALTA] para impacto directo no conforto
-[MEDIA] para melhorias significativas
-[BAIXA] para optimizacoes
-Cada solucao: elemento construtivo/material especifico + norma tecnica (ISO/EN/WELL/LEED) + custo estimado (baixo/medio/alto).
-
-## REPRESENTACAO CARTOGRAFICA
-Como ajustar os registos existentes para reflectir as solucoes. Novos estimulos a registar apos intervencao.
-
-## CHECKLIST DE PROJECTO
-8-10 itens de verificacao antes do licenciamento ou inicio de obra.';
-
-  const poePrompt='Responds entirely in '+lang+'.
-Eres um investigador especialista em Avaliacao Pos-Ocupacao (POE) e conforto sensorial.
-
-'+baseCtx+'
-
-Analise de AVALIACAO POS-OCUPACAO. Responde em 5 seccoes:
-
-## DESEMPENHO SENSORIAL ACTUAL
-Classifica cada sentido: Adequado / Limite / Problematico. Identifica o sentido mais critico para esta tipologia de uso.
-
-## IMPACTO NOS UTILIZADORES
-Efeitos concretos dos estimulos nos utilizadores (produtividade, bem-estar, saude, orientacao). Referencia estudos (Schafer, Fanger, McLean, WELL) quando relevante.
-
-## CAUSAS E CONFLITOS
-Causas raiz de cada conflito: construtivas (dificeis) / de uso (geriveis) / de equipamento (interveniveis). Para cada causa: consequencia especifica e urgencia.
-
-## PLANO DE INTERVENCAO
-Accoes em 3 horizontes:
-[IMEDIATO] sem obras, custo zero ou minimo
-[CURTO PRAZO] pequenas obras 1-6 meses
-[MEDIO PRAZO] intervencao estrutural 6-24 meses
-Cada accao: descricao especifica, efeito esperado nos estimulos, norma de referencia.
-
-## INDICADORES DE MONITORIZACAO
-5-6 KPIs sensoriais: o que medir, como medir, limiar de referencia aceitavel para esta tipologia.';
+  const poePrompt='Responds entirely in '+lang+'.\nEres um investigador especialista em Avaliacao Pos-Ocupacao (POE) e conforto sensorial.\n\n'+baseCtx+'\n\nAnalise de AVALIACAO POS-OCUPACAO. Responde em 5 seccoes:\n\n## DESEMPENHO SENSORIAL ACTUAL\nClassifica cada sentido: Adequado / Limite / Problematico. Identifica o sentido mais critico para esta tipologia de uso.\n\n## IMPACTO NOS UTILIZADORES\nEfeitos concretos dos estimulos nos utilizadores (produtividade, bem-estar, saude, orientacao). Referencia estudos (Schafer, Fanger, McLean, WELL) quando relevante.\n\n## CAUSAS E CONFLITOS\nCausas raiz de cada conflito: construtivas (dificeis) / de uso (geriveis) / de equipamento (interveniveis). Para cada causa: consequencia especifica e urgencia.\n\n## PLANO DE INTERVENCAO\nAccoes em 3 horizontes:\n[IMEDIATO] sem obras, custo zero ou minimo\n[CURTO PRAZO] pequenas obras 1-6 meses\n[MEDIO PRAZO] intervencao estrutural 6-24 meses\nCada accao: descricao especifica, efeito esperado nos estimulos, norma de referencia.\n\n## INDICADORES DE MONITORIZACAO\n5-6 KPIs sensoriais: o que medir, como medir, limiar de referencia aceitavel para esta tipologia.';
 
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{
@@ -1613,18 +2252,15 @@ Cada accao: descricao especifica, efeito esperado nos estimulos, norma de refere
     const senseColMap={'DIAGNOSTICO':'#5DD4F0','DESEMPENHO':'#5DD4F0','CONFLITOS':'#FFCA4F','RISCOS':'#FFCA4F','SOLUCOES':'#88E863','INTERVENCAO':'#88E863','PLANO':'#88E863','REPRESENTACAO':'#FF8C42','CARTOGRAFICA':'#FF8C42','CHECKLIST':'#a0d0ff','IMPACTO':'#BB99FF','CAUSAS':'#FFCA4F','INDICADORES':'#FF8C42'};
     const getCol=t=>{ for(const[k,v] of Object.entries(senseColMap)) if(t.toUpperCase().includes(k)) return v; return 'var(--sound)'; };
 
-    const sections=text.split(/
-##\s+/).filter(Boolean);
+    const sections=text.split(/\n##\s+/).filter(Boolean);
     document.getElementById('ai-result').innerHTML=
       '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'+modeLabel+
       '<span style="font-family:var(--mono);font-size:10px;color:var(--muted)">'+(state.space.name||'—')+' · '+new Date().toLocaleString([],{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'</span></div>'+
       sections.map(sec=>{
-        const lines=sec.split('
-');
+        const lines=sec.split('\n');
         const title=lines[0].replace(/^#+\s*/,'').trim();
         const col=getCol(title);
-        let body=lines.slice(1).join('
-').trim()
+        let body=lines.slice(1).join('\n').trim()
           .replace(/\[ALTA\]\s*/g,'<div class="sol-card prio-high"><div class="sol-prio" style="color:#FF6B6B">ALTA PRIORIDADE</div><div class="sol-body">')
           .replace(/\[MEDIA\]\s*/g,'<div class="sol-card prio-med"><div class="sol-prio" style="color:#FFCA4F">MEDIA PRIORIDADE</div><div class="sol-body">')
           .replace(/\[BAIXA\]\s*/g,'<div class="sol-card prio-low"><div class="sol-prio" style="color:#88E863">BAIXA PRIORIDADE</div><div class="sol-body">')
@@ -1633,10 +2269,7 @@ Cada accao: descricao especifica, efeito esperado nos estimulos, norma de refere
           .replace(/\[MEDIO PRAZO\]\s*/g,'<div style="color:#FF6B6B;font-family:var(--mono);font-size:11px;margin:10px 0 4px">MEDIO PRAZO</div><div class="sol-card prio-high"><div class="sol-body">')
           .replace(/\*\*(.+?)\*\*/g,'<strong style="color:#fff">$1</strong>')
           .replace(/^[-•]\s+(.+)$/gm,'<div style="padding:4px 0;border-bottom:1px solid #ffffff08;color:#d0e8ff">&#8594; $1</div>')
-          .replace(/
-
-+/g,'<br>').replace(/
-/g,'<br>');
+          .replace(/\n\n+/g,'<br>').replace(/\n/g,'<br>');
         return '<div class="ar-section"><div class="ar-head" style="border-bottom-color:'+col+'44"><div class="ar-title" style="color:'+col+'">'+title+'</div></div><div class="ar-body">'+body+'</div></div>';
       }).join('');
   }catch(e){
@@ -1673,7 +2306,7 @@ function updateModeDesc(){
 
 
 function exportJSON(){
-  const data=JSON.stringify({space:state.space,sensors:state.sensors.map(s=>({...s,photos:s.photos?.map(p=>({...p,src:'[image]'}))}))},null,2);
+  const data=JSON.stringify({space:state.space,sensors:state.sensors.map(s=>({...s,photos:s.photos?.map(p=>({...p,src:'[image]'}))})),customTypes:customTypes.map(t=>({...t,iconImg:undefined,iconData:undefined}))},null,2);
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
   a.download=`sensory-${state.space.name||'export'}-${Date.now()}.json`;
@@ -1685,7 +2318,12 @@ function showToast(msg){
   const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
   setTimeout(()=>el.classList.remove('show'),2500);
 }
-function updateCountHeader(){ document.getElementById('counts-header').textContent=state.sensors.length; }
+function updateCountHeader(){
+  const n=state.sensors.length;
+  const nc=detectConflicts(state.sensors).length;
+  ['hdr-count-stim','sb-stim-count','hdr-mb-stim'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=n;});
+  ['hdr-count-conf','sb-conf-count','hdr-mb-conf'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=nc;});
+}
 
 // ══ VOICE ENGINE ══════════════════════════════════════════════════════════════
 const VOICE={recognition:null,listening:false,mode:'free',targetField:null,guidedStep:0,finalTranscript:'',timer:null};
@@ -1927,6 +2565,376 @@ function matchIntensity(text,map){
 function capFirst(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
 function flashField(el){el.style.borderColor='var(--safe)';el.style.transition='border-color 1s ease-out';setTimeout(()=>{el.style.borderColor='';el.style.transition='';},1200);}
 
+
+// ══ CUSTOM TYPE EDITOR ═══════════════════════════════════════════════════════
+let _cteEditId=null;
+let _cteEmoji='◆';
+let _cteIconData=null;
+let _cteProp='radial';
+
+const CTE_PALETTE=['#00D4FF','#FF6B6B','#88E863','#FFCA4F','#FF8C42','#A78BFA',
+  '#5DD4F0','#F4B942','#7DDA58','#FF7F50','#FF5C5C','#4AC8E8',
+  '#E040FB','#FF4081','#69F0AE','#FFEB3B','#FF6E40','#40C4FF'];
+
+function openCustomTypeEditor(id){
+  _cteEditId=id;
+  _cteIconData=null;
+  
+  const modal=document.getElementById('custom-type-modal');
+  const title=document.getElementById('cte-modal-title');
+  
+  // Build palette
+  const pal=document.getElementById('cte-palette');
+  if(pal) pal.innerHTML=CTE_PALETTE.map(c=>
+    `<div onclick="ctUpdateColor('${c}')" style="width:22px;height:22px;border-radius:4px;background:${c};cursor:pointer;border:2px solid transparent;transition:all .15s" title="${c}"></div>`
+  ).join('');
+  
+  if(id){
+    // Edit existing
+    const ct=customTypes.find(t=>t.id===id);
+    if(!ct)return;
+    title.textContent='✏ EDITAR: '+ct.title;
+    document.getElementById('cte-title').value=ct.title||'';
+    document.getElementById('cte-type').value=ct.type||'';
+    document.getElementById('cte-color').value=ct.color||'#00D4FF';
+    document.getElementById('cte-radius').value=ct.radDefault||80;
+    document.getElementById('cte-radius-val').textContent=ct.radDefault||80;
+    document.getElementById('cte-intensity').value=ct.intensityDefault||3;
+    document.getElementById('cte-intensity-val').textContent=ct.intensityDefault||3;
+    document.getElementById('cte-opacity').value=Math.round((ct.opacity||0.6)*100);
+    document.getElementById('cte-opacity-val').textContent=(ct.opacity||0.6).toFixed(2);
+    document.getElementById('cte-iconsize').value=ct.iconSize||16;
+    document.getElementById('cte-iconsize-val').textContent=(ct.iconSize||16)+'px';
+    document.getElementById('cte-can-dir').value=ct.canDir?'1':'0';
+    document.getElementById('cte-unit').value=ct.unit||'';
+    ctUpdateColor(ct.color||'#00D4FF');
+    _cteEmoji=ct.emoji||'◆';
+    _cteProp=ct.propDefault||'radial';
+    if(ct.iconData){
+      _cteIconData=ct.iconData;
+      document.getElementById('cte-icon-preview').src=ct.iconData;
+      document.getElementById('cte-icon-preview').style.display='block';
+      document.getElementById('cte-upload-label').style.display='none';
+    }
+    // Prop selection
+    document.querySelectorAll('.cte-prop-btn').forEach(b=>{
+      b.classList.toggle('selected',b.dataset.val===_cteProp);
+    });
+  } else {
+    title.textContent='◆ NOVO TIPO DE ESTÍMULO';
+    document.getElementById('cte-title').value='';
+    document.getElementById('cte-type').value='';
+    ctUpdateColor('#00D4FF');
+    _cteEmoji='◆'; _cteProp='radial'; _cteIconData=null;
+    document.getElementById('cte-radius').value=80;
+    document.getElementById('cte-radius-val').textContent='80';
+    document.getElementById('cte-intensity').value=3;
+    document.getElementById('cte-intensity-val').textContent='3';
+    document.getElementById('cte-opacity').value=60;
+    document.getElementById('cte-opacity-val').textContent='0.60';
+    document.getElementById('cte-iconsize').value=16;
+    document.getElementById('cte-iconsize-val').textContent='16px';
+    document.getElementById('cte-can-dir').value='1';
+    document.getElementById('cte-unit').value='';
+    document.getElementById('cte-icon-preview').style.display='none';
+    document.getElementById('cte-upload-label').style.display='';
+    document.querySelectorAll('.cte-prop-btn').forEach(b=>b.classList.toggle('selected',b.dataset.val==='radial'));
+    document.querySelectorAll('.cte-icon-btn').forEach(b=>b.classList.remove('selected'));
+  }
+  
+  // Show existing types list
+  cteRenderTypeList();
+  
+  // Draw preview
+  setTimeout(cteDrawPreview,50);
+  
+  modal.classList.add('open');
+}
+
+function closeCustomTypeEditor(){
+  document.getElementById('custom-type-modal').classList.remove('open');
+}
+
+function ctUpdateColor(col){
+  document.getElementById('cte-color').value=col;
+  document.getElementById('cte-color-swatch').style.background=col;
+  // Highlight palette item
+  document.querySelectorAll('#cte-palette div').forEach(d=>{
+    d.style.borderColor=d.style.background===col?'#fff':'transparent';
+    d.style.transform=d.style.background===col?'scale(1.2)':'';
+  });
+  cteDrawPreview();
+}
+
+function ctSelectEmoji(btn,em){
+  _cteEmoji=em; _cteIconData=null;
+  document.querySelectorAll('.cte-icon-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('cte-icon-preview').style.display='none';
+  document.getElementById('cte-upload-label').style.display='';
+  cteDrawPreview();
+}
+
+function ctSelectProp(btn){
+  _cteProp=btn.dataset.val;
+  document.querySelectorAll('.cte-prop-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  cteDrawPreview();
+}
+
+function ctLoadIcon(input){
+  const file=input.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    _cteIconData=ev.target.result;
+    document.getElementById('cte-icon-preview').src=_cteIconData;
+    document.getElementById('cte-icon-preview').style.display='block';
+    document.getElementById('cte-upload-label').style.display='none';
+    document.querySelectorAll('.cte-icon-btn').forEach(b=>b.classList.remove('selected'));
+    cteDrawPreview();
+  };
+  reader.readAsDataURL(file);
+}
+
+function cteDrawPreview(){
+  const canvas=document.getElementById('cte-preview-canvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const W=160,H=160,cx=W/2,cy=H/2;
+  const col=document.getElementById('cte-color')?.value||'#00D4FF';
+  const opacity=parseFloat(document.getElementById('cte-opacity')?.value||60)/100;
+  const iconSize=parseInt(document.getElementById('cte-iconsize')?.value||16);
+  const r=50;
+  
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#0c1824'; ctx.fillRect(0,0,W,H);
+  
+  // Draw propagation zone
+  ctx.save(); ctx.globalAlpha=opacity;
+  if(_cteProp==='directional'){
+    const g=ctx.createRadialGradient(cx,cy,1,cx,cy,r);
+    g.addColorStop(0,col); g.addColorStop(1,'transparent');
+    ctx.fillStyle=g;
+    ctx.beginPath(); ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,-Math.PI/2-0.8,-Math.PI/2+0.8);
+    ctx.closePath(); ctx.fill();
+  } else if(_cteProp==='diffuse'){
+    for(let i=3;i>=1;i--){
+      ctx.globalAlpha=opacity*(i/4);
+      ctx.fillStyle=col;
+      ctx.beginPath(); ctx.arc(cx,cy,r*i/3,0,Math.PI*2); ctx.fill();
+    }
+  } else if(_cteProp==='point'){
+    ctx.fillStyle=col+'88';
+    ctx.beginPath(); ctx.arc(cx,cy,8,0,Math.PI*2); ctx.fill();
+  } else {
+    const g=ctx.createRadialGradient(cx,cy,1,cx,cy,r);
+    g.addColorStop(0,col); g.addColorStop(1,'transparent');
+    ctx.fillStyle=g;
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+  
+  // Draw dot
+  ctx.fillStyle=col;
+  ctx.beginPath(); ctx.arc(cx,cy,8,0,Math.PI*2); ctx.fill();
+  
+  // Draw icon
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  if(_cteIconData){
+    const img=new Image();
+    img.onload=()=>{
+      ctx.save(); ctx.globalAlpha=1;
+      ctx.drawImage(img,cx-iconSize/2,cy-iconSize/2,iconSize,iconSize);
+      ctx.restore();
+    };
+    img.src=_cteIconData;
+  } else {
+    ctx.fillStyle='#fff'; ctx.font=`bold ${iconSize}px sans-serif`;
+    ctx.fillText(_cteEmoji,cx,cy);
+  }
+  
+  // Update pill preview
+  const title=document.getElementById('cte-title')?.value||'Novo Tipo';
+  const pill=document.getElementById('cte-preview-pill');
+  if(pill){
+    pill.style.background=col+'22';
+    pill.style.borderColor=col;
+    pill.style.color=col;
+    pill.innerHTML=(_cteIconData?`<img src="${_cteIconData}" style="width:14px;height:14px;object-fit:contain">`:
+      `<span>${_cteEmoji}</span>`)+' '+title.toUpperCase();
+  }
+  const desc=document.getElementById('cte-preview-desc');
+  if(desc){
+    const unit=document.getElementById('cte-unit')?.value;
+    const props=['Propagação: '+{radial:'Radial',directional:'Direcional',diffuse:'Difuso',point:'Pontual'}[_cteProp],
+      'Raio: '+document.getElementById('cte-radius')?.value,
+      unit?'Unidade: '+unit:''];
+    desc.textContent=props.filter(Boolean).join(' · ');
+  }
+}
+
+function cteRenderTypeList(){
+  const sec=document.getElementById('cte-existing-section');
+  const list=document.getElementById('cte-type-list');
+  if(!sec||!list)return;
+  sec.style.display=customTypes.length?'':'none';
+  list.innerHTML=customTypes.map(ct=>`
+    <div class="cte-type-item">
+      <div class="cte-type-dot" style="background:${ct.color}"></div>
+      ${ct.iconData?`<img src="${ct.iconData}" style="width:20px;height:20px;object-fit:contain">`:
+        `<span style="font-size:18px">${ct.emoji||'◆'}</span>`}
+      <span class="cte-type-name">${ct.title}</span>
+      <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">${ct.type||''}</span>
+      <div class="cte-type-actions">
+        <button class="btn btn-ghost btn-xs" onclick="openCustomTypeEditor('${ct.id}')">✏</button>
+        <button class="btn btn-danger btn-xs" onclick="deleteCustomType('${ct.id}')">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function saveCustomType(){
+  const title=document.getElementById('cte-title').value.trim();
+  if(!title){showToast('⚠ Título obrigatório'); return;}
+  
+  const ct={
+    id: _cteEditId||('ct_'+Date.now()),
+    title,
+    type: document.getElementById('cte-type').value.trim(),
+    emoji: _cteEmoji,
+    color: document.getElementById('cte-color').value,
+    iconData: _cteIconData||null,
+    propDefault: _cteProp,
+    radDefault: parseInt(document.getElementById('cte-radius').value)||80,
+    intensityDefault: parseInt(document.getElementById('cte-intensity').value)||3,
+    opacity: parseFloat(document.getElementById('cte-opacity').value)/100,
+    iconSize: parseInt(document.getElementById('cte-iconsize').value)||16,
+    canDir: document.getElementById('cte-can-dir').value==='1',
+    unit: document.getElementById('cte-unit').value.trim()||null,
+  };
+  
+  // Build iconImg for runtime use
+  if(ct.iconData){
+    const img=new Image(); img.src=ct.iconData; ct.iconImg=img;
+  }
+  
+  if(_cteEditId){
+    const i=customTypes.findIndex(t=>t.id===_cteEditId);
+    if(i>=0) customTypes[i]=ct;
+  } else {
+    customTypes.push(ct);
+  }
+  
+  saveCustomTypes();
+  buildSenseSelector();
+  buildFilterBars();
+  renderMap();
+  if(_cteEditId){
+    showToast('✅ Tipo actualizado: '+title);
+  } else {
+    showToast('✅ Novo tipo criado: '+title);
+    // Auto-select new type
+    selectSense(ct.id);
+    goPage('register',null);
+  }
+  closeCustomTypeEditor();
+}
+
+function deleteCustomType(id){
+  const ct=customTypes.find(t=>t.id===id);
+  if(!ct)return;
+  if(!confirm('Apagar tipo "'+ct.title+'"? Os estímulos deste tipo mantêm-se.'))return;
+  customTypes=customTypes.filter(t=>t.id!==id);
+  saveCustomTypes();
+  buildSenseSelector();
+  buildFilterBars();
+  renderMap();
+  cteRenderTypeList();
+  showToast('🗑 Tipo removido');
+}
+
+// ── Export / Import ───────────────────────────────────────────────────────────
+function openExportModal(){
+  document.getElementById('export-modal').classList.add('open');
+}
+function closeExportModal(){
+  document.getElementById('export-modal').classList.remove('open');
+}
+
+function exportFull(){
+  const data={
+    version:2,
+    exportedAt:new Date().toISOString(),
+    space:{...state.space},
+    sensors:state.sensors,
+    customTypes:customTypes.map(t=>({...t,iconImg:undefined})),
+    lang,
+  };
+  const json=JSON.stringify(data,null,2);
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([json],{type:'application/json'}));
+  a.download=`sensory-terreno-${(state.space.name||'export').replace(/\s+/g,'_')}-${Date.now()}.json`;
+  a.click();
+  showToast('📦 Exportação completa ✓');
+  closeExportModal();
+}
+
+function importData(input){
+  const file=input.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(d.sensors) state.sensors=d.sensors;
+      if(d.space) state.space={...state.space,...d.space};
+      if(d.customTypes){
+        customTypes=d.customTypes;
+        customTypes.forEach(ct=>{
+          if(ct.iconData){const img=new Image();img.src=ct.iconData;ct.iconImg=img;}
+        });
+      }
+      saveAll();
+      // Rebuild UI
+      document.getElementById('sp-name').value=state.space.name||'';
+      document.getElementById('sp-area').value=state.space.area||'';
+      document.getElementById('sp-floor').value=state.space.floor||'';
+      document.getElementById('sp-desc').value=state.space.desc||'';
+      if(state.space.planImage){
+        document.getElementById('plan-img').src=state.space.planImage;
+        document.getElementById('plan-preview').style.display='block';
+      }
+      buildSenseSelector();
+      buildFilterBars();
+      buildSensorForm();
+      renderMap();
+      renderList();
+      updateCountHeader();
+      updateSpaceHeader();
+      showToast('📥 Importado: '+state.sensors.length+' estímulos');
+      closeExportModal();
+    }catch(e){showToast('⚠ Erro ao importar: '+e.message);}
+  };
+  reader.readAsText(file);
+}
+
+
+// Responsive resize handler
+let _lastMobile=null;
+window.addEventListener('resize',()=>{
+  const mob=isMobile();
+  if(mob!==_lastMobile){
+    _lastMobile=mob;
+    if(!mob){
+      // Switched to desktop: return map-panel to body-row
+      const mp=document.getElementById('map-panel');
+      const br=document.getElementById('body-row');
+      if(mp&&br&&mp.parentElement!==br) br.appendChild(mp);
+    }
+    setTimeout(()=>{resizeMapCanvas();renderMap();},100);
+  }
+});
+
 // ══ INIT ══════════════════════════════════════════════════════════════════════
 function init(){
   loadAll();
@@ -1938,8 +2946,9 @@ function init(){
   if(state.space.planImage){document.getElementById('plan-img').src=state.space.planImage;document.getElementById('plan-preview').style.display='block';}
   if(state.space.gps){const g=state.space.gps;document.getElementById('gps-coords').textContent=`${g.lat.toFixed(6)}, ${g.lng.toFixed(6)}`;document.getElementById('gps-result').style.display='block';document.querySelector('#gps-status .gps-dot').style.background='var(--safe)';}
   applyTranslations();
+  buildFilterBars();
   // Apply type select after translation
-  setTimeout(()=>{document.getElementById('sp-type').value=state.space.type||'';},50);
+  setTimeout(()=>{const st=document.getElementById('sp-type');if(st&&state.space.type)st.value=state.space.type;},10);
   buildSenseSelector();
   buildSensorForm();
   initVoice();
@@ -1977,7 +2986,16 @@ document.addEventListener('DOMContentLoaded',()=>{
       _pinch.active=false;
       const t=e.touches[0],rect=canvas.getBoundingClientRect();
       const cx=t.clientX-rect.left, cy=t.clientY-rect.top;
-      _pan={active:true,sx:cx,sy:cy,px0:mv.px,py0:mv.py};
+      const hitT=findSensorAt(cx,cy);
+      if(hitT){
+        // Touch on sensor: prepare drag (movement will activate it)
+        _drag={active:true,sensorId:hitT.id,startCx:cx,startCy:cy,
+               startSx:hitT.x,startSy:hitT.y,moved:false};
+        _pan={active:false,sx:cx,sy:cy,px0:mv.px,py0:mv.py};
+      } else {
+        _drag={active:false,sensorId:null,startCx:0,startCy:0,startSx:0,startSy:0,moved:false};
+        _pan={active:true,sx:cx,sy:cy,px0:mv.px,py0:mv.py};
+      }
       _tap={t:Date.now(),x:cx,y:cy};
     }
   },{passive:false});
@@ -1995,6 +3013,22 @@ document.addEventListener('DOMContentLoaded',()=>{
       mv.py=fy-(fy-_pinch.py0)*(newScale/_pinch.sc0);
       mv.scale=newScale;
       clampPan(); renderMap();
+    } else if(_drag.active && e.touches.length===1){
+      // Touch drag on sensor
+      const t=e.touches[0],rect=canvas.getBoundingClientRect();
+      const cx=t.clientX-rect.left, cy=t.clientY-rect.top;
+      const dx=cx-_drag.startCx, dy=cy-_drag.startCy;
+      if(Math.hypot(dx,dy)>8) _drag.moved=true;
+      if(_drag.moved){
+        const sens=state.sensors.find(x=>x.id===_drag.sensorId);
+        if(sens){
+          const W2=canvas.clientWidth, H2=canvas.height;
+          const sx2=W2/MAP_W, sy2=H2/MAP_H;
+          sens.x=Math.round(Math.max(0,Math.min(MAP_W,_drag.startSx+dx/mv.scale/sx2)));
+          sens.y=Math.round(Math.max(0,Math.min(MAP_H,_drag.startSy+dy/mv.scale/sy2)));
+          renderMap();
+        }
+      }
     } else if(_pan.active && e.touches.length===1){
       const t=e.touches[0],rect=canvas.getBoundingClientRect();
       const cx=t.clientX-rect.left, cy=t.clientY-rect.top;
@@ -2006,7 +3040,13 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   canvas.addEventListener('touchend',e=>{
     _pinch.active=false;
-    if(e.changedTouches.length===1 && _pan.active){
+    if(_drag.active && _drag.moved){
+      // Touch drag end — save position
+      saveAll();
+      const sens=state.sensors.find(x=>x.id===_drag.sensorId);
+      if(sens){showToast('📍 '+sens.label+' → '+sens.x+', '+sens.y);showSensorInfo(sens);}
+      _drag={active:false,sensorId:null,startCx:0,startCy:0,startSx:0,startSy:0,moved:false};
+    } else if(e.changedTouches.length===1 && _pan.active){
       const t=e.changedTouches[0],rect=canvas.getBoundingClientRect();
       const cx=t.clientX-rect.left, cy=t.clientY-rect.top;
       const dx=cx-_tap.x, dy=cy-_tap.y;
@@ -2016,12 +3056,14 @@ document.addEventListener('DOMContentLoaded',()=>{
         const {mx,my}=cssPxToMap(cx,cy);
         // Check if tapping near a directional sensor
         const hit=findSensorAt(cx,cy);
-        if(hit && hit.propagationType==='directional'){
-          openConeEditor(hit);
+        if(hit){
+          selectSensor(hit.id);
+          closeConeEditor();
         } else {
-          // Set position for register form
-          showToast(`📍 ${mx}, ${my}`);
-          const fe=document.getElementById('f-xy'); if(fe) fe.value=mx+','+my;
+          deselectSensor();
+          showToast('📍 '+mx+', '+my);
+          const fe=document.getElementById('f-xy');
+          if(fe) fe.value=mx+','+my;
           closeConeEditor();
         }
       }
@@ -2030,15 +3072,69 @@ document.addEventListener('DOMContentLoaded',()=>{
   },{passive:false});
 
   // Also support mouse for desktop testing
+  // ── Mouse drag/select on map canvas ──────────────────────────────────────
+  canvas.addEventListener('mousedown',e=>{
+    if(e.button!==0) return;
+    const rect=canvas.getBoundingClientRect();
+    const cx=e.clientX-rect.left, cy=e.clientY-rect.top;
+    const hit=findSensorAt(cx,cy);
+    if(hit){
+      _drag={active:true,sensorId:hit.id,startCx:cx,startCy:cy,
+             startSx:hit.x,startSy:hit.y,moved:false};
+      canvas.classList.add('dragging');
+      e.preventDefault();
+    }
+  });
+  canvas.addEventListener('mousemove',e=>{
+    const rect=canvas.getBoundingClientRect();
+    const cx=e.clientX-rect.left, cy=e.clientY-rect.top;
+    if(_drag.active){
+      const dx=cx-_drag.startCx, dy=cy-_drag.startCy;
+      if(Math.hypot(dx,dy)>4) _drag.moved=true;
+      if(_drag.moved){
+        const sens=state.sensors.find(x=>x.id===_drag.sensorId);
+        if(sens){
+          // Convert canvas delta to map coords
+          const canvas2=document.getElementById('map-canvas');
+          const W=canvas2.clientWidth, H=canvas2.height;
+          const sx=W/MAP_W, sy=H/MAP_H;
+          sens.x=Math.round(Math.max(0,Math.min(MAP_W,_drag.startSx+dx/mv.scale/sx)));
+          sens.y=Math.round(Math.max(0,Math.min(MAP_H,_drag.startSy+dy/mv.scale/sy)));
+          renderMap();
+        }
+      }
+    } else {
+      // Hover cursor
+      const hit=findSensorAt(cx,cy);
+      canvas.classList.toggle('over-sensor',!!hit);
+    }
+  });
+  window.addEventListener('mouseup',e=>{
+    if(!_drag.active) return;
+    canvas.classList.remove('dragging');
+    canvas.classList.remove('over-sensor');
+    if(_drag.moved){
+      // Dragged — save new position
+      saveAll();
+      const sens=state.sensors.find(x=>x.id===_drag.sensorId);
+      if(sens) showToast('📍 '+sens.label+' → '+sens.x+', '+sens.y);
+      // Update info overlay coords
+      if(selectedSensorId===_drag.sensorId && sens) showSensorInfo(sens);
+    } else {
+      // Click (no drag) → select sensor
+      selectSensor(_drag.sensorId);
+    }
+    _drag={active:false,sensorId:null,startCx:0,startCy:0,startSx:0,startSy:0,moved:false};
+  });
+  // Click on empty map → deselect + set position
   canvas.addEventListener('click',e=>{
     const rect=canvas.getBoundingClientRect();
     const cx=e.clientX-rect.left, cy=e.clientY-rect.top;
     const hit=findSensorAt(cx,cy);
-    if(hit && hit.propagationType==='directional'){
-      openConeEditor(hit);
-    } else {
+    if(!hit){
+      deselectSensor();
       const {mx,my}=cssPxToMap(cx,cy);
-      showToast(`📍 ${mx}, ${my}`);
+      showToast('📍 '+mx+', '+my);
       const fe=document.getElementById('f-xy'); if(fe) fe.value=mx+','+my;
     }
   });
@@ -2065,6 +3161,68 @@ function findSensorAt(cx,cy){
     if(d<bestD){bestD=d;best=s;}
   });
   return best;
+}
+
+
+// ── Sensor Selection & Info Overlay ──────────────────────────────────────────
+function selectSensor(id){
+  selectedSensorId=(selectedSensorId===id)?null:id;
+  if(selectedSensorId){
+    const s=state.sensors.find(x=>x.id===id);
+    if(s) showSensorInfo(s);
+  } else {
+    hideSensorInfo();
+  }
+  renderMap();
+}
+function deselectSensor(){
+  selectedSensorId=null;
+  hideSensorInfo();
+  renderMap();
+}
+function showSensorInfo(s){
+  const col=SENSE_COLORS[s.sense]||'#5DD4F0';
+  const bar=document.getElementById('sio-color-bar');
+  const title=document.getElementById('sio-title');
+  const meta=document.getElementById('sio-meta');
+  const overlay=document.getElementById('sensor-info-overlay');
+  const coneBtn=document.getElementById('sio-cone-btn');
+  if(!overlay)return;
+  if(bar) bar.style.background=col;
+  if(title) title.textContent=SENSE_EMOJIS[s.sense]+' '+s.label;
+  if(meta){
+    const parts=[getSenseLabel(s.sense),
+      'Int. '+s.intensity+'/6',
+      'r='+s.propagationRadius,
+      s.x+', '+s.y];
+    meta.textContent=parts.join(' · ');
+  }
+  // Show/hide cone button
+  const coneB=overlay.querySelector('[onclick="sioConeEdit()"]');
+  if(coneB) coneB.style.display=s.propagationType==='directional'?'':'none';
+  overlay.classList.add('visible');
+  // Show drag hint briefly
+  const dh=document.getElementById('drag-hint');
+  if(dh){dh.classList.add('show');setTimeout(()=>dh.classList.remove('show'),2500);}
+}
+function hideSensorInfo(){
+  const ov=document.getElementById('sensor-info-overlay');
+  if(ov) ov.classList.remove('visible');
+}
+function sioEdit(){
+  const s=state.sensors.find(x=>x.id===selectedSensorId);
+  if(s) openSensorDetail(s.id);
+}
+function sioConeEdit(){
+  const s=state.sensors.find(x=>x.id===selectedSensorId);
+  if(s) openConeEditor(s);
+}
+function sioDelete(){
+  if(!selectedSensorId)return;
+  state.sensors=state.sensors.filter(s=>s.id!==selectedSensorId);
+  selectedSensorId=null;
+  hideSensorInfo();
+  saveAll(); updateCountHeader(); renderMap(); renderList();
 }
 
 // ── CONE EDITOR ──────────────────────────────────────────────────────────────
@@ -2182,38 +3340,246 @@ if('serviceWorker'in navigator){
   const sw=`self.addEventListener('install',e=>{self.skipWaiting()});self.addEventListener('activate',e=>{self.clients.claim()});self.addEventListener('fetch',e=>{if(e.request.url.includes('api.anthropic.com'))return;e.respondWith(caches.open('sa-v1').then(c=>c.match(e.request).then(r=>r||fetch(e.request).then(res=>{if(res.ok)c.put(e.request,res.clone());return res}).catch(()=>r))));});`;
   navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
 }
+
+// ── DESKTOP EXTRAS ───────────────────────────────────────────────────────────
+let _resizePending=false;
+function resizeMapCanvas(){
+  if(_resizePending)return;
+  _resizePending=true;
+  requestAnimationFrame(()=>{
+    _resizePending=false;
+    const wrap=document.getElementById('map-canvas-wrap');
+    const canvas=document.getElementById('map-canvas');
+    if(!wrap||!canvas)return;
+    const W=Math.max(200,wrap.clientWidth);
+    const H=Math.max(200,wrap.clientHeight);
+    if(canvas.width!==W||canvas.height!==H){canvas.width=W;canvas.height=H;}
+    renderMap();
+  });
+}
+document.addEventListener('keydown',e=>{
+  const tag=document.activeElement.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT')return;
+  const s={'1':'space','2':'register','3':'list','4':'analysis'};
+  if(s[e.key])goPage(s[e.key],null);
+  if(e.key==='Escape'){closeConeEditor();closeModal();closeCustomTypeEditor();closeExportModal();}
+  if(e.key==='e'||e.key==='E') openExportModal();
+});
+let _roTimer;
+if(window.ResizeObserver){
+  const ro=new ResizeObserver(()=>{clearTimeout(_roTimer);_roTimer=setTimeout(resizeMapCanvas,80);});
+  const wrap=document.getElementById('map-canvas-wrap');
+  if(wrap)ro.observe(wrap);
+}
+window.addEventListener('resize',()=>{clearTimeout(_roTimer);_roTimer=setTimeout(resizeMapCanvas,150);});
+document.getElementById('map-canvas')?.addEventListener('dblclick',e=>{
+  const canvas=document.getElementById('map-canvas');
+  const rect=canvas.getBoundingClientRect();
+  const cx=e.clientX-rect.left, cy=e.clientY-rect.top;
+  const hit=findSensorAt(cx,cy);
+  if(hit){
+    // Double click on sensor → open detail
+    openSensorDetail(hit.id);
+  } else {
+    // Double click on empty space → set position + go to register
+    const {mx,my}=cssPxToMap(cx,cy);
+    const fe=document.getElementById('f-xy'); if(fe) fe.value=mx+','+my;
+    showToast('📍 '+mx+', '+my+' — REGISTAR');
+    goPage('register',null);
+  }
+});
+// Desktop: patch load event to also trigger resizeMapCanvas
+window.addEventListener('load',function(){setTimeout(resizeMapCanvas,60);setTimeout(resizeMapCanvas,350);});
+
+
 </script>
 
-<!-- ══ CONE EDITOR PANEL ══ -->
-<div id="cone-editor">
-  <div id="cone-editor-title">EDITAR DIREÇÃO / ABERTURA</div>
-  <div id="cone-editor-label"></div>
-  <div style="display:flex;gap:16px;align-items:flex-start;justify-content:center">
-    <div id="compass-wrap">
-      <canvas id="compass-canvas" width="180" height="180"></canvas>
+<!-- ── Custom Type Editor Modal ───────────────────────────────────────── -->
+<div id="custom-type-modal">
+  <div id="cte-panel">
+    <div id="cte-header">
+      <span id="cte-modal-title">◆ NOVO TIPO DE ESTÍMULO</span>
+      <button class="cte-close" onclick="closeCustomTypeEditor()">✕</button>
     </div>
-    <div style="flex:1;display:flex;flex-direction:column;gap:14px;padding-top:8px">
-      <div class="ce-row">
-        <span class="ce-lbl">DIREÇÃO</span>
-        <input type="range" id="ce-dir" min="0" max="360" step="1" oninput="ceConeDir(this.value)" style="flex:1">
-        <span class="ce-val" id="ce-dir-val">0°</span>
+    <div id="cte-body">
+      <!-- Identity -->
+      <div class="cte-section">
+        <div class="cte-section-title">▸ IDENTIFICAÇÃO</div>
+        <div class="cte-row">
+          <div class="cte-field" style="flex:2">
+            <label>TÍTULO</label>
+            <input id="cte-title" type="text" placeholder="Ex: Vibração, Radiação, Fluxo…" maxlength="40">
+          </div>
+          <div class="cte-field" style="flex:1">
+            <label>CATEGORIA / TIPO</label>
+            <input id="cte-type" type="text" placeholder="Ex: físico, ambiental…" maxlength="30">
+          </div>
+        </div>
       </div>
-      <div class="ce-row">
-        <span class="ce-lbl">ABERTURA</span>
-        <input type="range" id="ce-spread" min="10" max="300" step="5" oninput="ceConeSpread(this.value)" style="flex:1">
-        <span class="ce-val" id="ce-spread-val">90°</span>
+      <!-- Representation -->
+      <div class="cte-section">
+        <div class="cte-section-title">▸ REPRESENTAÇÃO VISUAL</div>
+        <div class="cte-row" style="margin-bottom:12px">
+          <div class="cte-field">
+            <label>COR</label>
+            <div id="cte-color-preview">
+              <div id="cte-color-swatch"></div>
+              <input type="color" id="cte-color" value="#00D4FF" oninput="ctUpdateColor(this.value)" style="flex:1">
+            </div>
+          </div>
+          <div class="cte-field">
+            <label>PALHETA RÁPIDA</label>
+            <div id="cte-palette" style="display:flex;gap:6px;flex-wrap:wrap;padding-top:4px"></div>
+          </div>
+        </div>
+        <div class="cte-field" style="margin-bottom:10px">
+          <label>ÍCONE — CARREGUE B&amp;W PNG/SVG 100×100 px</label>
+          <div id="cte-icon-upload-area" onclick="document.getElementById('cte-icon-file').click()">
+            <img id="cte-icon-preview" alt="">
+            <span id="cte-upload-label">📁 clique para carregar PNG/SVG (100×100 px, preto e branco)</span>
+          </div>
+          <input type="file" id="cte-icon-file" accept="image/png,image/svg+xml,image/jpeg" style="display:none" onchange="ctLoadIcon(this)">
+        </div>
+        <div class="cte-field">
+          <label>OU ESCOLHA UM ÍCONE PREDEFINIDO</label>
+          <div id="cte-icon-grid"><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'◆')" title="◆">◆</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'●')" title="●">●</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'★')" title="★">★</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'▲')" title="▲">▲</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'■')" title="■">■</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'⬟')" title="⬟">⬟</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'⬡')" title="⬡">⬡</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'⊕')" title="⊕">⊕</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'⊗')" title="⊗">⊗</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'✦')" title="✦">✦</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'⚡')" title="⚡">⚡</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'☀')" title="☀">☀</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'🔥')" title="🔥">🔥</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'💧')" title="💧">💧</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'🌊')" title="🌊">🌊</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'❄')" title="❄">❄</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'🌀')" title="🌀">🌀</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'⚑')" title="⚑">⚑</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'⚓')" title="⚓">⚓</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'⚙')" title="⚙">⚙</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'♫')" title="♫">♫</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'🏗')" title="🏗">🏗</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'📡')" title="📡">📡</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'🔬')" title="🔬">🔬</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'💡')" title="💡">💡</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'🔆')" title="🔆">🔆</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'🌡')" title="🌡">🌡</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'📢')" title="📢">📢</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'🧲')" title="🧲">🧲</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'☢')" title="☢">☢</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'⚠')" title="⚠">⚠</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'🔴')" title="🔴">🔴</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'🟡')" title="🟡">🟡</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'🟢')" title="🟢">🟢</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'🔵')" title="🔵">🔵</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'🟣')" title="🟣">🟣</button><button class="cte-icon-btn" onclick="ctSelectEmoji(this,'⬛')" title="⬛">⬛</button></div>
+        </div>
       </div>
-      <div class="ce-row">
-        <span class="ce-lbl">RAIO</span>
-        <input type="range" id="ce-radius" min="10" max="400" step="5" oninput="ceConeRadius(this.value)" style="flex:1">
-        <span class="ce-val" id="ce-radius-val">100</span>
+      <!-- Propagation -->
+      <div class="cte-section">
+        <div class="cte-section-title">▸ PROPAGAÇÃO E GEOMETRIA</div>
+        <div class="cte-field" style="margin-bottom:12px">
+          <label>FORMA DE PROPAGAÇÃO</label>
+          <div id="cte-prop-grid">
+            <button class="cte-prop-btn selected" data-val="radial" onclick="ctSelectProp(this)">◎ Radial</button>
+            <button class="cte-prop-btn" data-val="directional" onclick="ctSelectProp(this)">▷ Direcional</button>
+            <button class="cte-prop-btn" data-val="diffuse" onclick="ctSelectProp(this)">◌ Difuso</button>
+            <button class="cte-prop-btn" data-val="point" onclick="ctSelectProp(this)">· Pontual</button>
+          </div>
+        </div>
+        <div class="cte-row">
+          <div class="cte-field">
+            <label>RAIO PADRÃO (unidades mapa)</label>
+            <div class="cte-range-row">
+              <input type="range" id="cte-radius" min="10" max="500" value="80"
+                oninput="document.getElementById('cte-radius-val').textContent=this.value">
+              <span class="cte-range-val" id="cte-radius-val">80</span>
+            </div>
+          </div>
+          <div class="cte-field">
+            <label>INTENSIDADE PADRÃO (0-6)</label>
+            <div class="cte-range-row">
+              <input type="range" id="cte-intensity" min="0" max="6" value="3"
+                oninput="document.getElementById('cte-intensity-val').textContent=this.value">
+              <span class="cte-range-val" id="cte-intensity-val">3</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Display -->
+      <div class="cte-section">
+        <div class="cte-section-title">▸ VISUALIZAÇÃO NO MAPA</div>
+        <div class="cte-row">
+          <div class="cte-field">
+            <label>OPACIDADE DA ZONA (0–1)</label>
+            <div class="cte-range-row">
+              <input type="range" id="cte-opacity" min="0" max="100" value="60"
+                oninput="document.getElementById('cte-opacity-val').textContent=(this.value/100).toFixed(2)">
+              <span class="cte-range-val" id="cte-opacity-val">0.60</span>
+            </div>
+          </div>
+          <div class="cte-field">
+            <label>TAMANHO DO ÍCONE FONTE</label>
+            <div class="cte-range-row">
+              <input type="range" id="cte-iconsize" min="8" max="48" value="16"
+                oninput="document.getElementById('cte-iconsize-val').textContent=this.value+'px'">
+              <span class="cte-range-val" id="cte-iconsize-val">16px</span>
+            </div>
+          </div>
+        </div>
+        <div class="cte-row" style="margin-top:10px">
+          <div class="cte-field">
+            <label>DIRECIONALIDADE</label>
+            <select id="cte-can-dir">
+              <option value="1">Sim — pode ter direção</option>
+              <option value="0">Não — sempre omnidirecional</option>
+            </select>
+          </div>
+          <div class="cte-field">
+            <label>UNIDADE DE MEDIDA (opcional)</label>
+            <input id="cte-unit" type="text" placeholder="Ex: dB, lux, °C, mg/m³…" maxlength="15">
+          </div>
+        </div>
+      </div>
+      <!-- Preview -->
+      <div class="cte-section">
+        <div class="cte-section-title">▸ PRÉ-VISUALIZAÇÃO</div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <canvas id="cte-preview-canvas" width="160" height="160" style="border-radius:8px;border:1px solid var(--border)"></canvas>
+          <div>
+            <div id="cte-preview-pill" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;border:1.5px solid;font-family:var(--mono);font-size:12px;margin-bottom:8px"></div>
+            <div id="cte-preview-desc" style="font-size:11px;color:var(--muted);line-height:1.6"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Actions -->
+      <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:4px">
+        <button class="btn btn-ghost" onclick="closeCustomTypeEditor()">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveCustomType()" style="background:var(--accent);border-color:var(--accent);color:#000">
+          💾 GUARDAR TIPO
+        </button>
+      </div>
+      <!-- Existing custom types list -->
+      <div class="cte-section" id="cte-existing-section" style="display:none">
+        <div class="cte-section-title" style="display:flex;justify-content:space-between">
+          <span>▸ TIPOS PERSONALIZADOS</span>
+        </div>
+        <div id="cte-type-list"></div>
       </div>
     </div>
-  </div>
-  <div class="ce-btn-row">
-    <button class="btn btn-ghost" onclick="closeConeEditor()">✕ CANCELAR</button>
-    <button class="btn btn-green" onclick="saveConeEdit()">✅ GUARDAR</button>
   </div>
 </div>
+
+<!-- ── Export / Import Modal ─────────────────────────────────────────────── -->
+<div id="export-modal">
+  <div id="export-panel">
+    <div id="export-header">
+      <span>📦 EXPORTAR / IMPORTAR</span>
+      <button class="cte-close" onclick="closeExportModal()">✕</button>
+    </div>
+    <div id="export-body">
+      <div class="export-option" onclick="exportFull()">
+        <div class="export-option-icon">📦</div>
+        <div class="export-option-text">
+          <strong>EXPORTAR TERRENO COMPLETO</strong>
+          <span>JSON com todos os dados, imagens, tipos personalizados — para análise desktop</span>
+        </div>
+      </div>
+      <div class="export-option" onclick="exportJSON()">
+        <div class="export-option-icon">📋</div>
+        <div class="export-option-text">
+          <strong>EXPORTAR DADOS (sem imagens)</strong>
+          <span>JSON compacto com estímulos e metadados do espaço</span>
+        </div>
+      </div>
+      <div class="export-option" onclick="openExportModal()">
+        <div class="export-option-icon">🗺</div>
+        <div class="export-option-text">
+          <strong>EXPORTAR MAPA COMO IMAGEM</strong>
+          <span>PNG do mapa atual com todos os estímulos</span>
+        </div>
+      </div>
+      <div class="export-option" onclick="document.getElementById('import-file').click()">
+        <div class="export-option-icon">📥</div>
+        <div class="export-option-text">
+          <strong>IMPORTAR TERRENO</strong>
+          <span>Carregar ficheiro JSON exportado anteriormente</span>
+        </div>
+      </div>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this)">
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
